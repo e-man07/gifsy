@@ -283,6 +283,9 @@ export async function makeDepthGif(
   const layer = depthMap ? buildDepthLayer(original, cutoutImg, depthMap) : null;
   const backdrop = layer ? buildBackdrop(original, size, blur) : null;
   const maps = layer ? buildPixelMaps(size, layer.gw, layer.gh) : null;
+  const backdropData = backdrop
+    ? getCtx(backdrop).getImageData(0, 0, size, size).data!
+    : null;
 
   for (let i = 0; i < frameCount; i++) {
     const t = i / frameCount;
@@ -295,11 +298,11 @@ export async function makeDepthGif(
 
     ctx.clearRect(0, 0, size, size);
 
-    if (layer && backdrop && maps) {
+    if (layer && backdrop && backdropData && maps) {
       renderDepthFrame(
         ctx,
         layer,
-        backdrop,
+        backdropData,
         maps,
         size,
         Math.sin(phase),
@@ -430,12 +433,13 @@ function buildPixelMaps(size: number, gw: number, gh: number) {
 /**
  * Composite one frame: backdrop, then the photo displaced per-pixel by its
  * depth — near pixels follow the subject's motion, far pixels drift the other
- * way, so the motion reads as real parallax.
+ * way, so the motion reads as real parallax. Integer math + packed writes to
+ * keep the 480² × 58-frame loop fast.
  */
 function renderDepthFrame(
   ctx: Ctx2D,
   layer: DepthLayer,
-  backdrop: HTMLCanvasElement,
+  backdrop: Uint8ClampedArray,
   maps: { x0: Int32Array; y0: Int32Array; fx: Float32Array; fy: Float32Array },
   size: number,
   dirX: number,
@@ -445,7 +449,7 @@ function renderDepthFrame(
   const { gw, gh, depth, dMean, src } = layer;
   const img = ctx.createImageData(size, size);
   const out = img.data;
-  const bd = getCtx(backdrop).getImageData(0, 0, size, size).data;
+  const out32 = new Uint32Array(out.buffer);
   const disp = size * 0.05 * intensity;
   const sxScale = gw / size;
   const syScale = gh / size;
@@ -454,6 +458,7 @@ function renderDepthFrame(
 
   for (let y = 0; y < size; y++) {
     const gyf = ((y + 0.5) * gh) / size - 0.5;
+    let gxf = 0.5 * sxScale - 0.5;
     for (let x = 0; x < size; x++) {
       const i = y * size + x;
       const gx0 = maps.x0[i];
@@ -475,7 +480,6 @@ function renderDepthFrame(
       const ox = (d - dMean) * disp * dirX;
       const oy = (d - dMean) * disp * dirY;
 
-      const gxf = ((x + 0.5) * gw) / size - 0.5;
       const sx0 = gxf - ox * sxScale;
       const sx = sx0 < 0 ? 0 : sx0 > maxX ? maxX : sx0;
       const sxI = sx | 0;
@@ -499,13 +503,19 @@ function renderDepthFrame(
       const sg = src[a + 1] * w00 + src[b + 1] * w10 + src[c + 1] * w01 + src[d2 + 1] * w11;
       const sb = src[a + 2] * w00 + src[b + 2] * w10 + src[c + 2] * w01 + src[d2 + 2] * w11;
       const sa = src[a + 3] * w00 + src[b + 3] * w10 + src[c + 3] * w01 + src[d2 + 3] * w11;
-      const al = sa / 255;
 
+      // out = bd + (sr - bd) * (sa / 255), integer-rounded and packed.
       const o = i * 4;
-      out[o] = bd[o] * (1 - al) + sr * al;
-      out[o + 1] = bd[o + 1] * (1 - al) + sg * al;
-      out[o + 2] = bd[o + 2] * (1 - al) + sb * al;
-      out[o + 3] = 255;
+      const br = backdrop[o];
+      const bg = backdrop[o + 1];
+      const bb = backdrop[o + 2];
+      out32[i] =
+        0xff000000 |
+        (((bb * 255 + (sb - bb) * sa + 127) >> 8) << 16) |
+        (((bg * 255 + (sg - bg) * sa + 127) >> 8) << 8) |
+        ((br * 255 + (sr - br) * sa + 127) >> 8);
+
+      gxf += sxScale;
     }
   }
   ctx.putImageData(img, 0, 0);

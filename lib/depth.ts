@@ -1,9 +1,9 @@
-// Monocular depth estimation with Depth Anything V2 (small, int8) running
+// Monocular depth estimation with Depth Anything V2 (small, fp16) running
 // fully client-side via onnxruntime-web. Returns a grayscale canvas where
 // brighter pixels are closer to the camera.
 
+import type * as ort from "onnxruntime-web";
 import { getCtx, makeCanvas } from "./image";
-import * as ort from "onnxruntime-web";
 
 export type DepthModel = "depth-anything-v2-small-fp16";
 
@@ -34,12 +34,19 @@ const MAX_OUTPUT_DIM = 512; // depth canvas long edge
 let sessionPromise: Promise<ort.InferenceSession> | null = null;
 let sessionModel: DepthModel | null = null;
 
+/** onnxruntime-web is ~390KB; load it lazily so it stays out of the main bundle. */
+async function loadOrt(): Promise<typeof ort> {
+  const { default: ort } = await import("onnxruntime-web");
+  return ort;
+}
+
 async function loadSession(
   model: DepthModel,
   onProgress?: (p: DepthProgress) => void,
 ): Promise<ort.InferenceSession> {
   if (sessionPromise && sessionModel === model) return sessionPromise;
   sessionPromise = (async () => {
+    const ort = await loadOrt();
     ort.env.wasm.wasmPaths = WASM_PATH;
     const res = await fetch(MODEL_URLS[model]);
     if (!res.ok) {
@@ -78,7 +85,7 @@ async function loadSession(
  * rounded to the model's 14px patch multiple (the export accepts any
  * multiple-of-14 size and returns depth at the same resolution).
  */
-function preprocess(img: HTMLImageElement) {
+function preprocess(img: HTMLImageElement, ort: typeof import("onnxruntime-web")) {
   const w = img.naturalWidth;
   const h = img.naturalHeight;
   const scale = Math.min(INPUT_SIZE / w, INPUT_SIZE / h);
@@ -131,7 +138,7 @@ export async function estimateDepth(
   model: DepthModel = "depth-anything-v2-small-fp16",
 ): Promise<HTMLCanvasElement> {
   const session = await loadSession(model, onProgress);
-  const { tensor, iw, ih } = preprocess(img);
+  const { tensor, iw, ih } = preprocess(img, await loadOrt());
 
   onProgress?.({ stage: "compute", fraction: 1 });
   const inputName = session.inputNames[0];
