@@ -1,26 +1,148 @@
 @import "tailwindcss";
 
+/* ── Palette sampled from the pixel-art hero video ─────────────────────── */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --sky: #2e9bf0; /* primary — the vivid sky */
+  --sky-deep: #1466b4; /* depth / hovers */
+  --grass: #6fb43a; /* go / success accent */
+  --grass-deep: #3c6b27;
+  --bark: #7a4e22; /* warm neutral */
+  --cloud: #f5faff; /* light panels / text-on-dark */
+  --ink: #0e2438; /* text + every pixel border & hard shadow */
+  --sun: #f2c230; /* playful pop */
+  --petal: #e8506b; /* playful pop */
+
+  --background: #eaf4ff; /* soft daytime-sky page tint */
+  --foreground: #0e2438;
+  --panel: #ffffff;
+  --muted: #5b6b7d;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-panel: var(--panel);
+  --color-muted: var(--muted);
+  --color-sky: var(--sky);
+  --color-sky-deep: var(--sky-deep);
+  --color-grass: var(--grass);
+  --color-grass-deep: var(--grass-deep);
+  --color-bark: var(--bark);
+  --color-cloud: var(--cloud);
+  --color-ink: var(--ink);
+  --color-sun: var(--sun);
+  --color-petal: var(--petal);
+  --font-sans: var(--font-body);
+  --font-pixel: var(--font-pixel);
 }
 
+/* Night-time variant: the sky video stays bright, the workshop goes dark. */
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #0b1a2b;
+    --foreground: #eaf3ff;
+    --panel: #12263c;
+    --muted: #9fb4c9;
+    --ink: #04101d;
   }
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+}
+
+.font-pixel {
+  font-family: var(--font-pixel), ui-monospace, "Courier New", monospace;
+}
+
+/* ── Signature: chunky 8-bit borders + hard, blur-less offset shadows ──── */
+.hud {
+  border: 3px solid var(--ink);
+  box-shadow: 5px 5px 0 0 var(--ink);
+}
+.hud-sm {
+  border: 2px solid var(--ink);
+  box-shadow: 3px 3px 0 0 var(--ink);
+}
+
+/* Physical "press-to-click" button. */
+.btn-pixel {
+  border: 3px solid var(--ink);
+  box-shadow: 4px 4px 0 0 var(--ink);
+  transition:
+    transform 0.06s ease,
+    box-shadow 0.06s ease,
+    filter 0.15s ease;
+}
+.btn-pixel:hover {
+  transform: translate(1px, 1px);
+  box-shadow: 3px 3px 0 0 var(--ink);
+  filter: brightness(1.05);
+}
+.btn-pixel:active {
+  transform: translate(4px, 4px);
+  box-shadow: 0 0 0 0 var(--ink);
+}
+.btn-pixel:disabled {
+  transform: none;
+  box-shadow: 4px 4px 0 0 var(--ink);
+  filter: none;
+}
+
+/* ── Motion ────────────────────────────────────────────────────────────── */
+@keyframes floaty {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-6px);
+  }
+}
+@keyframes popin {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.floaty {
+  animation: floaty 4.5s ease-in-out infinite;
+}
+.popin {
+  animation: popin 0.55s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .floaty,
+  .popin {
+    animation: none;
+  }
+  .btn-pixel {
+    transition: none;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Checkerboard to indicate transparency behind sticker previews. */
+.checkerboard {
+  background-image:
+    linear-gradient(45deg, #ccc 25%, transparent 25%),
+    linear-gradient(-45deg, #ccc 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #ccc 75%),
+    linear-gradient(-45deg, transparent 75%, #ccc 75%);
+  background-size: 20px 20px;
+  background-position: 0 0, 0 10px, 10px -10px, -10px 0;
+  background-color: #fff;
 }
