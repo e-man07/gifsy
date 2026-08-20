@@ -1,7 +1,7 @@
 // GIF creation: animate a single image with effects, add real depth, or stitch
 // several images into a loop. Uses a single global color palette for the
 // single-image paths so frames don't flicker between near-identical colors.
-import { drawCover, getCtx, makeCanvas, refineCutout, type Ctx2D } from "./image";
+import { blurAlpha, drawCover, getCtx, makeCanvas, refineCutout, type Ctx2D } from "./image";
 
 export type GifEffect =
   | "depth"
@@ -253,14 +253,16 @@ export interface DepthOptions {
 }
 
 /**
- * Give a single photo real depth: the AI-cut subject floats in sharp focus
- * over a soft, blurred copy of the original that drifts the opposite way
- * (parallax). Reads far more "alive" than moving a flat image.
+ * Real-depth GIF from a single photo. Requires a depth map (see
+ * `estimateDepth` in lib/depth.ts): every background pixel is displaced by how
+ * close it is to the camera, the AI-cut subject floats sharp on top, and a
+ * blurred copy of the original hides the reveal behind it.
  */
 export async function makeDepthGif(
   original: HTMLImageElement,
   cutoutImg: HTMLImageElement,
   opts: DepthOptions = {},
+  depthMap?: HTMLCanvasElement,
 ): Promise<Blob> {
   const size = opts.size ?? 480;
   const frameCount = opts.frames ?? 30;
@@ -276,6 +278,12 @@ export async function makeDepthGif(
   const floatY = size * 0.035 * intensity;
   const blur = Math.max(2, Math.round(size * 0.03));
 
+  // With a depth map: per-pixel displaced layer over a static blurred
+  // backdrop. Without one, fall back to the old two-plane sway.
+  const layer = depthMap ? buildDepthLayer(original, cutoutImg, depthMap) : null;
+  const backdrop = layer ? buildBackdrop(original, size, blur) : null;
+  const maps = layer ? buildPixelMaps(size, layer.gw, layer.gh) : null;
+
   for (let i = 0; i < frameCount; i++) {
     const t = i / frameCount;
     const phase = t * Math.PI * 2;
@@ -287,11 +295,24 @@ export async function makeDepthGif(
 
     ctx.clearRect(0, 0, size, size);
 
-    // Background: blurred, zoomed original drifting opposite the subject.
-    ctx.save();
-    ctx.filter = `blur(${blur}px) brightness(0.85) saturate(1.08)`;
-    drawCover(ctx, original, size, 1.4, -fgX * 0.45, -fgY * 0.45);
-    ctx.restore();
+    if (layer && backdrop && maps) {
+      renderDepthFrame(
+        ctx,
+        layer,
+        backdrop,
+        maps,
+        size,
+        Math.sin(phase),
+        -bob,
+        intensity,
+      );
+    } else {
+      // Legacy fallback: blurred, zoomed original drifting opposite the subject.
+      ctx.save();
+      ctx.filter = `blur(${blur}px) brightness(0.85) saturate(1.08)`;
+      drawCover(ctx, original, size, 1.4, -fgX * 0.45, -fgY * 0.45);
+      ctx.restore();
+    }
 
     // Foreground: sharp subject with a soft contact shadow for separation.
     ctx.save();
@@ -310,6 +331,184 @@ export async function makeDepthGif(
     opts.onProgress?.((i + 1) / frameCount);
   }
   return encodeFrames(withBoomerang(frames, opts.boomerang), true);
+}
+
+/**
+ * The background layer at depth-grid resolution: the original cover-zoomed
+ * 12% so displaced sampling never runs out of pixels at the edges, with the
+ * subject carved out (transparent) so the blurred backdrop shows through.
+ */
+interface DepthLayer {
+  gw: number;
+  gh: number;
+  depth: Float32Array; // 0..1, closer = 1
+  dMean: number; // mean depth of the background (parallax pivot)
+  src: Uint8ClampedArray; // RGBA, subject region transparent
+}
+
+function buildDepthLayer(
+  original: HTMLImageElement,
+  cutoutImg: HTMLImageElement,
+  depthMap: HTMLCanvasElement,
+): DepthLayer {
+  const gw = depthMap.width;
+  const gh = depthMap.height;
+
+  const dd = getCtx(depthMap).getImageData(0, 0, gw, gh).data;
+  const depth = new Float32Array(gw * gh);
+  for (let i = 0; i < gw * gh; i++) depth[i] = dd[i * 4] / 255;
+
+  const src = makeCanvas(gw, gh);
+  const sctx = getCtx(src);
+  const base = Math.max(gw / original.naturalWidth, gh / original.naturalHeight);
+  const s = base * 1.12;
+  const dw = original.naturalWidth * s;
+  const dh = original.naturalHeight * s;
+  sctx.drawImage(original, (gw - dw) / 2, (gh - dh) / 2, dw, dh);
+
+  // Subject mask at grid resolution: de-halo + feather, same as refineCutout.
+  const mask = makeCanvas(gw, gh);
+  getCtx(mask).drawImage(cutoutImg, 0, 0, gw, gh);
+  const md = getCtx(mask).getImageData(0, 0, gw, gh).data;
+  for (let i = 0; i < gw * gh; i++) {
+    if (md[i * 4 + 3] < 20) md[i * 4 + 3] = 0;
+  }
+  blurAlpha(md, gw, gh, 1);
+
+  const sd = sctx.getImageData(0, 0, gw, gh).data;
+  const srcPx = new Uint8ClampedArray(sd);
+  let sum = 0;
+  let wsum = 0;
+  for (let i = 0; i < gw * gh; i++) {
+    const m = md[i * 4 + 3] / 255;
+    srcPx[i * 4 + 3] = 255 - md[i * 4 + 3];
+    const w = 1 - m * 0.85; // pivot on the background, ignore the subject
+    sum += depth[i] * w;
+    wsum += w;
+  }
+  return { gw, gh, depth, dMean: sum / wsum, src: srcPx };
+}
+
+/** Static blurred backdrop that fills holes the displacement reveals. */
+function buildBackdrop(
+  original: HTMLImageElement,
+  size: number,
+  blur: number,
+): HTMLCanvasElement {
+  const c = makeCanvas(size);
+  const ctx = getCtx(c);
+  ctx.filter = `blur(${blur}px) brightness(0.85) saturate(1.08)`;
+  drawCover(ctx, original, size, 1.35);
+  return c;
+}
+
+/** Per-output-pixel mapping into the depth grid (frame-invariant). */
+function buildPixelMaps(size: number, gw: number, gh: number) {
+  const n = size * size;
+  const x0 = new Int32Array(n);
+  const y0 = new Int32Array(n);
+  const fx = new Float32Array(n);
+  const fy = new Float32Array(n);
+  for (let y = 0; y < size; y++) {
+    const gyf = ((y + 0.5) * gh) / size - 0.5;
+    const gy = gyf < 0 ? 0 : gyf;
+    const gyI = gy | 0;
+    const fyv = gy - gyI;
+    for (let x = 0; x < size; x++) {
+      const gxf = ((x + 0.5) * gw) / size - 0.5;
+      const gx = gxf < 0 ? 0 : gxf;
+      const i = y * size + x;
+      x0[i] = gx | 0;
+      y0[i] = gyI;
+      fx[i] = gx - (gx | 0);
+      fy[i] = fyv;
+    }
+  }
+  return { x0, y0, fx, fy };
+}
+
+/**
+ * Composite one frame: backdrop, then the photo displaced per-pixel by its
+ * depth — near pixels follow the subject's motion, far pixels drift the other
+ * way, so the motion reads as real parallax.
+ */
+function renderDepthFrame(
+  ctx: Ctx2D,
+  layer: DepthLayer,
+  backdrop: HTMLCanvasElement,
+  maps: { x0: Int32Array; y0: Int32Array; fx: Float32Array; fy: Float32Array },
+  size: number,
+  dirX: number,
+  dirY: number,
+  intensity: number,
+) {
+  const { gw, gh, depth, dMean, src } = layer;
+  const img = ctx.createImageData(size, size);
+  const out = img.data;
+  const bd = getCtx(backdrop).getImageData(0, 0, size, size).data;
+  const disp = size * 0.05 * intensity;
+  const sxScale = gw / size;
+  const syScale = gh / size;
+  const maxX = gw - 1;
+  const maxY = gh - 1;
+
+  for (let y = 0; y < size; y++) {
+    const gyf = ((y + 0.5) * gh) / size - 0.5;
+    for (let x = 0; x < size; x++) {
+      const i = y * size + x;
+      const gx0 = maps.x0[i];
+      const gy0 = maps.y0[i];
+      const gx1 = Math.min(gx0 + 1, maxX);
+      const gy1 = Math.min(gy0 + 1, maxY);
+      const fxi = maps.fx[i];
+      const fyi = maps.fy[i];
+      const i00 = gy0 * gw + gx0;
+      const i10 = gy0 * gw + gx1;
+      const i01 = gy1 * gw + gx0;
+      const i11 = gy1 * gw + gx1;
+      const d =
+        depth[i00] * (1 - fxi) * (1 - fyi) +
+        depth[i10] * fxi * (1 - fyi) +
+        depth[i01] * (1 - fxi) * fyi +
+        depth[i11] * fxi * fyi;
+
+      const ox = (d - dMean) * disp * dirX;
+      const oy = (d - dMean) * disp * dirY;
+
+      const gxf = ((x + 0.5) * gw) / size - 0.5;
+      const sx0 = gxf - ox * sxScale;
+      const sx = sx0 < 0 ? 0 : sx0 > maxX ? maxX : sx0;
+      const sxI = sx | 0;
+      const tx = sx - sxI;
+      const sxI1 = sxI === maxX ? maxX : sxI + 1;
+      const sy0 = gyf - oy * syScale;
+      const sy = sy0 < 0 ? 0 : sy0 > maxY ? maxY : sy0;
+      const syI = sy | 0;
+      const ty = sy - syI;
+      const syI1 = syI === maxY ? maxY : syI + 1;
+
+      const a = (syI * gw + sxI) * 4;
+      const b = (syI * gw + sxI1) * 4;
+      const c = (syI1 * gw + sxI) * 4;
+      const d2 = (syI1 * gw + sxI1) * 4;
+      const w00 = (1 - tx) * (1 - ty);
+      const w10 = tx * (1 - ty);
+      const w01 = (1 - tx) * ty;
+      const w11 = tx * ty;
+      const sr = src[a] * w00 + src[b] * w10 + src[c] * w01 + src[d2] * w11;
+      const sg = src[a + 1] * w00 + src[b + 1] * w10 + src[c + 1] * w01 + src[d2 + 1] * w11;
+      const sb = src[a + 2] * w00 + src[b + 2] * w10 + src[c + 2] * w01 + src[d2 + 2] * w11;
+      const sa = src[a + 3] * w00 + src[b + 3] * w10 + src[c + 3] * w01 + src[d2 + 3] * w11;
+      const al = sa / 255;
+
+      const o = i * 4;
+      out[o] = bd[o] * (1 - al) + sr * al;
+      out[o + 1] = bd[o + 1] * (1 - al) + sg * al;
+      out[o + 2] = bd[o + 2] * (1 - al) + sb * al;
+      out[o + 3] = 255;
+    }
+  }
+  ctx.putImageData(img, 0, 0);
 }
 
 export interface SlideshowOptions {

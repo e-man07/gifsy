@@ -95,7 +95,12 @@ export function blobToURL(blob: Blob): string {
 }
 
 /** Separable box blur applied to the alpha channel only (feathers cutout edges). */
-function blurAlpha(data: Uint8ClampedArray, w: number, h: number, radius: number) {
+export function blurAlpha(
+  data: Uint8ClampedArray,
+  w: number,
+  h: number,
+  radius: number,
+) {
   if (radius < 1) return;
   const a = new Float32Array(w * h);
   for (let i = 0; i < w * h; i++) a[i] = data[i * 4 + 3];

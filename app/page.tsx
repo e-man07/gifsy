@@ -12,6 +12,7 @@ import {
   makeSlideshowGif,
 } from "@/lib/gif";
 import { composeSticker, cutout } from "@/lib/sticker";
+import { estimateDepth } from "@/lib/depth";
 import { downloadBlob, toStickerWebp } from "@/lib/export";
 import {
   Activity,
@@ -160,17 +161,26 @@ export default function Home() {
               );
               setProgress(p.fraction);
             });
-            setStatus("Rendering depth…");
-            setProgress(null);
             const [orig, cut] = await Promise.all([
               loadImage(sources[0].file),
               loadImage(pngRaw),
             ]);
-            const blob = await makeDepthGif(orig, cut, {
-              fps,
-              boomerang,
-              onProgress: setProgress,
+            const depthMap = await estimateDepth(orig, (p) => {
+              setStatus(
+                p.stage === "download"
+                  ? "Loading depth model (first time only)…"
+                  : "Estimating depth…",
+              );
+              setProgress(p.stage === "download" ? p.fraction : null);
             });
+            setStatus("Rendering depth…");
+            setProgress(null);
+            const blob = await makeDepthGif(
+              orig,
+              cut,
+              { fps, boomerang, onProgress: setProgress },
+              depthMap,
+            );
             finish({
               kind: "gif",
               blob,
@@ -524,9 +534,10 @@ export default function Home() {
                       aria-hidden
                     />
                     <span>
-                      Separates you from the background and floats you over a
-                      soft blur for real 3D-style motion. First run downloads a
-                      small AI model.
+                      A depth-estimation model scans the photo and moves each
+                      pixel by how close it is to the camera — real parallax,
+                      all in your browser. First run downloads two small AI
+                      models.
                     </span>
                   </p>
                 )}
