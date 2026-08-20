@@ -4,6 +4,7 @@
 
 import type * as ort from "onnxruntime-web";
 import { getCtx, makeCanvas } from "./image";
+import { cachedFetch, evictCached } from "./model-cache";
 
 export type DepthModel = "depth-anything-v2-small-fp16";
 
@@ -48,7 +49,8 @@ async function loadSession(
   sessionPromise = (async () => {
     const ort = await loadOrt();
     ort.env.wasm.wasmPaths = WASM_PATH;
-    const res = await fetch(MODEL_URLS[model]);
+    const url = MODEL_URLS[model];
+    const res = await cachedFetch(url);
     if (!res.ok) {
       throw new Error(
         `Could not download the depth model (HTTP ${res.status}). Check your connection and try again.`,
@@ -71,10 +73,22 @@ async function loadSession(
     }
     onProgress?.({ stage: "download", fraction: 1 });
     const buffer = await new Blob(chunks as BlobPart[]).arrayBuffer();
-    return ort.InferenceSession.create(buffer, {
-      executionProviders: ["wasm"],
-      graphOptimizationLevel: "all",
-    });
+    try {
+      return await ort.InferenceSession.create(buffer, {
+        executionProviders: ["wasm"],
+        graphOptimizationLevel: "all",
+      });
+    } catch (e) {
+      // The cached copy may be stale/corrupt — evict it and retry once.
+      await evictCached(url);
+      const retry = await cachedFetch(url);
+      if (!retry.ok) throw e;
+      const retryBuffer = await new Blob([await retry.arrayBuffer()]).arrayBuffer();
+      return ort.InferenceSession.create(retryBuffer, {
+        executionProviders: ["wasm"],
+        graphOptimizationLevel: "all",
+      });
+    }
   })();
   sessionModel = model;
   return sessionPromise;

@@ -25,6 +25,10 @@ export async function cutout(
   return removeBackground(source, {
     model,
     output: { format: "image/png" },
+    // Serve model/wasm chunks from the HTTP cache without revalidating on
+    // every visit (staticimgly sends no max-age, so the browser would
+    // otherwise re-check all ~24 chunks of the ISNet model each time).
+    fetchArgs: { cache: "force-cache" },
     progress: (key, current, total) => {
       const fraction = total > 0 ? current / total : 0;
       onProgress?.({
