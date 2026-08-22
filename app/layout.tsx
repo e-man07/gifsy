@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Pixelify_Sans, Nunito } from "next/font/google";
 import "./globals.css";
+import { Analytics } from "@vercel/analytics/next"
 
 // Display: a legible pixel face for the wordmark, headline, and labels.
 const pixel = Pixelify_Sans({
@@ -26,7 +27,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${pixel.variable} ${nunito.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+      {children}
+      <Analytics />
+      </body>
     </html>
   );
 }
