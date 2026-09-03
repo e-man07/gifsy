@@ -1,16 +1,42 @@
 // Monocular depth estimation with Depth Anything V2 (small, fp16) running
-// fully client-side via onnxruntime-web. Returns a grayscale canvas where
-// brighter pixels are closer to the camera.
+// fully client-side via onnxruntime-web. Produces a normalized depth grid
+// (Float32Array, 0..1, larger = closer) that both the GIF depth effect and
+// any future 2.5D renderer consume; `estimateDepth` renders it as a
+// grayscale canvas where brighter pixels are closer to the camera.
 
-import type * as ort from "onnxruntime-web";
 import { getCtx, makeCanvas } from "./image";
-import { cachedFetch, evictCached } from "./model-cache";
+import { getOrt, loadSession } from "./inference/session";
 
 export type DepthModel = "depth-anything-v2-small-fp16";
 
 export interface DepthProgress {
   stage: "download" | "compute";
   fraction: number; // 0..1
+}
+
+/** A normalized depth map: one 0..1 float per pixel, larger = closer. */
+export interface DepthGrid {
+  data: Float32Array;
+  width: number;
+  height: number;
+}
+
+/** Render a normalized depth grid to a grayscale canvas (brighter = closer). */
+export function depthGridToCanvas(grid: DepthGrid): HTMLCanvasElement {
+  const c = makeCanvas(grid.width, grid.height);
+  const ctx = getCtx(c);
+  const id = ctx.createImageData(grid.width, grid.height);
+  const d = id.data;
+  for (let i = 0; i < grid.width * grid.height; i++) {
+    const g = Math.round(Math.max(0, Math.min(1, grid.data[i])) * 255);
+    const o = i * 4;
+    d[o] = g;
+    d[o + 1] = g;
+    d[o + 2] = g;
+    d[o + 3] = 255;
+  }
+  ctx.putImageData(id, 0, 0);
+  return c;
 }
 
 // Model weights are fetched from the Hugging Face CDN on first use, then
@@ -23,75 +49,23 @@ const MODEL_URLS: Record<DepthModel, string> = {
     "https://huggingface.co/onnx-community/depth-anything-v2-small/resolve/main/onnx/model_fp16.onnx",
 };
 
-// onnxruntime-web fetches its WASM binaries from the versioned CDN path.
-// Keep in sync with the `onnxruntime-web` version in package.json.
-const WASM_PATH = "https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/";
-
 const INPUT_SIZE = 518; // longest edge fed to the model (any multiple-of-14 size works)
 const MEAN = [0.485, 0.456, 0.406];
 const STD = [0.229, 0.224, 0.225];
 const MAX_OUTPUT_DIM = 512; // depth canvas long edge
+const THREED_INPUT_SIZE = 770; // higher-res depth pass for 3D (multiple of 14)
 
-let sessionPromise: Promise<ort.InferenceSession> | null = null;
-let sessionModel: DepthModel | null = null;
-
-/** onnxruntime-web is ~390KB; load it lazily so it stays out of the main bundle. */
-async function loadOrt(): Promise<typeof ort> {
-  const { default: ort } = await import("onnxruntime-web");
-  return ort;
-}
-
-async function loadSession(
-  model: DepthModel,
-  onProgress?: (p: DepthProgress) => void,
-): Promise<ort.InferenceSession> {
-  if (sessionPromise && sessionModel === model) return sessionPromise;
-  sessionPromise = (async () => {
-    const ort = await loadOrt();
-    ort.env.wasm.wasmPaths = WASM_PATH;
-    const url = MODEL_URLS[model];
-    const res = await cachedFetch(url);
-    if (!res.ok) {
-      throw new Error(
-        `Could not download the depth model (HTTP ${res.status}). Check your connection and try again.`,
-      );
-    }
-    const total = Number(res.headers.get("content-length")) || 0;
-    const reader = res.body?.getReader();
-    const chunks: Uint8Array[] = [];
-    let received = 0;
-    if (reader) {
-      for (;;) {
-        const { done, value } = await reader.read();
-        if (done) break;
-        chunks.push(value);
-        received += value.length;
-        if (total > 0) onProgress?.({ stage: "download", fraction: received / total });
-      }
-    } else {
-      chunks.push(new Uint8Array(await res.arrayBuffer()));
-    }
-    onProgress?.({ stage: "download", fraction: 1 });
-    const buffer = await new Blob(chunks as BlobPart[]).arrayBuffer();
-    try {
-      return await ort.InferenceSession.create(buffer, {
-        executionProviders: ["wasm"],
-        graphOptimizationLevel: "all",
-      });
-    } catch (e) {
-      // The cached copy may be stale/corrupt — evict it and retry once.
-      await evictCached(url);
-      const retry = await cachedFetch(url);
-      if (!retry.ok) throw e;
-      const retryBuffer = await new Blob([await retry.arrayBuffer()]).arrayBuffer();
-      return ort.InferenceSession.create(retryBuffer, {
-        executionProviders: ["wasm"],
-        graphOptimizationLevel: "all",
-      });
-    }
-  })();
-  sessionModel = model;
-  return sessionPromise;
+/**
+ * Device-aware working resolution for the 3D depth pass. A larger grid lets the
+ * guided-filter refine inject real image-edge detail into the relief (crisper
+ * silhouettes), but inference + refine cost grow ~quadratically — so only
+ * capable devices opt into the bigger pass; everything else keeps 518.
+ */
+export function depthWorkingSize(): number {
+  if (typeof navigator === "undefined") return INPUT_SIZE;
+  const mem = (navigator as Navigator & { deviceMemory?: number }).deviceMemory ?? 4;
+  const cores = navigator.hardwareConcurrency ?? 4;
+  return mem >= 8 && cores >= 8 ? THREED_INPUT_SIZE : INPUT_SIZE;
 }
 
 /**
@@ -99,10 +73,14 @@ async function loadSession(
  * rounded to the model's 14px patch multiple (the export accepts any
  * multiple-of-14 size and returns depth at the same resolution).
  */
-function preprocess(img: HTMLImageElement, ort: typeof import("onnxruntime-web")) {
+function preprocess(
+  img: HTMLImageElement,
+  ort: typeof import("onnxruntime-web"),
+  size = INPUT_SIZE,
+) {
   const w = img.naturalWidth;
   const h = img.naturalHeight;
-  const scale = Math.min(INPUT_SIZE / w, INPUT_SIZE / h);
+  const scale = Math.min(size / w, size / h);
   const iw = Math.max(14, Math.round((w * scale) / 14) * 14);
   const ih = Math.max(14, Math.round((h * scale) / 14) * 14);
 
@@ -143,6 +121,44 @@ function preprocess(img: HTMLImageElement, ort: typeof import("onnxruntime-web")
 }
 
 /**
+ * Estimate a normalized depth grid for an image at the model's working
+ * resolution. This is the shared inference output: run it once per image,
+ * cache it, and hand it to whichever renderer needs it.
+ */
+export async function estimateDepthGrid(
+  img: HTMLImageElement,
+  onProgress?: (p: DepthProgress) => void,
+  model: DepthModel = "depth-anything-v2-small-fp16",
+  workingSize: number = INPUT_SIZE,
+): Promise<DepthGrid> {
+  const session = await loadSession(MODEL_URLS[model], {
+    label: "the depth model",
+    onProgress: (p) => onProgress?.({ stage: "download", fraction: p.fraction }),
+  });
+  const { tensor, iw, ih } = preprocess(img, await getOrt(), workingSize);
+
+  onProgress?.({ stage: "compute", fraction: 1 });
+  const inputName = session.inputNames[0];
+  const outputName = session.outputNames[0];
+  const result = await session.run({ [inputName]: tensor });
+  const raw = result[outputName].data as Float32Array; // [ih, iw], larger = closer
+  if (raw.length !== iw * ih) {
+    throw new Error(`Unexpected depth output size: ${raw.length}`);
+  }
+
+  // Robust min/max so a few outliers don't flatten the map, then normalize
+  // to 0..1 in place.
+  const sorted = raw.slice().sort();
+  const lo = sorted[Math.floor(sorted.length * 0.005)];
+  const hi = sorted[Math.ceil(sorted.length * 0.995)];
+  const span = Math.max(hi - lo, 1e-6);
+  for (let i = 0; i < raw.length; i++) {
+    raw[i] = (raw[i] - lo) / span;
+  }
+  return { data: raw, width: iw, height: ih };
+}
+
+/**
  * Estimate a depth map for an image. Returns a grayscale canvas at the
  * image's aspect ratio (long edge ≤ 512) where brighter = closer.
  */
@@ -151,23 +167,7 @@ export async function estimateDepth(
   onProgress?: (p: DepthProgress) => void,
   model: DepthModel = "depth-anything-v2-small-fp16",
 ): Promise<HTMLCanvasElement> {
-  const session = await loadSession(model, onProgress);
-  const { tensor, iw, ih } = preprocess(img, await loadOrt());
-
-  onProgress?.({ stage: "compute", fraction: 1 });
-  const inputName = session.inputNames[0];
-  const outputName = session.outputNames[0];
-  const result = await session.run({ [inputName]: tensor });
-  const raw = result[outputName].data as Float32Array; // [1, ih, iw], larger = closer
-  if (raw.length !== iw * ih) {
-    throw new Error(`Unexpected depth output size: ${raw.length}`);
-  }
-
-  // Robust min/max so a few outliers don't flatten the map.
-  const sorted = raw.slice().sort();
-  const lo = sorted[Math.floor(sorted.length * 0.005)];
-  const hi = sorted[Math.ceil(sorted.length * 0.995)];
-  const span = Math.max(hi - lo, 1e-6);
+  const { data, width: iw, height: ih } = await estimateDepthGrid(img, onProgress, model);
 
   // Scale up to the output canvas (long edge ≤ 512).
   const scale = Math.min(MAX_OUTPUT_DIM / iw, MAX_OUTPUT_DIM / ih);
@@ -194,11 +194,11 @@ export async function estimateDepth(
       const i01 = syI1 * iw + sxI;
       const i11 = syI1 * iw + sxI1;
       const v =
-        raw[i00] * (1 - tx) * (1 - ty) +
-        raw[i10] * tx * (1 - ty) +
-        raw[i01] * (1 - tx) * ty +
-        raw[i11] * tx * ty;
-      const g = Math.round(((v - lo) / span) * 255);
+        data[i00] * (1 - tx) * (1 - ty) +
+        data[i10] * tx * (1 - ty) +
+        data[i01] * (1 - tx) * ty +
+        data[i11] * tx * ty;
+      const g = Math.round(v * 255);
       const o = (y * ow + x) * 4;
       od[o] = g;
       od[o + 1] = g;

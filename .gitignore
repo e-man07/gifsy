@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# QA scratch (large; contains a browser profile), local artifacts
+/qa-3d/
+/3d.webm
+/dev.log
+*.log

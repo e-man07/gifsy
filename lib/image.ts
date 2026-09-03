@@ -32,6 +32,19 @@ export function makeCanvas(width: number, height = width): HTMLCanvasElement {
   return c;
 }
 
+/** Downscale a decoded image to a bounded working resolution (handoff §16). */
+export function imageToCanvas(
+  img: HTMLImageElement,
+  maxDim = 1024,
+): HTMLCanvasElement {
+  const scale = Math.min(1, maxDim / Math.max(img.naturalWidth, img.naturalHeight));
+  const w = Math.max(1, Math.round(img.naturalWidth * scale));
+  const h = Math.max(1, Math.round(img.naturalHeight * scale));
+  const c = makeCanvas(w, h);
+  getCtx(c).drawImage(img, 0, 0, w, h);
+  return c;
+}
+
 export function getCtx(canvas: HTMLCanvasElement): Ctx2D {
   const ctx = canvas.getContext("2d", { willReadFrequently: true });
   if (!ctx) throw new Error("2D canvas context unavailable");

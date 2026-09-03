@@ -1,0 +1,640 @@
+<title>The Gifsy 3D Wedge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@400;500;600;700&family=Nunito:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap">
+
+<style>
+  /* ─────────────────────────────────────────────────────────────
+     Gifsy 3D strategy memo — built on the app's own pixel-HUD
+     system (Pixelify Sans + Nunito, sky/ink palette, hard offset
+     shadows). Pixel font for chrome only; Nunito for all reading.
+     ───────────────────────────────────────────────────────────── */
+
+  :root{
+    --ground:#eaf4ff;
+    --panel:#ffffff;
+    --panel-2:#f5faff;
+    --text:#0e2438;
+    --muted:#5b6b7d;
+    --edge:#0e2438;
+    --shadow:#0e2438;
+    --rule:rgba(14,36,56,.12);
+    --sky:#2e9bf0;
+    --sky-deep:#1466b4;
+    --sky-wash:#e2f0fd;
+    --sky-ink:#125a9e;
+    --grass-wash:#e7f5db;
+    --grass-ink:#356414;
+    --grass-dot:#6fb43a;
+    --sun-wash:#fdf3d3;
+    --sun-ink:#8a6a0c;
+    --sun-dot:#e8ad1f;
+    --petal-wash:#fce2e9;
+    --petal-ink:#b32c48;
+    --petal-dot:#e8506b;
+  }
+
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --ground:#0a1826;
+      --panel:#13273d;
+      --panel-2:#0f2033;
+      --text:#eaf3ff;
+      --muted:#9fb4c9;
+      --edge:#02090f;
+      --shadow:#02090f;
+      --rule:rgba(234,243,255,.14);
+      --sky:#5bb1f5;
+      --sky-deep:#8ecbff;
+      --sky-wash:#123049;
+      --sky-ink:#bfe0ff;
+      --grass-wash:#16311b;
+      --grass-ink:#c1e9a2;
+      --grass-dot:#7ec24a;
+      --sun-wash:#33280b;
+      --sun-ink:#f2cf5c;
+      --sun-dot:#e8ad1f;
+      --petal-wash:#3a1420;
+      --petal-ink:#f79bb4;
+      --petal-dot:#e8506b;
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0a1826;
+    --panel:#13273d;
+    --panel-2:#0f2033;
+    --text:#eaf3ff;
+    --muted:#9fb4c9;
+    --edge:#02090f;
+    --shadow:#02090f;
+    --rule:rgba(234,243,255,.14);
+    --sky:#5bb1f5;
+    --sky-deep:#8ecbff;
+    --sky-wash:#123049;
+    --sky-ink:#bfe0ff;
+    --grass-wash:#16311b;
+    --grass-ink:#c1e9a2;
+    --grass-dot:#7ec24a;
+    --sun-wash:#33280b;
+    --sun-ink:#f2cf5c;
+    --sun-dot:#e8ad1f;
+    --petal-wash:#3a1420;
+    --petal-ink:#f79bb4;
+    --petal-dot:#e8506b;
+  }
+
+  *{ box-sizing:border-box; }
+
+  body{
+    margin:0;
+    background:var(--ground);
+    color:var(--text);
+    font-family:"Nunito", ui-sans-serif, system-ui, -apple-system, sans-serif;
+    font-size:17px;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+
+  .pixel{
+    font-family:"Pixelify Sans", ui-monospace, "Courier New", monospace;
+    font-weight:600;
+    letter-spacing:.01em;
+  }
+
+  .memo{
+    max-width:880px;
+    margin:0 auto;
+    padding:clamp(28px,5vw,64px) clamp(18px,4vw,40px) 80px;
+    display:flex;
+    flex-direction:column;
+    gap:clamp(40px,6vw,64px);
+  }
+
+  /* Entrance — quiet, staggered, off under reduced motion */
+  .rise{ animation:rise .5s both cubic-bezier(.2,.7,.3,1); }
+  .rise:nth-child(1){ animation-delay:.02s; }
+  .rise:nth-child(2){ animation-delay:.08s; }
+  .rise:nth-child(3){ animation-delay:.14s; }
+  .rise:nth-child(4){ animation-delay:.20s; }
+  .rise:nth-child(5){ animation-delay:.26s; }
+  .rise:nth-child(6){ animation-delay:.32s; }
+  .rise:nth-child(7){ animation-delay:.38s; }
+  .rise:nth-child(8){ animation-delay:.44s; }
+  @keyframes rise{ from{ opacity:0; transform:translateY(12px); } to{ opacity:1; transform:none; } }
+
+  /* ── HUD card: chunky ink border + hard blur-less offset shadow ── */
+  .hud{
+    background:var(--panel);
+    border:3px solid var(--edge);
+    box-shadow:6px 6px 0 0 var(--shadow);
+    border-radius:4px;
+  }
+
+  /* ── Masthead ─────────────────────────────────────────────── */
+  header.mast{ display:flex; flex-direction:column; gap:18px; }
+  .eyebrow{
+    font-size:.72rem; letter-spacing:.16em; text-transform:uppercase;
+    color:var(--sky-deep);
+  }
+  .mast h1{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-weight:700;
+    font-size:clamp(2.4rem,7vw,3.9rem);
+    line-height:1.02;
+    margin:0;
+    text-wrap:balance;
+    color:var(--text);
+  }
+  .mast h1 em{ font-style:normal; color:var(--sky); }
+  .dek{
+    font-size:clamp(1.05rem,2.4vw,1.28rem);
+    color:var(--muted);
+    max-width:60ch;
+    margin:0;
+    font-weight:500;
+  }
+  .meta{
+    display:flex; flex-wrap:wrap; gap:8px; margin-top:4px;
+  }
+  .tag{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:.74rem; letter-spacing:.03em;
+    padding:5px 11px 4px;
+    border:2px solid var(--edge);
+    box-shadow:2px 2px 0 0 var(--shadow);
+    border-radius:3px;
+    background:var(--panel-2);
+    color:var(--text);
+    white-space:nowrap;
+  }
+
+  /* ── Section scaffolding ──────────────────────────────────── */
+  section{ display:flex; flex-direction:column; gap:20px; }
+  .kicker{
+    display:flex; align-items:baseline; gap:12px;
+  }
+  .kicker .n{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:1rem; color:var(--sky);
+    border:2px solid var(--edge); border-radius:3px;
+    box-shadow:2px 2px 0 0 var(--shadow);
+    background:var(--panel);
+    padding:2px 8px 1px; line-height:1;
+  }
+  h2{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-weight:600;
+    font-size:clamp(1.5rem,4vw,2.1rem);
+    margin:0; line-height:1.1; text-wrap:balance;
+  }
+  .lede{ max-width:64ch; margin:0; color:var(--text); }
+  .lede.mut{ color:var(--muted); }
+  p{ margin:0; }
+  .prose{ max-width:64ch; display:flex; flex-direction:column; gap:14px; }
+  strong{ font-weight:800; }
+  a{ color:var(--sky-deep); }
+
+  /* ── Bottom-line panel ────────────────────────────────────── */
+  .bluf{ padding:26px clamp(22px,4vw,34px); display:flex; flex-direction:column; gap:16px; }
+  .bluf .big{
+    font-size:clamp(1.12rem,2.6vw,1.32rem);
+    line-height:1.5; max-width:62ch; font-weight:600;
+  }
+  .bluf .big .hl{
+    background:linear-gradient(transparent 62%, color-mix(in srgb, var(--sky) 34%, transparent) 62%);
+    padding:0 2px;
+  }
+  .verdict-line{
+    display:flex; gap:14px; align-items:flex-start;
+    border-top:2px dashed var(--rule); padding-top:16px;
+  }
+  .verdict-line .lab{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:.7rem; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--grass-ink); background:var(--grass-wash);
+    border:2px solid var(--grass-dot); border-radius:3px;
+    padding:5px 9px 4px; white-space:nowrap; flex:none;
+  }
+  .verdict-line p{ font-weight:600; font-size:1.02rem; max-width:52ch; }
+
+  /* ── Positioning matrix: the empty box ────────────────────── */
+  .matrix-wrap{ overflow-x:auto; padding:2px 2px 8px; }
+  .matrix{
+    min-width:560px;
+    display:grid;
+    grid-template-columns:auto 1fr 1fr;
+    grid-template-rows:auto auto auto;
+    gap:12px;
+  }
+  .axis-y{
+    grid-row:2 / span 2; grid-column:1;
+    writing-mode:vertical-rl; transform:rotate(180deg);
+    display:flex; align-items:center; justify-content:center;
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:.72rem; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); padding:0 2px;
+  }
+  .axis-x{
+    grid-row:1; grid-column:2 / span 2;
+    display:flex; justify-content:space-between;
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:.72rem; letter-spacing:.06em; text-transform:uppercase;
+    color:var(--muted); padding:0 6px 2px;
+  }
+  .axis-x span:last-child{ color:var(--sky-deep); }
+  .quad{
+    background:var(--panel); border:3px solid var(--edge);
+    box-shadow:5px 5px 0 0 var(--shadow); border-radius:4px;
+    padding:16px 16px 18px; min-height:132px;
+    display:flex; flex-direction:column; gap:7px;
+  }
+  .quad .who{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:.95rem; line-height:1.25; color:var(--text);
+  }
+  .quad .what{ font-size:.86rem; color:var(--muted); line-height:1.4; }
+  .quad.dim{ background:var(--panel-2); }
+  .quad.prize{
+    background:var(--sky-wash);
+    border-color:var(--sky-deep);
+    box-shadow:9px 9px 0 0 var(--sky);
+    position:relative;
+  }
+  .quad.prize .who{ color:var(--sky-ink); font-size:1.35rem; font-weight:700; }
+  .quad.prize .flag{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:.66rem; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--sky-ink);
+  }
+  .quad.prize .what{ color:var(--sky-ink); opacity:.85; }
+
+  /* ── Tables ───────────────────────────────────────────────── */
+  .table-wrap{ overflow-x:auto; }
+  table{
+    width:100%; min-width:520px; border-collapse:separate; border-spacing:0;
+    background:var(--panel);
+    border:3px solid var(--edge);
+    box-shadow:6px 6px 0 0 var(--shadow);
+    border-radius:4px; overflow:hidden;
+  }
+  thead th{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-weight:600; font-size:.78rem; letter-spacing:.04em;
+    text-transform:uppercase; text-align:left;
+    background:var(--edge); color:var(--panel);
+    padding:11px 14px;
+  }
+  tbody td{
+    padding:13px 14px; vertical-align:top;
+    border-top:2px solid var(--rule); font-size:.95rem;
+  }
+  tbody tr:first-child td{ border-top:none; }
+  td .prod{ font-weight:800; }
+  td .cant{ color:var(--petal-ink); font-weight:600; }
+  .seg-name{ font-weight:700; }
+
+  /* Fit meter */
+  .fit{ display:flex; align-items:center; gap:9px; white-space:nowrap; }
+  .fit .num{ font-family:"Pixelify Sans", ui-monospace, monospace; font-size:.9rem; font-variant-numeric:tabular-nums; }
+  .meter{ display:inline-flex; gap:3px; }
+  .meter i{ width:9px; height:14px; border:1.5px solid var(--edge); border-radius:1px; background:transparent; display:block; }
+  .m-core i.on{ background:var(--grass-dot); }
+  .m-mid  i.on{ background:var(--sun-dot); }
+  .m-low  i.on{ background:var(--petal-dot); }
+
+  .chip{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:.68rem; letter-spacing:.05em; text-transform:uppercase;
+    padding:4px 8px 3px; border-radius:3px; border:2px solid;
+    display:inline-block; white-space:nowrap;
+  }
+  .chip.core{ background:var(--grass-wash); color:var(--grass-ink); border-color:var(--grass-dot); }
+  .chip.mid{ background:var(--sun-wash); color:var(--sun-ink); border-color:var(--sun-dot); }
+  .chip.no{ background:var(--petal-wash); color:var(--petal-ink); border-color:var(--petal-dot); }
+  .verdict-cell{ display:flex; flex-direction:column; gap:6px; }
+  .verdict-cell .note{ font-size:.86rem; color:var(--muted); line-height:1.4; }
+
+  /* ── Insight / WTP callouts ───────────────────────────────── */
+  .callout{
+    display:flex; gap:16px; padding:20px 22px;
+    background:var(--panel-2);
+    border:3px solid var(--edge);
+    box-shadow:6px 6px 0 0 var(--shadow); border-radius:4px;
+  }
+  .callout .mark{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:1.4rem; color:var(--sky); line-height:1; flex:none;
+  }
+  .callout p{ max-width:60ch; }
+  .callout .k{ font-weight:800; }
+
+  /* ── Use-case list (ranked — numbering is meaningful) ─────── */
+  .cases{ display:flex; flex-direction:column; gap:14px; list-style:none; margin:0; padding:0; }
+  .case{
+    display:grid; grid-template-columns:auto 1fr; gap:18px; align-items:start;
+    background:var(--panel);
+    border:3px solid var(--edge);
+    box-shadow:5px 5px 0 0 var(--shadow); border-radius:4px;
+    padding:16px 20px 18px;
+  }
+  .case .rank{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-size:2rem; line-height:1; color:var(--sky);
+    font-variant-numeric:tabular-nums;
+    min-width:1.4ch; text-align:center;
+  }
+  .case.flag{ background:var(--sky-wash); border-color:var(--sky-deep); box-shadow:7px 7px 0 0 var(--sky); }
+  .case .body h3{
+    font-family:"Nunito", sans-serif; font-weight:800;
+    font-size:1.06rem; margin:0 0 4px;
+  }
+  .case .body p{ color:var(--muted); font-size:.96rem; max-width:60ch; }
+  .case .body .tagline{ display:inline-block; margin-top:6px; font-size:.8rem;
+    font-family:"Pixelify Sans", monospace; color:var(--sky-ink);
+    background:var(--sky-wash); border:2px solid var(--sky-deep);
+    border-radius:3px; padding:3px 8px 2px; }
+
+  /* ── Pull quote ───────────────────────────────────────────── */
+  .pull{
+    padding:30px clamp(24px,5vw,44px);
+    background:var(--edge); color:var(--panel);
+    border-radius:4px; box-shadow:6px 6px 0 0 var(--sky);
+  }
+  .pull q{
+    font-family:"Pixelify Sans", ui-monospace, monospace;
+    font-weight:500;
+    font-size:clamp(1.3rem,3.6vw,1.95rem);
+    line-height:1.28; quotes:none; display:block; text-wrap:balance;
+  }
+  .pull q::before,.pull q::after{ content:none; }
+  .pull .attrib{ margin-top:14px; font-size:.82rem; color:color-mix(in srgb, var(--panel) 62%, var(--sky)); letter-spacing:.04em; }
+
+  /* ── Caveat ───────────────────────────────────────────────── */
+  .caveat{
+    padding:22px 24px; display:flex; flex-direction:column; gap:14px;
+    background:var(--sun-wash);
+    border:3px solid var(--edge);
+    box-shadow:6px 6px 0 0 var(--shadow); border-radius:4px;
+  }
+  .caveat h2{ color:var(--sun-ink); }
+  .caveat p{ max-width:64ch; }
+
+  /* ── Footer ───────────────────────────────────────────────── */
+  footer{
+    border-top:2px dashed var(--rule); padding-top:22px;
+    display:flex; flex-direction:column; gap:8px;
+    font-size:.82rem; color:var(--muted);
+  }
+  footer .row1{ font-family:"Pixelify Sans", monospace; letter-spacing:.05em; color:var(--text); }
+
+  @media (max-width:560px){
+    body{ font-size:16px; }
+    .case{ grid-template-columns:auto 1fr; gap:12px; }
+    .case .rank{ font-size:1.5rem; }
+    .verdict-line{ flex-direction:column; gap:10px; }
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    .rise{ animation:none; }
+  }
+</style>
+
+<div class="memo">
+
+  <header class="mast rise">
+    <div class="eyebrow pixel">Gifsy · 3D Feature · Strategy Read</div>
+    <h1>The 3D <em>Wedge</em></h1>
+    <p class="dek">Where the depth feature actually creates value — the one position nobody else holds, the ICP it fits, and the use cases that follow from it.</p>
+    <div class="meta">
+      <span class="tag">28 Aug 2026</span>
+      <span class="tag">Research base · 6 products, 6 segments</span>
+      <span class="tag">Status · for discussion</span>
+    </div>
+  </header>
+
+  <!-- BOTTOM LINE -->
+  <section class="rise">
+    <div class="hud bluf">
+      <p class="big">There's one box on the competitive map nobody occupies, and it's the one you're in: <span class="hl">your own photo → an interactive, web-native embed, in seconds, no modeling, no code.</span> The value is a <strong>premium-signal, not a function</strong> — it makes a flat photo look expensively art-directed. It wins on attention and polish, and loses the moment it's sold as a conversion, inspection, or animation tool.</p>
+      <div class="verdict-line">
+        <span class="lab">Recommended ICP</span>
+        <p>The no-code / low-code site-builder making marketing &amp; portfolio sites — whose real job is <em>“make me look more capable than my budget.”</em></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- THE EMPTY BOX -->
+  <section class="rise">
+    <div class="kicker"><span class="n pixel">01</span><h2>The empty box</h2></div>
+    <p class="lede mut">Everyone doing <strong>photo → 3D</strong> ships a baked clip. Everyone doing <strong>interactive web-3D</strong> makes you build a scene from scratch. The top-right corner — a real photo, alive on a page — is unoccupied.</p>
+    <div class="matrix-wrap">
+      <div class="matrix">
+        <div class="axis-x pixel"><span>← can't use a real photo</span><span>uses YOUR real photo →</span></div>
+        <div class="axis-y pixel">baked / static · · · interactive embed</div>
+
+        <div class="quad">
+          <div class="who">Spline · Unicorn Studio · Three.js</div>
+          <div class="what">Interactive on the web — but you must model or compose an abstract scene. Can't ingest the client's photo.</div>
+        </div>
+
+        <div class="quad prize">
+          <div class="flag">the empty box</div>
+          <div class="who pixel">GIFSY</div>
+          <div class="what">Your real photo, interactive, web-native — one embed, seconds, zero 3D skill.</div>
+        </div>
+
+        <div class="quad dim">
+          <div class="who">Lottie</div>
+          <div class="what">Featherweight web motion, gold-standard embed — but vector only. Can't represent a photograph.</div>
+        </div>
+
+        <div class="quad">
+          <div class="who">Immersity · LeiaPix · Motionleap · CapCut</div>
+          <div class="what">Photo → depth in seconds — but the output is a baked MP4/GIF for the feed, not a live embed.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COMPETITORS & THEIR ICP -->
+  <section class="rise">
+    <div class="kicker"><span class="n pixel">02</span><h2>The neighbors &amp; who they actually serve</h2></div>
+    <p class="lede mut">The photo→3D crowd is stuck in the social feed; the interactive-web crowd is stuck behind a skill wall. You collapse both.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Product</th><th>Their actual ICP</th><th>What they can't do</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="prod">Spline / Three.js</span></td>
+            <td>Design- &amp; code-literate builders who'll author a scene</td>
+            <td><span class="cant">Ingest a real photo</span> — you model an abstract scene</td>
+          </tr>
+          <tr>
+            <td><span class="prod">Unicorn Studio</span></td>
+            <td>No-code designers wanting abstract WebGL motion</td>
+            <td><span class="cant">Use your image</span> — it's generative noise/fluid, not your photo</td>
+          </tr>
+          <tr>
+            <td><span class="prod">Immersity / LeiaPix</span></td>
+            <td>Consumers &amp; social creators wanting a 3D “wiggle” clip</td>
+            <td><span class="cant">A live embed</span> — ships a baked MP4/GIF</td>
+          </tr>
+          <tr>
+            <td><span class="prod">Motionleap</span> <span style="color:var(--muted);font-size:.85em">(50M+ installs)</span></td>
+            <td>Mass mobile users posting one-photo motion to feeds</td>
+            <td><span class="cant">A web embed at all</span> — social video only</td>
+          </tr>
+          <tr>
+            <td><span class="prod">CapCut “3D Zoom”</span></td>
+            <td>Video editors &amp; social creators</td>
+            <td><span class="cant">Interactive</span> — a baked in-editor template</td>
+          </tr>
+          <tr>
+            <td><span class="prod">Lottie</span></td>
+            <td>Motion designers (After Effects) + front-end devs</td>
+            <td><span class="cant">Represent a real photo</span> — vector only</td>
+          </tr>
+          <tr>
+            <td><span class="prod">E-commerce 3D/AR</span> <span style="color:var(--muted);font-size:.85em">(Threekit)</span></td>
+            <td>Enterprise / mid-market retail</td>
+            <td><span class="cant">A cheap no-skill asset</span> from one photo — needs real models</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- WHO IT'S FOR -->
+  <section class="rise">
+    <div class="kicker"><span class="n pixel">03</span><h2>Who it's for</h2></div>
+    <p class="lede">Six candidate segments, scored on fit. The two that scored highest are really <strong>one person seen twice</strong>.</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Segment</th><th>Fit</th><th>Verdict</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="seg-name">No-code site builders <span style="color:var(--muted);font-weight:400;font-size:.85em">(Webflow / Framer / Carrd)</span></td>
+            <td><span class="fit"><span class="meter m-core"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span class="num">4/5</span></span></td>
+            <td><div class="verdict-cell"><span class="chip core">Core ICP</span><span class="note">Pasting embeds <em>is</em> their native behavior.</span></div></td>
+          </tr>
+          <tr>
+            <td class="seg-name">Web designers &amp; small agencies</td>
+            <td><span class="fit"><span class="meter m-core"><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i></i></span><span class="num">4/5</span></span></td>
+            <td><div class="verdict-cell"><span class="chip core">Core ICP</span><span class="note">Best fit for the embed value prop.</span></div></td>
+          </tr>
+          <tr>
+            <td class="seg-name">Photographers &amp; portfolios</td>
+            <td><span class="fit"><span class="meter m-mid"><i class="on"></i><i class="on"></i><i class="on"></i><i></i><i></i></span><span class="num">3/5</span></span></td>
+            <td><div class="verdict-cell"><span class="chip mid">Narrow yes</span><span class="note">Design-forward slice only — heavily quality-gated.</span></div></td>
+          </tr>
+          <tr>
+            <td class="seg-name">DTC / e-commerce</td>
+            <td><span class="fit"><span class="meter m-low"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span><span class="num">2/5</span></span></td>
+            <td><div class="verdict-cell"><span class="chip no">No</span><span class="note">Pays for <em>inspection</em>; parallax is decoration on their sacred LCP hero.</span></div></td>
+          </tr>
+          <tr>
+            <td class="seg-name">Emotional photos / real-estate</td>
+            <td><span class="fit"><span class="meter m-low"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span><span class="num">2/5</span></span></td>
+            <td><div class="verdict-cell"><span class="chip no">No</span><span class="note">Strongest aha in the product — but it's shared to feeds, where the embed dies into a commodity GIF.</span></div></td>
+          </tr>
+          <tr>
+            <td class="seg-name">Social creators</td>
+            <td><span class="fit"><span class="meter m-low"><i class="on"></i><i class="on"></i><i></i><i></i><i></i></span><span class="num">2/5</span></span></td>
+            <td><div class="verdict-cell"><span class="chip no">No</span><span class="note">Your one moat can't live in a Reel; you'd fight CapCut's free template on your weakest axis.</span></div></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="callout">
+      <span class="mark pixel">→</span>
+      <p><span class="k">One person, seen twice.</span> The two 4/5 segments are the same buyer: the site-builder with a real photo, a premium itch, and zero 3D skill. That's the exact <em>“someone building a website ships it”</em> persona set as the bar for this rework — the research landed there on its own.</p>
+    </div>
+
+    <div class="callout">
+      <span class="mark pixel">$</span>
+      <p><span class="k">The value is already priced.</span> Your ICP pays <strong>$12–14/mo</strong> for the adjacent thing today (Spline $12, Unicorn Studio $14) on top of their builder plan. You're contesting an existing budget line, not inventing one.</p>
+    </div>
+  </section>
+
+  <!-- USE CASES -->
+  <section class="rise">
+    <div class="kicker"><span class="n pixel">04</span><h2>What the feature is for</h2></div>
+    <p class="lede">Every case below is the same move — <strong>take the real photo they already have and make it look art-directed, in one embed, without a 3D artist.</strong> Ranked by strength.</p>
+    <ol class="cases">
+      <li class="case flag">
+        <div class="rank pixel">1</div>
+        <div class="body">
+          <h3>The premium hero</h3>
+          <p>The client's real product shot, brand key-art, or founder portrait becomes a hover- and scroll-reactive depth hero above the fold.</p>
+          <span class="tagline">The flagship — exactly what Spline can't do without modeling the product</span>
+        </div>
+      </li>
+      <li class="case">
+        <div class="rank pixel">2</div>
+        <div class="body">
+          <h3>The “expensive” About / team page</h3>
+          <p>A founder or team portrait with subtle depth reads bespoke and high-end on a page that's normally flat.</p>
+        </div>
+      </li>
+      <li class="case">
+        <div class="rank pixel">3</div>
+        <div class="body">
+          <h3>Portfolio &amp; case-study thumbnails</h3>
+          <p>Gallery images that come alive on hover — motion that signals quality without a Spline scene or a dev.</p>
+        </div>
+      </li>
+      <li class="case">
+        <div class="rank pixel">4</div>
+        <div class="body">
+          <h3>Category heroes</h3>
+          <p>Architecture &amp; interiors → a building shot; hospitality → a signature dish; SaaS → a product screenshot or key-art given depth above the fold.</p>
+        </div>
+      </li>
+      <li class="case">
+        <div class="rank pixel">5</div>
+        <div class="body">
+          <h3>The pitch-winner</h3>
+          <p>The designer drops an interactive mockup into a <em>staging</em> site to win the client — “look what we can do” — at near-zero effort. A use case for the designer's <em>own</em> sales process; maybe the stickiest hook of all.</p>
+        </div>
+      </li>
+    </ol>
+  </section>
+
+  <!-- FIRST VALUE -->
+  <section class="rise">
+    <div class="kicker"><span class="n pixel">05</span><h2>Where we stand on first value</h2></div>
+    <div class="pull">
+      <q>The aha isn't in your editor — it's the working embed on their real page.</q>
+      <div class="attrib pixel">Repeated across five of six segments</div>
+    </div>
+    <div class="prose">
+      <p>First value is <em>“I pasted one line into my Webflow hero, moved my mouse, and my actual photo lifted off its background — live.”</em> The in-app preview is not the activation event.</p>
+      <p>And it gates on one thing that is pure product, not marketing: <strong>artifact quality on the user's own, imperfect photo.</strong> This ICP is the least forgiving audience alive — they judge the effect on their own showcase image. A first upload with hair, a busy background, or weak subject/background separation produces an <strong>anti-aha</strong>: a halo or stretched edge that permanently sours them.</p>
+      <p>That is exactly what <strong>Phase 1 of the rework attacked</strong> — edge-aware depth refinement, halo removal, disocclusion inpaint. The research independently confirms that was the right, and gating, investment. For this ICP it isn't polish; it's the whole game.</p>
+    </div>
+    <div class="callout">
+      <span class="mark pixel">✓</span>
+      <p><span class="k">Net position.</span> An uncontested wedge, aimed at a real ICP that already pays for the adjacent thing, with adoption gated almost entirely on first-upload quality — the precise thing you've been fixing.</p>
+    </div>
+  </section>
+
+  <!-- CAVEAT -->
+  <section class="rise">
+    <div class="caveat">
+      <div class="kicker"><span class="n pixel">!</span><h2>The honest caveat</h2></div>
+      <p>Depth-parallax has a 20-year record as a <strong>front door, not a foundation</strong> — a first-session wow that decays to wallpaper by the tenth view, with no recurring job (Facebook 3D Photos, Depthy, LeiaPix all peaked and faded).</p>
+      <p>Treat the interactive embed as the <strong>hook</strong> and edge quality as the <strong>moat</strong>. Winning the ICP's <em>first</em> value doesn't require answering “why do they come back?” — but that unanswered question is what decides whether this is a great <em>feature</em> or a <em>company</em>.</p>
+    </div>
+  </section>
+
+  <footer>
+    <div class="row1">Gifsy · 3D feature strategy · internal — for discussion</div>
+    <div>Synthesized 28 Aug 2026 from research on 6 competitor products (Lottie, Spline, Unicorn Studio, Immersity/LeiaPix, Motionleap, CapCut, e-commerce 3D/AR) and 6 candidate segments. Marketing &amp; distribution deliberately out of scope.</div>
+  </footer>
+
+</div>
