@@ -8,7 +8,7 @@
 // URLs it points at. No AI is ever loaded here — only the stored files move.
 
 import type { SceneStore } from "./store";
-import type { SceneAssetRef, SceneManifest, SceneRecord } from "./types";
+import type { SaveResult, SceneAssetRef, SceneManifest, SceneRecord } from "./types";
 
 function filenameFor(field: string, mime: string): string {
   const ext = mime === "image/webp" ? "webp" : mime === "image/png" ? "png" : "bin";
@@ -22,7 +22,7 @@ async function fetchAsset(ref: SceneAssetRef): Promise<{ blob: Blob; mime: strin
 }
 
 export const serverSceneStore: SceneStore = {
-  async save(record: SceneRecord): Promise<void> {
+  async save(record: SceneRecord): Promise<SaveResult> {
     const form = new FormData();
     form.set("id", record.id);
     form.set("version", String(record.version));
@@ -36,6 +36,9 @@ export const serverSceneStore: SceneStore = {
     if (record.background) {
       form.set("background", record.background.blob, filenameFor("background", record.background.mime));
     }
+    if (record.thumb) {
+      form.set("thumb", record.thumb.blob, filenameFor("thumb", record.thumb.mime));
+    }
 
     const res = await fetch("/api/scenes", { method: "POST", body: form });
     if (!res.ok) {
@@ -48,6 +51,7 @@ export const serverSceneStore: SceneStore = {
       }
       throw new Error(message);
     }
+    return { persistence: "server" };
   },
 
   async get(id: string): Promise<SceneRecord | null> {

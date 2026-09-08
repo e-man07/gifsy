@@ -57,6 +57,51 @@ body {
   font-family: var(--font-pixel), ui-monospace, "Courier New", monospace;
 }
 
+/* ── Continuous horizontal marquee ─────────────────────────────────────── */
+/* The showcase strip streams sideways forever instead of stacking, which on a
+   phone turned six clips into six full-height screens of scrolling.
+   The track holds the list TWICE, so translating it by exactly -50% lands the
+   copy where the original started and the loop is seamless.
+   Paused on hover/focus so a visitor can actually aim at a card, and disabled
+   under prefers-reduced-motion — where the container becomes a normal
+   swipeable scroller instead (see the motion-reduce classes on it). */
+@keyframes marquee-x {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(-50%, 0, 0);
+  }
+}
+.marquee-track {
+  animation: marquee-x var(--marquee-duration, 48s) linear infinite;
+  will-change: transform;
+}
+.marquee:hover .marquee-track,
+.marquee:focus-within .marquee-track {
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .marquee-track {
+    animation: none;
+  }
+}
+
+/* ── Numbers that must not be misread ──────────────────────────────────── */
+/* Pixelify Sans draws "2" with a closed lower loop, so "$29" reads as "$89" —
+   and its "0" reads as "8" the same way ("80%" looks like "88%"). Heavier
+   weight makes it worse and letter-spacing doesn't touch the glyph shape, so
+   the only fix is a different typeface for the digits.
+   Use .num on any figure a user could act on incorrectly: prices, quota
+   counts. Body font, extra bold to hold weight against the pixel type around
+   it, and tabular figures so columns of numbers still line up. */
+.num {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+
 /* ── Signature: chunky 8-bit borders + hard, blur-less offset shadows ──── */
 .hud {
   border: 3px solid var(--ink);
@@ -89,6 +134,88 @@ body {
   transform: none;
   box-shadow: 4px 4px 0 0 var(--ink);
   filter: none;
+}
+
+/* ── Legibility over the hero art ──────────────────────────────────────── */
+/* The landing nav floats over a video whose frames swing from dark sky to
+   bright sunlit foliage. A single 1px offset shadow disappears against the
+   light greens, so links need a hard 4-way ink outline (keeps the pixel look)
+   plus a soft halo underneath, which is what actually does the separating on
+   the bright frames. */
+.hero-text {
+  text-shadow:
+    1px 1px 0 var(--ink),
+    -1px 1px 0 var(--ink),
+    1px -1px 0 var(--ink),
+    -1px -1px 0 var(--ink),
+    0 2px 7px rgba(4, 16, 29, 0.9);
+}
+
+/* Belt-and-braces for the same problem: a gradient scrim that guarantees a
+   dark ground under the nav no matter what frame the video is on.
+   The nav is `absolute … z-20`, so it establishes its own stacking context and
+   a negative z-index here paints behind the nav's own links while still
+   sitting above the hero video. pointer-events:none so the taller scrim box
+   can't swallow clicks meant for the hero. */
+.nav-scrim::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 190%;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    rgba(4, 16, 29, 0.82) 0%,
+    rgba(4, 16, 29, 0.5) 50%,
+    rgba(4, 16, 29, 0) 100%
+  );
+}
+
+/* ── Long-form policy copy (privacy / terms / refund) ──────────────────── */
+/* No typography plugin in the project, so the legal pages get one small
+   block of element styles rather than class soup on every paragraph. */
+.legal > * + * {
+  margin-top: 1rem;
+}
+.legal h2 {
+  font-family: var(--font-pixel), ui-monospace, monospace;
+  font-size: 1.25rem;
+  color: var(--foreground);
+  margin-top: 2.25rem;
+}
+.legal h2:first-child {
+  margin-top: 0;
+}
+.legal h3 {
+  font-family: var(--font-pixel), ui-monospace, monospace;
+  font-size: 1rem;
+  color: var(--foreground);
+  margin-top: 1.5rem;
+}
+.legal p,
+.legal li {
+  color: var(--muted);
+  line-height: 1.65;
+}
+.legal ul {
+  list-style: disc;
+  padding-left: 1.35rem;
+}
+.legal li + li {
+  margin-top: 0.4rem;
+}
+.legal strong {
+  color: var(--foreground);
+  font-weight: 700;
+}
+.legal a {
+  color: var(--sky-deep);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.legal a:hover {
+  color: var(--sky);
 }
 
 /* ── Motion ────────────────────────────────────────────────────────────── */

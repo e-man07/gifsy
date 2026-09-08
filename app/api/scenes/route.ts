@@ -17,7 +17,6 @@ export const runtime = "nodejs";
 const ID_RE = /^[a-z0-9]{6,32}$/i;
 const ONE_YEAR_SECONDS = 365 * 24 * 60 * 60;
 const MAX_ASSET_BYTES = 24 * 1024 * 1024; // per-asset guard (image/depth/mask)
-const FREE_SCENE_LIMIT = 5; // published scenes a free account may keep
 
 function bad(message: string, status = 400): Response {
   return Response.json({ error: message }, { status });
@@ -43,7 +42,7 @@ export async function POST(request: Request): Promise<Response> {
 
   // ── Ownership: a scene id belongs to whoever first published it. This closes
   //    the old overwrite hole (deterministic paths + allowOverwrite let anyone
-  //    clobber a known id). A new id under the free cap is also enforced here. ──
+  //    clobber a known id). ──
   const { data: existing } = await supabase
     .from("scenes")
     .select("owner_id")
@@ -58,16 +57,10 @@ export async function POST(request: Request): Promise<Response> {
     .eq("id", user.id)
     .maybeSingle();
   const plan = (profile?.plan as string) ?? "free";
+  // Publishing is unlimited on every plan — the free cap moved onto 3D
+  // *generation* (app/api/generations/route.ts), which is the step that costs
+  // something. The plan still decides the watermark.
   const watermark = plan === "free";
-  if (!existing && plan === "free") {
-    const { count } = await supabase
-      .from("scenes")
-      .select("id", { count: "exact", head: true })
-      .eq("owner_id", user.id);
-    if ((count ?? 0) >= FREE_SCENE_LIMIT) {
-      return bad("Free plan scene limit reached — upgrade to publish more.", 402);
-    }
-  }
 
   const configRaw = form.get("config");
   if (typeof configRaw !== "string") return bad("Missing config.");
@@ -88,16 +81,19 @@ export async function POST(request: Request): Promise<Response> {
   const depth = form.get("depth");
   const mask = form.get("mask");
   const background = form.get("background");
+  const thumb = form.get("thumb");
   if (!(image instanceof Blob) || !(depth instanceof Blob)) {
     return bad("Missing image or depth asset.");
   }
   if (mask !== null && !(mask instanceof Blob)) return bad("Malformed mask asset.");
   if (background !== null && !(background instanceof Blob)) return bad("Malformed background asset.");
+  if (thumb !== null && !(thumb instanceof Blob)) return bad("Malformed thumb asset.");
   const tooBig =
     image.size > MAX_ASSET_BYTES ||
     depth.size > MAX_ASSET_BYTES ||
     (mask instanceof Blob && mask.size > MAX_ASSET_BYTES) ||
-    (background instanceof Blob && background.size > MAX_ASSET_BYTES);
+    (background instanceof Blob && background.size > MAX_ASSET_BYTES) ||
+    (thumb instanceof Blob && thumb.size > MAX_ASSET_BYTES);
   if (tooBig) return bad("Asset exceeds size limit.", 413);
 
   const base = `scenes/${id}`;
@@ -109,7 +105,7 @@ export async function POST(request: Request): Promise<Response> {
   };
 
   try {
-    const [imageRes, depthRes, maskRes, backgroundRes] = await Promise.all([
+    const [imageRes, depthRes, maskRes, backgroundRes, thumbRes] = await Promise.all([
       put(`${base}/image.webp`, image, { ...putOpts, contentType: "image/webp" }),
       put(`${base}/depth.png`, depth, { ...putOpts, contentType: "image/png" }),
       mask instanceof Blob
@@ -117,6 +113,9 @@ export async function POST(request: Request): Promise<Response> {
         : Promise.resolve(null),
       background instanceof Blob
         ? put(`${base}/background.webp`, background, { ...putOpts, contentType: "image/webp" })
+        : Promise.resolve(null),
+      thumb instanceof Blob
+        ? put(`${base}/thumb.webp`, thumb, { ...putOpts, contentType: "image/webp" })
         : Promise.resolve(null),
     ]);
 
@@ -131,6 +130,7 @@ export async function POST(request: Request): Promise<Response> {
         depth: { url: depthRes.url, mime: "image/png" },
         mask: maskRes ? { url: maskRes.url, mime: "image/png" } : null,
         background: backgroundRes ? { url: backgroundRes.url, mime: "image/webp" } : null,
+        thumb: thumbRes ? { url: thumbRes.url, mime: "image/webp" } : null,
       },
     };
 
@@ -149,6 +149,7 @@ export async function POST(request: Request): Promise<Response> {
         depth_url: depthRes.url,
         mask_url: maskRes ? maskRes.url : null,
         background_url: backgroundRes ? backgroundRes.url : null,
+        thumb_url: thumbRes ? thumbRes.url : null,
         watermark,
       },
       { onConflict: "id" },

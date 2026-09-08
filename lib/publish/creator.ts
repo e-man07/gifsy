@@ -9,7 +9,7 @@ import type { SceneConfig } from "@/lib/rendering/types";
 import { canvasToBlob, getCtx, imageToCanvas, makeCanvas } from "@/lib/image";
 import { sceneStore } from "./store";
 import { newSceneId } from "./scene-id";
-import type { SceneAsset, SceneRecord } from "./types";
+import type { PublishResult, SceneAsset, SceneRecord } from "./types";
 
 /**
  * Bake a clean subject-removed backdrop by sending the image + subject mask to
@@ -56,6 +56,28 @@ async function inpaintBackgroundAsset(
   }
 }
 
+/** Long edge of the grid thumbnail. The /scenes and /gallery cells render at
+ *  roughly 200–260 CSS px, so 400 covers a 2x display with no upscaling. */
+const THUMB_LONG_EDGE = 400;
+
+/**
+ * A small WebP preview of the colour image, for the account and gallery grids.
+ * Those grids used to load the full 1440px hero image into a ~240px cell —
+ * about an order of magnitude more bytes per cell than needed, paid on every
+ * grid view. q0.8 is fine at this size.
+ *
+ * Never throws: a scene is perfectly publishable without a thumbnail, and the
+ * grids fall back to the full image when one is absent.
+ */
+async function thumbAsset(image: HTMLImageElement): Promise<SceneAsset | null> {
+  try {
+    const blob = await canvasToBlob(imageToCanvas(image, THUMB_LONG_EDGE), "image/webp", 0.8);
+    return { blob, mime: "image/webp" };
+  } catch {
+    return null;
+  }
+}
+
 export interface PublishOptions {
   image: HTMLImageElement;
   depthGrid: DepthGrid;
@@ -66,9 +88,13 @@ export interface PublishOptions {
 
 /**
  * Optimize the creator's outputs into publishable assets, build a SceneRecord,
- * and persist it. Returns the saved record (with its shareable id).
+ * and persist it.
+ *
+ * Returns the saved record AND where it landed. Callers must check
+ * `persistence`: "local" means the server write failed and the scene is not
+ * actually published, so no share link or embed code should be offered.
  */
-export async function publishScene(opts: PublishOptions): Promise<SceneRecord> {
+export async function publishScene(opts: PublishOptions): Promise<PublishResult> {
   const { image, depthGrid, cutout, config, onProgress } = opts;
 
   // Step 1/3 — color image as WebP (≤1440 long edge); q0.90 for a crisp hero asset.
@@ -102,14 +128,15 @@ export async function publishScene(opts: PublishOptions): Promise<SceneRecord> {
     depth: { blob: depthBlob, mime: "image/png" },
     mask,
     background,
+    thumb: await thumbAsset(image),
     config,
     createdAt: Date.now(),
   };
 
   onProgress?.(0.85);
-  await sceneStore.save(record);
+  const result = await sceneStore.save(record);
   onProgress?.(1);
-  return record;
+  return { ...result, record };
 }
 
 /** Resolve a scene id to its stored record (or null). */

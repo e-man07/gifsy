@@ -107,3 +107,36 @@ export const GALLERY: GalleryCategory[] = [
 
 /** Total curated scenes — handy for hero copy / headers. */
 export const GALLERY_COUNT = GALLERY.reduce((n, c) => n + c.items.length, 0);
+
+/**
+ * The six clips shown in the landing-page strip, deliberately spread across
+ * categories so a first-time visitor sees the effect work on a pet, a
+ * character, a landscape and an object — not four variations of one thing.
+ * Kept small on purpose: these sit above the fold, and every extra card is
+ * another video the browser may decide to fetch.
+ */
+export const FEATURED_IDS = [
+  "animals-1",
+  "character-5",
+  "nature-4",
+  "flowers-7",
+  // "food-7" (The Burger) was here, but its parallax swing carries the burger
+  // almost out of frame behind a dark foreground shape — it reads as a mistake
+  // rather than a demo. "Coffee for Two" holds its subject across the whole
+  // swing and its two cups sit at different depths, so the parallax is legible.
+  "food-1",
+  "stilllife-4",
+] as const;
+
+export type FeaturedItem = GalleryItem & { accent: Accent };
+
+/** Resolve FEATURED_IDS to full items, carrying each one's category accent.
+ *  Unknown ids are skipped rather than throwing, so a typo degrades to a
+ *  shorter strip instead of a blank landing page. */
+export const FEATURED: FeaturedItem[] = FEATURED_IDS.flatMap((id) => {
+  for (const cat of GALLERY) {
+    const item = cat.items.find((i) => i.id === id);
+    if (item) return [{ ...item, accent: cat.accent }];
+  }
+  return [];
+});

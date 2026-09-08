@@ -22,10 +22,38 @@ export interface SceneRecord {
    *  null when segmentation was skipped or inpaint was unavailable — the viewer
    *  then falls back to the client-side push-pull fill. */
   background?: SceneAsset | null;
+  /** Small (400px) WebP preview used by the /scenes and /gallery grids, so a
+   *  grid cell doesn't download the full-size hero image. Optional: scenes
+   *  published before thumbnails existed have none, and the grids fall back to
+   *  the full image. */
+  thumb?: SceneAsset | null;
   config: SceneConfig;
   createdAt: number;
   /** Owner's-plan watermark flag carried from the manifest (default on). */
   watermark?: boolean;
+}
+
+/**
+ * Where a save actually landed.
+ *
+ * "server" — the assets reached Blob and a `scenes` row was written, so the
+ *   scene resolves on any device and is listed under the owner's account.
+ * "local"  — only the IndexedDB mirror was written. The scene is NOT published:
+ *   nothing can list it (the local store has no `list()`), it resolves in no
+ *   other browser, and clearing site data destroys it. Callers MUST NOT present
+ *   this as a successful publish.
+ */
+export type ScenePersistence = "server" | "local";
+
+export interface SaveResult {
+  persistence: ScenePersistence;
+  /** Why the server write failed — set only when persistence is "local". */
+  error?: string;
+}
+
+/** What `publishScene()` returns: the record plus where it actually landed. */
+export interface PublishResult extends SaveResult {
+  record: SceneRecord;
 }
 
 /** A stored asset addressed by public URL instead of an inline blob. */
@@ -53,5 +81,7 @@ export interface SceneManifest {
     mask: SceneAssetRef | null;
     /** LaMa-inpainted backdrop; absent on scenes published before Phase 3-4. */
     background?: SceneAssetRef | null;
+    /** 400px grid preview; absent on scenes published before thumbnails. */
+    thumb?: SceneAssetRef | null;
   };
 }

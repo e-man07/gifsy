@@ -7,6 +7,7 @@ import { track } from "@vercel/analytics";
 import { Check, Code, Copy } from "lucide-react";
 import { useScene } from "@/lib/publish/use-scene";
 import type { SceneConfig } from "@/lib/rendering/types";
+import { embedOrigin } from "@/lib/site-url";
 
 const SceneViewer = dynamic(() => import("@/components/SceneViewer").then((m) => m.SceneViewer), {
   ssr: false,
@@ -21,7 +22,9 @@ export function SceneClient({ id }: { id: string }) {
   const { scene, loading } = useScene(id);
   const [copied, setCopied] = useState<"url" | "code" | null>(null);
 
-  const origin = typeof window !== "undefined" ? window.location.origin : "";
+  // Canonical domain when configured — a copied embed must not hardcode a
+  // preview deployment's URL. See lib/site-url.ts.
+  const origin = embedOrigin();
   const shareUrl = `${origin}/s/${id}`;
   const embedUrl = `${origin}/embed/${id}`;
   const embedCode = `<iframe src="${embedUrl}" style="width:100%;height:500px;border:0" loading="lazy"></iframe>`;

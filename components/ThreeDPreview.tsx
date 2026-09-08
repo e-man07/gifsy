@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from "react";
 import * as THREE from "three";
 import type { DepthGrid } from "@/lib/depth";
 import { depthGridToCanvas } from "@/lib/depth";
@@ -8,15 +8,14 @@ import {
   buildParallaxScene,
   makeTexture,
   planeDims,
-  coverDistance,
+  framingPlan,
+  subjectExtent,
+  subjectRecentre,
+  type SubjectExtent,
   placeOrbit,
   CAM_SWAY,
-  COVER_REST,
-  COVER_HOVER,
-  COVER_CAPTURE,
   ORBIT_MAX_THETA,
   ORBIT_MAX_PHI,
-  ORBIT_COVER,
   ORBIT_RELIEF_BIAS,
   ORBIT_RELIEF_BOOST,
   type ParallaxScene,
@@ -78,6 +77,34 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
   const orbitTarget = useRef({ theta: 0, phi: 0 }); // driven by drag / auto-turntable
   const planeDimsRef = useRef({ pw: 1.6, ph: 1.6 });
   const [fps, setFps] = useState<number | null>(null);
+  // Subject reach, measured from the cutout when the scene is built.
+  const extentRef = useRef<SubjectExtent | undefined>(undefined);
+
+  /**
+   * Every camera distance in this component comes from here, so the live
+   * preview and the GIF/WebM/PNG exporters cannot disagree about how a scene
+   * sits in its frame — and neither can drift from the embed, which asks the
+   * same function (lib/rendering/scene.ts).
+   */
+  const planFor = useCallback((aspect: number) => {
+    const cam = cameraRef.current;
+    const mount = mountRef.current;
+    return framingPlan(
+      cam ? cam.fov : 40,
+      planeDimsRef.current.pw,
+      planeDimsRef.current.ph,
+      aspect,
+      {
+        framing: configRef.current.framing,
+        subjectOnly: configRef.current.subjectOnly,
+        extent: extentRef.current,
+        // CSS px, so the matte-scale cap does not depend on the display.
+        viewportPx: mount
+          ? { w: mount.clientWidth, h: mount.clientHeight }
+          : undefined,
+      },
+    );
+  }, []);
   const [webglFailed, setWebglFailed] = useState(false);
 
   imageRef.current = image;
@@ -146,7 +173,21 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
     const camera = new THREE.PerspectiveCamera(36 + configRef.current.perspective * 8, w / h, 0.1, 100);
     const dims = planeDims(image.naturalWidth / image.naturalHeight);
     planeDimsRef.current = dims;
-    const initZ = coverDistance(camera.fov, dims.pw, dims.ph, w / h) * COVER_REST;
+    // Measured once per cutout; lets a subject-only scene frame the subject
+    // rather than the photo plane it came from.
+    extentRef.current = config.subjectOnly && cutout ? subjectExtent(cutout) : undefined;
+    // Centre the subject at the origin so the camera frames it, not the photo
+    // it was cut from (the camera always looks at 0,0,0).
+    if (extentRef.current) {
+      const off = subjectRecentre(extentRef.current, dims.pw, dims.ph);
+      scene.position.set(off.x, off.y, 0);
+    }
+    const initZ = framingPlan(camera.fov, dims.pw, dims.ph, w / h, {
+      framing: config.framing,
+      subjectOnly: config.subjectOnly,
+      extent: extentRef.current,
+      viewportPx: { w, h },
+    }).rest;
     camera.position.set(0, 0, initZ);
     camera.lookAt(0, 0, 0);
     cameraRef.current = camera;
@@ -287,9 +328,8 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
         orbit.current.phi += (orbitTarget.current.phi - orbit.current.phi) * oe;
         parallax.setPointer(0, 0);
         parallax.setRelief(ORBIT_RELIEF_BIAS, ORBIT_RELIEF_BOOST);
-        const fitZ = coverDistance(camera.fov, planeDimsRef.current.pw, planeDimsRef.current.ph, camera.aspect);
-        placeOrbit(camera, orbit.current.theta, orbit.current.phi, fitZ * ORBIT_COVER);
-        curZ = camera.position.z; // keep cover-fit continuous if the mode switches
+        placeOrbit(camera, orbit.current.theta, orbit.current.phi, planFor(camera.aspect).orbit);
+        curZ = camera.position.z; // keep the fit continuous if the mode switches
       } else {
         parallax.setRelief(0.5, 1.0); // default ± relief (identical to pre-orbit behavior)
 
@@ -324,11 +364,13 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
         camera.position.x = Math.max(-0.18, Math.min(0.18, px * gain * CAM_SWAY));
         camera.position.y = Math.max(-0.14, Math.min(0.14, py * gain * CAM_SWAY));
 
-        // Cover-fit the plane to the viewport (fill, crop overflow → no black
-        // border); hover eases the camera in for a zoom, auto adds a slow breathe.
-        const fitZ = coverDistance(camera.fov, planeDimsRef.current.pw, planeDimsRef.current.ph, camera.aspect);
-        const breathe = mm === "auto" ? Math.sin(tick * 0.5) * 0.02 * fitZ : 0;
-        const targetZ = (hovering ? fitZ * COVER_HOVER : fitZ * COVER_REST) + breathe;
+        // Framing comes from the plan: "window" cover-fits (fill, crop overflow →
+        // no black border), "popout" contains the backdrop with margin so the
+        // lifted subject can cross its edge. Hover eases the camera in a little;
+        // auto adds a slow breathe.
+        const plan = planFor(camera.aspect);
+        const breathe = mm === "auto" ? Math.sin(tick * 0.5) * 0.02 * plan.rest : 0;
+        const targetZ = (hovering ? plan.hover : plan.rest) + breathe;
         curZ += (targetZ - curZ) * 0.08;
         camera.position.z = curZ;
         camera.lookAt(0, 0, 0);
@@ -380,7 +422,15 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
       rendererRef.current = null;
     };
     // Rebuild only when identity of image/depth/cutout changes; config handled live.
-  }, [image, depthGrid, cutout]);
+    // subjectOnly adds/removes the backdrop mesh, so it needs a rebuild rather
+    // than a uniform update like the other controls.
+    //
+    // config.framing is deliberately NOT a dependency: the animate loop reads it
+    // through planFor every frame and eases the camera to the new distance, so
+    // toggling pop-out glides instead of tearing the scene down — a rebuild here
+    // would also throw away wherever the viewer had dragged the orbit to.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [image, depthGrid, cutout, config.subjectOnly]);
 
   // ── Export API (Phase 5) ──────────────────────────────────────────────────
 
@@ -424,8 +474,9 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
       const frames: Array<{ data: Uint8ClampedArray; width: number; height: number; delay: number }> = [];
       const orbitMode = configRef.current.motionMode === "orbit";
       const gain = 0.75 + configRef.current.perspective * 0.6;
-      const capZ = coverDistance(camera.fov, planeDimsRef.current.pw, planeDimsRef.current.ph, ew / eh) * COVER_CAPTURE;
-      const orbitRadius = coverDistance(camera.fov, planeDimsRef.current.pw, planeDimsRef.current.ph, ew / eh) * ORBIT_COVER;
+      const exportPlan = planFor(ew / eh);
+      const capZ = exportPlan.capture;
+      const orbitRadius = exportPlan.orbit;
       try {
         for (let i = 0; i < frameCount; i++) {
           const t = i / frameCount;
@@ -498,10 +549,10 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
         if (configRef.current.motionMode === "orbit") {
           parallaxRef.current?.setPointer(0, 0);
           parallaxRef.current?.setRelief(ORBIT_RELIEF_BIAS, ORBIT_RELIEF_BOOST);
-          const r = coverDistance(camera.fov, planeDimsRef.current.pw, planeDimsRef.current.ph, ew / eh) * ORBIT_COVER;
+          const r = planFor(ew / eh).orbit;
           placeOrbit(camera, ORBIT_MAX_THETA * 0.6, ORBIT_MAX_PHI * 0.35, r);
         } else {
-          const stillZ = coverDistance(camera.fov, planeDimsRef.current.pw, planeDimsRef.current.ph, ew / eh) * COVER_CAPTURE;
+          const stillZ = planFor(ew / eh).capture;
           parallaxRef.current?.setPointer(0.35 * gain, 0.12 * gain);
           camera.position.set(0.35 * gain * CAM_SWAY, 0.12 * gain * CAM_SWAY, stillZ);
           camera.lookAt(0, 0, 0);
@@ -547,8 +598,9 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
         const start = performance.now();
         const orbitMode = configRef.current.motionMode === "orbit";
         const gain = 0.75 + configRef.current.perspective * 0.6;
-        const capZ = coverDistance(camera.fov, planeDimsRef.current.pw, planeDimsRef.current.ph, camera.aspect) * COVER_CAPTURE;
-        const orbitRadius = coverDistance(camera.fov, planeDimsRef.current.pw, planeDimsRef.current.ph, camera.aspect) * ORBIT_COVER;
+        const livePlan = planFor(camera.aspect);
+        const capZ = livePlan.capture;
+        const orbitRadius = livePlan.orbit;
         capturingRef.current = true;
         rec.start();
         await new Promise<void>((resolve) => {
@@ -596,7 +648,14 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
   }
 
   return (
-    <div className={`relative overflow-hidden rounded-xl bg-background ${className ?? ""}`}>
+    // Pop-out and subject-only scenes are meant to sit on whatever is behind
+    // them; a panel colour here would put the lifted subject back in a box.
+    // `overflow-hidden` stays: the canvas is the scene's outer bound either way.
+    <div
+      className={`relative overflow-hidden rounded-xl ${
+        config.framing === "popout" || config.subjectOnly ? "" : "bg-background"
+      } ${className ?? ""}`}
+    >
       <div ref={mountRef} className="h-[360px] w-full sm:h-[420px]" />
       {fps !== null && (
         <span className="pointer-events-none absolute bottom-2 right-2 rounded bg-ink/70 px-1.5 py-0.5 font-pixel text-[10px] text-cloud">{fps} fps</span>

@@ -3,13 +3,17 @@
 
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { SiteNav } from "@/components/SiteNav";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "My scenes · Gifsy" };
+export const metadata = { title: "My scenes" };
 
 interface SceneRow {
   id: string;
   image_url: string | null;
+  /** 400px preview (0004_scene_thumbnails.sql); null on scenes published
+   *  before thumbnails existed, so the grid falls back to image_url. */
+  thumb_url: string | null;
   created_at: string;
   watermark: boolean;
 }
@@ -23,31 +27,33 @@ export default async function MyScenesPage() {
 
   const { data } = await supabase
     .from("scenes")
-    .select("id,image_url,created_at,watermark")
+    .select("id,image_url,thumb_url,created_at,watermark")
     .eq("owner_id", user.id)
     .order("created_at", { ascending: false });
   const scenes = (data ?? []) as SceneRow[];
 
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-5 py-8 sm:py-12">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <p className="font-pixel text-xs uppercase tracking-[0.2em] text-sky">Your account</p>
-          <h1 className="mt-1 font-pixel text-3xl text-foreground">My scenes</h1>
-          <p className="mt-1 text-sm text-muted">{user.email}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Link href="/pricing" className="btn-pixel rounded-xl bg-panel px-4 py-2 font-pixel text-sm text-foreground">
-            Plans
+    <main className="flex min-h-screen flex-1 flex-col bg-background">
+      <section className="border-b-[3px] border-ink bg-ink text-cloud">
+        <SiteNav />
+
+        <div className="mx-auto w-full max-w-5xl px-5 pb-10 pt-6 sm:px-8 sm:pb-12 sm:pt-8">
+          <p className="font-pixel text-xs uppercase tracking-[0.2em] text-sun drop-shadow-[1px_1px_0_var(--ink)]">
+            Your account
+          </p>
+          <h1 className="mt-2 font-pixel text-3xl text-cloud drop-shadow-[2px_2px_0_var(--ink)] sm:text-4xl">
+            My scenes
+          </h1>
+          <Link href="/account" className="mt-3 inline-block text-sm text-cloud/70 underline decoration-dotted hover:text-sun">
+            {user.email}
           </Link>
-          <Link href="/" className="btn-pixel rounded-xl bg-sky px-4 py-2 font-pixel text-sm text-cloud">
-            New scene
-          </Link>
         </div>
-      </div>
+      </section>
+
+      <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 sm:py-10">
 
       {scenes.length === 0 ? (
-        <div className="hud mt-8 rounded-2xl bg-panel p-10 text-center">
+        <div className="hud rounded-2xl bg-panel p-10 text-center">
           <p className="font-pixel text-lg text-foreground">No published scenes yet</p>
           <p className="mt-2 text-sm text-muted">
             Make a 3D scene and hit Publish — it&apos;ll show up here with a shareable link and embed code.
@@ -57,7 +63,7 @@ export default async function MyScenesPage() {
           </Link>
         </div>
       ) : (
-        <div className="mt-8 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-4">
           {scenes.map((s) => (
             <Link
               key={s.id}
@@ -65,10 +71,10 @@ export default async function MyScenesPage() {
               className="hud group overflow-hidden rounded-xl bg-panel transition hover:-translate-y-0.5"
             >
               <div className="aspect-square w-full overflow-hidden bg-background">
-                {s.image_url ? (
+                {s.thumb_url ?? s.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={s.image_url}
+                    src={s.thumb_url ?? s.image_url!}
                     alt=""
                     loading="lazy"
                     className="h-full w-full object-cover transition group-hover:scale-105"
@@ -89,6 +95,7 @@ export default async function MyScenesPage() {
           ))}
         </div>
       )}
+      </div>
     </main>
   );
 }

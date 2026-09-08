@@ -5,9 +5,14 @@
 // grayscale canvas where brighter pixels are closer to the camera.
 
 import { getCtx, makeCanvas } from "./image";
-import { getOrt, loadSession } from "./inference/session";
+import { getOrt } from "./inference/session";
+import { runSplitDepth } from "./depth-split/client";
 
 export type DepthModel = "depth-anything-v2-small-fp16";
+
+/** The export both split halves are built from. Changing this means re-running
+ *  scripts/split-depth-model.py and re-publishing both halves. */
+export const SPLIT_MODEL: DepthModel = "depth-anything-v2-small-fp16";
 
 export interface DepthProgress {
   stage: "download" | "compute";
@@ -39,15 +44,17 @@ export function depthGridToCanvas(grid: DepthGrid): HTMLCanvasElement {
   return c;
 }
 
-// Model weights are fetched from the Hugging Face CDN on first use, then
-// browser-cached. The image itself never leaves the machine. To self-host,
-// drop the .onnx into `public/` and point this URL at it.
+// The model is SPLIT (scripts/split-depth-model.py): the browser gets the
+// encoder half, and the DPT head runs either locally (Pro, fetched from
+// /api/models/depth-head) or on the server (free, metered per generation by
+// /api/depth/head). The encoder alone emits activations, not depth, which is
+// what makes the free tier's server call unavoidable instead of advisory.
+//
+// The image itself still never leaves the machine on either path — a free
+// generation uploads intermediate activations, not the photo.
+//
 // NB: the int8-quantized export uses ConvInteger ops that onnxruntime-web's
-// WASM backend doesn't implement, so we ship the fp16 build instead.
-const MODEL_URLS: Record<DepthModel, string> = {
-  "depth-anything-v2-small-fp16":
-    "https://huggingface.co/onnx-community/depth-anything-v2-small/resolve/main/onnx/model_fp16.onnx",
-};
+// WASM backend doesn't implement, so both halves come from the fp16 build.
 
 const INPUT_SIZE = 518; // longest edge fed to the model (any multiple-of-14 size works)
 const MEAN = [0.485, 0.456, 0.406];
@@ -128,20 +135,15 @@ function preprocess(
 export async function estimateDepthGrid(
   img: HTMLImageElement,
   onProgress?: (p: DepthProgress) => void,
-  model: DepthModel = "depth-anything-v2-small-fp16",
   workingSize: number = INPUT_SIZE,
 ): Promise<DepthGrid> {
-  const session = await loadSession(MODEL_URLS[model], {
-    label: "the depth model",
-    onProgress: (p) => onProgress?.({ stage: "download", fraction: p.fraction }),
-  });
   const { tensor, iw, ih } = preprocess(img, await getOrt(), workingSize);
 
   onProgress?.({ stage: "compute", fraction: 1 });
-  const inputName = session.inputNames[0];
-  const outputName = session.outputNames[0];
-  const result = await session.run({ [inputName]: tensor });
-  const raw = result[outputName].data as Float32Array; // [ih, iw], larger = closer
+  // Encoder runs here; the head runs locally for Pro or on the server for free.
+  const raw = await runSplitDepth(tensor, ih, iw, (fraction) =>
+    onProgress?.({ stage: "download", fraction }),
+  ); // [ih, iw], larger = closer
   if (raw.length !== iw * ih) {
     throw new Error(`Unexpected depth output size: ${raw.length}`);
   }
@@ -165,9 +167,8 @@ export async function estimateDepthGrid(
 export async function estimateDepth(
   img: HTMLImageElement,
   onProgress?: (p: DepthProgress) => void,
-  model: DepthModel = "depth-anything-v2-small-fp16",
 ): Promise<HTMLCanvasElement> {
-  const { data, width: iw, height: ih } = await estimateDepthGrid(img, onProgress, model);
+  const { data, width: iw, height: ih } = await estimateDepthGrid(img, onProgress);
 
   // Scale up to the output canvas (long edge ≤ 512).
   const scale = Math.min(MAX_OUTPUT_DIM / iw, MAX_OUTPUT_DIM / ih);

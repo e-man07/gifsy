@@ -263,9 +263,58 @@ export function cleanCutout(cutout: HTMLImageElement, maxDim = 1024): HTMLCanvas
   for (let i = 0; i < w * h; i++) {
     if (d[i * 4 + 3] < 24) d[i * 4 + 3] = 0; // drop near-transparent halo
   }
+  dropStrayIslands(d, w, h);
   blurAlpha(d, w, h, 1); // soft anti-aliased edge
   ctx.putImageData(id, 0, 0);
   return base;
+}
+
+/**
+ * Erase opaque regions far smaller than the main subject.
+ *
+ * Segmentation regularly keeps a scrap of background — a blade of grass beside
+ * the dog, a crumb on the table. Behind a backdrop nobody notices. On a
+ * subject-only cut-out (config.subjectOnly) it floats in mid-air with nothing
+ * around it, which reads as a glitch. One pass of connected-component labelling
+ * over the alpha; anything under 5% of the largest region goes.
+ *
+ * Threshold is deliberately relative, not absolute: a subject can legitimately
+ * have several parts (two cans, a person and their bag), and those are within
+ * an order of magnitude of each other. True debris is orders smaller.
+ */
+function dropStrayIslands(d: Uint8ClampedArray, w: number, h: number): void {
+  const label = new Int32Array(w * h).fill(-1);
+  const sizes: number[] = [];
+  const solid = (p: number) => d[p * 4 + 3] > 40;
+  const stack: number[] = [];
+
+  for (let p = 0; p < w * h; p++) {
+    if (label[p] !== -1 || !solid(p)) continue;
+    const id = sizes.length;
+    let n = 0;
+    label[p] = id;
+    stack.push(p);
+    while (stack.length) {
+      const q = stack.pop() as number;
+      n++;
+      const x = q % w;
+      const y = (q / w) | 0;
+      if (x > 0 && label[q - 1] === -1 && solid(q - 1)) { label[q - 1] = id; stack.push(q - 1); }
+      if (x < w - 1 && label[q + 1] === -1 && solid(q + 1)) { label[q + 1] = id; stack.push(q + 1); }
+      if (y > 0 && label[q - w] === -1 && solid(q - w)) { label[q - w] = id; stack.push(q - w); }
+      if (y < h - 1 && label[q + w] === -1 && solid(q + w)) { label[q + w] = id; stack.push(q + w); }
+    }
+    sizes.push(n);
+  }
+  if (sizes.length < 2) return; // single region — nothing to prune
+
+  let max = 0;
+  for (const n of sizes) if (n > max) max = n;
+  const cutoff = max * 0.05;
+  for (let p = 0; p < w * h; p++) {
+    const l = label[p];
+    if (l !== -1 && sizes[l] < cutoff) d[p * 4 + 3] = 0;
+  }
 }
 
 /**

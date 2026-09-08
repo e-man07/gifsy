@@ -1,14 +1,16 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { GALLERY_COUNT } from "@/lib/gallery";
+import { SiteNav, navLinkCls } from "@/components/SiteNav";
 
 export const metadata: Metadata = {
-  title: "Gifsy 3D Gallery",
+  title: "3D Gallery",
   description:
-    "See what Gifsy's 3D mode does to a single photo — real depth, in motion, made entirely in your browser. No modeling, no uploads, no accounts.",
+    "See what Gifsy's 3D mode does to a single photo — real depth, in motion, rendered in your browser. No modeling, and your photo is never uploaded.",
   openGraph: {
+    // Standalone: the "%s · Gifsy" template applies to `title`, not to og:title.
     title: "Gifsy 3D Gallery",
     description:
       "Every scene started as one still photo. Gifsy gives it real depth — in your browser.",
@@ -28,30 +30,11 @@ export default function GalleryPage() {
         />
 
         {/* Nav — mirrors the landing chrome (cloud-on-ink) */}
-        <nav className="flex items-center justify-between px-5 py-4 sm:px-8">
-          <Link
-            href="/"
-            className="flex items-center gap-1 font-pixel text-2xl text-cloud drop-shadow-[2px_2px_0_var(--ink)]"
-          >
-            GIFSY
-            <Play className="h-5 w-5 fill-sun text-sun" strokeWidth={2.5} aria-hidden />
+        <SiteNav>
+          <Link href="/#how" className={`hidden sm:block ${navLinkCls}`}>
+            How it works
           </Link>
-          <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/#how"
-              className="hidden font-pixel text-sm text-cloud drop-shadow-[1px_1px_0_var(--ink)] hover:text-sun sm:block"
-            >
-              How it works
-            </Link>
-            <Link
-              href="/#make"
-              className="btn-pixel flex items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-pixel text-sm text-cloud"
-            >
-              Make one
-              <ArrowRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-            </Link>
-          </div>
-        </nav>
+        </SiteNav>
 
         {/* Hero content */}
         <div className="mx-auto w-full max-w-6xl px-5 pb-12 pt-10 sm:px-8 sm:pb-16 sm:pt-16">
@@ -88,8 +71,9 @@ export default function GalleryPage() {
             Your photo, in 3D.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-base font-semibold text-cloud/95 drop-shadow-[1px_1px_0_rgba(4,16,29,0.9)]">
-            Free, private, and instant. Drop a photo and watch it lift off the
-            page — no account, no upload, no wait.
+            Free to try, private, and instant. Drop a photo and watch it lift
+            off the page — your photo is never uploaded. 3D needs a free
+            account; GIFs and stickers don&apos;t.
           </p>
           <Link
             href="/#make"
@@ -102,7 +86,7 @@ export default function GalleryPage() {
       </section>
 
       <footer className="mt-auto border-t-[3px] border-ink bg-panel py-5 text-center font-pixel text-xs uppercase tracking-wide text-muted">
-        Made in your browser · no uploads, no accounts
+        Made in your browser · your photo is never uploaded
       </footer>
     </main>
   );

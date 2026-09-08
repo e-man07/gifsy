@@ -1,7 +1,11 @@
-// Phase 2 test surface for LaMa server-side inpainting. Node runtime (WASM
-// onnxruntime, no native deps). GET runs a synthetic self-test so the WASM +
-// model path can be verified on a real Vercel deploy by just visiting the URL;
-// POST inpaints real RGBA pixel data (the shape the publish flow will send).
+// LaMa server-side inpainting. Node runtime (WASM onnxruntime, no native deps).
+// POST inpaints real RGBA pixel data, sent by the publish flow.
+//
+// There is deliberately no GET: it used to run a synthetic self-test so the
+// WASM + model path could be verified on a real deploy by visiting the URL, but
+// unauthenticated it was a denial-of-wallet hole — every hit pulls the ~200MB
+// model on a cold instance and burns CPU up to maxDuration. Verify deploys with
+// an authenticated POST instead.
 
 import { NextResponse } from "next/server";
 import { inpaintBackground, type Rgba, type Gray } from "@/lib/inpaint/lama";
@@ -10,40 +14,10 @@ import { createClient } from "@/lib/supabase/server";
 export const runtime = "nodejs";
 export const maxDuration = 300; // first cold call downloads the ~200MB model
 
-// GET /api/inpaint — synthetic proof the model loads and runs in this runtime.
-export async function GET() {
-  try {
-    const N = 128;
-    const image: Rgba = { data: new Uint8Array(N * N * 4), width: N, height: N };
-    for (let y = 0; y < N; y++)
-      for (let x = 0; x < N; x++) {
-        const i = (y * N + x) * 4;
-        image.data[i] = (x * 4) % 255;
-        image.data[i + 1] = (y * 4) % 255;
-        image.data[i + 2] = 140;
-        image.data[i + 3] = 255;
-      }
-    const mask: Gray = { data: new Uint8Array(N * N), width: N, height: N };
-    const c = N / 2;
-    for (let y = 0; y < N; y++)
-      for (let x = 0; x < N; x++)
-        mask.data[y * N + x] = (x - c) ** 2 + (y - c) ** 2 < (N * 0.25) ** 2 ? 255 : 0;
-
-    const t0 = Date.now();
-    const out = await inpaintBackground(image, mask);
-    return NextResponse.json({
-      ok: true,
-      runtime: "nodejs/wasm",
-      ms: Date.now() - t0,
-      output: `${out.width}x${out.height}`,
-    });
-  } catch (e) {
-    return NextResponse.json(
-      { ok: false, error: e instanceof Error ? e.message : String(e) },
-      { status: 500 },
-    );
-  }
-}
+// Upper bound on accepted dimensions. The publish flow sends a 1024 canvas
+// (lib/publish/creator.ts) which lama.ts letterboxes to 512 anyway, so this is
+// pure headroom — it caps what a signed-in caller can make the server allocate.
+const MAX_DIM = 2048;
 
 // POST /api/inpaint — real inpaint. Body: multipart form with
 //   image: raw RGBA bytes,  mask: raw 1-byte-per-pixel,  width, height.
@@ -60,7 +34,14 @@ export async function POST(req: Request) {
     const form = await req.formData();
     const width = Number(form.get("width"));
     const height = Number(form.get("height"));
-    if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1) {
+    if (
+      !Number.isInteger(width) ||
+      !Number.isInteger(height) ||
+      width < 1 ||
+      height < 1 ||
+      width > MAX_DIM ||
+      height > MAX_DIM
+    ) {
       return NextResponse.json({ ok: false, error: "bad width/height" }, { status: 400 });
     }
     const imageFile = form.get("image");

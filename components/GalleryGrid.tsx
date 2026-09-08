@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Box, Pause, Play } from "lucide-react";
-import { GALLERY, GALLERY_H, GALLERY_W, type Accent } from "@/lib/gallery";
+import {
+  FEATURED,
+  GALLERY,
+  GALLERY_H,
+  GALLERY_W,
+  type Accent,
+} from "@/lib/gallery";
 
 // A card's box is reserved up front from the known clip aspect ratio, so the
 // masonry never reflows as the .webm files stream in behind their posters.
@@ -12,7 +18,15 @@ function setSrc(v: HTMLVideoElement) {
   if (!v.src && v.dataset.src) v.src = v.dataset.src;
 }
 
-export function GalleryGrid() {
+/**
+ * Shared playback plumbing for both the full gallery and the landing strip.
+ *
+ * Clips are `preload="none"` with their real URL parked in `data-src`, so a
+ * page carrying several of these downloads nothing until a card actually
+ * scrolls into view — which is what makes it safe to put a strip of these
+ * above the fold on the landing page.
+ */
+function useGalleryPlayback() {
   const rootRef = useRef<HTMLDivElement>(null);
   const [reduced, setReduced] = useState(false);
   // ids whose clip is currently playing — drives the play/pause overlay only.
@@ -70,6 +84,12 @@ export function GalleryGrid() {
     });
   }, []);
 
+  return { rootRef, playing, toggle, mark };
+}
+
+export function GalleryGrid() {
+  const { rootRef, playing, toggle, mark } = useGalleryPlayback();
+
   return (
     <div ref={rootRef} className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
       {GALLERY.map((cat) => (
@@ -105,6 +125,69 @@ export function GalleryGrid() {
           </div>
         </section>
       ))}
+    </div>
+  );
+}
+
+/**
+ * Compact, flat version for the landing page: six curated clips, no category
+ * headers. Shares Card and the playback hook with the full gallery, so the
+ * two can't drift in look or behaviour.
+ */
+export function GalleryStrip() {
+  const { rootRef, playing, toggle, mark } = useGalleryPlayback();
+
+  const card = (id: string, title: string, accent: Accent) => (
+    <Card
+      id={id}
+      title={title}
+      accent={accent}
+      playing={playing.has(id)}
+      onToggle={toggle}
+      onPlay={() => mark(id, true)}
+      onPause={() => mark(id, false)}
+    />
+  );
+
+  // One half of the marquee. The list is rendered twice and the CSS translates
+  // the track by -50%, so the copy arrives exactly where the first began and
+  // the strip never visibly restarts.
+  const half = (clone: boolean) => (
+    <div className="flex gap-5 pr-5" aria-hidden={clone || undefined}>
+      {FEATURED.map((it) => (
+        <div key={`${clone ? "clone-" : ""}${it.id}`} className="w-[260px] shrink-0">
+          {card(it.id, it.title, it.accent)}
+        </div>
+      ))}
+    </div>
+  );
+
+  // Both layouts live in the DOM and CSS picks one. The extra <video> elements
+  // in the hidden layout cost nothing: they are display:none, so they never
+  // intersect the viewport, and the playback hook only ever loads (preload=none
+  // + data-src) and plays what is actually on screen.
+  return (
+    <div ref={rootRef}>
+      {/* Phones: a single continuously scrolling row. Stacking six of these
+          full-width turned the section into six screens of scrolling.
+          motion-reduce stops the animation (globals.css) and turns this into an
+          ordinary swipeable scroller so the clips stay reachable. */}
+      <div className="marquee overflow-hidden motion-reduce:overflow-x-auto sm:hidden">
+        <div className="marquee-track flex w-max">
+          {half(false)}
+          {/* Hidden under reduced motion: with no animation the copy is just
+              duplicate cards in a scroller. */}
+          <div className="flex motion-reduce:hidden">{half(true)}</div>
+        </div>
+      </div>
+
+      {/* Tablet and up: the original grid — there is room for it, and a moving
+          strip is a worse way to browse when six cards already fit. */}
+      <div className="hidden gap-5 sm:grid sm:grid-cols-2 lg:grid-cols-3">
+        {FEATURED.map((it) => (
+          <div key={it.id}>{card(it.id, it.title, it.accent)}</div>
+        ))}
+      </div>
     </div>
   );
 }

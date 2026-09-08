@@ -1,21 +1,22 @@
 // POST /api/dodo/checkout
-// Creates a Dodo Payments subscription checkout session for the signed-in user
-// and returns { url } to redirect the browser to.
+// Creates a Dodo Payments checkout session for the signed-in user and returns
+// { url } to redirect the browser to.
 //
-// Auth: Supabase session (getUser). Body: { plan: "pro" | "studio" }.
+// Pro is a one-time lifetime purchase, so the Dodo product behind
+// DODO_PRODUCT_PRO must be a ONE-TIME product, not a subscription. The call
+// below is the same either way (product_cart + metadata); it's the product's
+// type in Dodo that decides which webhook family fires.
+//
+// Auth: Supabase session (getUser). Body: { plan: "pro" }.
 // The Supabase user id + email are attached so the webhook can resolve the
-// account after payment: id goes into checkout metadata (echoed back on every
-// subscription.* event) and email seeds/links the Dodo customer.
+// account after payment: id goes into checkout metadata (echoed back on the
+// payment.succeeded event) and email seeds/links the Dodo customer.
 
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
-import { getDodoClient, PLANS, type PaidPlanId } from "@/lib/billing/dodo";
+import { getDodoClient, PLANS, isPaidPlan } from "@/lib/billing/dodo";
 
 export const runtime = "nodejs";
-
-function isPaidPlan(v: unknown): v is PaidPlanId {
-  return v === "pro" || v === "studio";
-}
 
 export async function POST(req: Request) {
   // 1. Authenticate the user.
@@ -39,8 +40,23 @@ export async function POST(req: Request) {
 
   if (!isPaidPlan(plan)) {
     return NextResponse.json(
-      { error: 'Body must be { plan: "pro" | "studio" }.' },
+      { error: 'Body must be { plan: "pro" }.' },
       { status: 400 },
+    );
+  }
+
+  // Lifetime means there is nothing to buy a second time. Without this, a
+  // signed-in Pro user hitting the pricing page's CTA again would be walked
+  // through a full $29 checkout for something they already own.
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("plan")
+    .eq("id", user.id)
+    .maybeSingle();
+  if (profile?.plan === plan) {
+    return NextResponse.json(
+      { error: "You already have lifetime Pro — nothing to pay." },
+      { status: 409 },
     );
   }
 
@@ -49,9 +65,7 @@ export async function POST(req: Request) {
     // Misconfiguration — the product id env var is missing.
     return NextResponse.json(
       {
-        error: `No Dodo product configured for the "${plan}" plan. Set ${
-          plan === "pro" ? "DODO_PRODUCT_PRO" : "DODO_PRODUCT_STUDIO"
-        }.`,
+        error: `No Dodo product configured for the "${plan}" plan. Set DODO_PRODUCT_PRO.`,
       },
       { status: 500 },
     );

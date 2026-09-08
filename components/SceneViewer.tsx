@@ -11,14 +11,13 @@ import {
   buildParallaxScene,
   makeTexture,
   planeDims,
-  coverDistance,
+  framingPlan,
+  subjectExtent,
+  subjectRecentre,
   placeOrbit,
   CAM_SWAY,
-  COVER_REST,
-  COVER_HOVER,
   ORBIT_MAX_THETA,
   ORBIT_MAX_PHI,
-  ORBIT_COVER,
   ORBIT_RELIEF_BIAS,
   ORBIT_RELIEF_BOOST,
   type ParallaxScene,
@@ -34,11 +33,16 @@ interface Props {
   background?: HTMLImageElement | null; // pre-baked LaMa backdrop (published scenes)
   config: SceneConfig;
   showBrand?: boolean; // "Made with Gifsy" corner mark (handoff §42)
-  surface?: "share" | "embed"; // which route hosts the viewer — drives funnel analytics
+  // Which surface hosts the viewer — drives funnel analytics as
+  // `<surface>_loaded` / `<surface>_interacted`. "landing" is the pre-baked
+  // demo on the homepage, so `landing_interacted` measures the one thing that
+  // matters there: did a visitor actually drag a scene before uploading?
+  surface?: "share" | "embed" | "landing";
   className?: string;
 }
 
 export function SceneViewer({ image, depth, mask, background, config, showBrand = true, surface, className }: Props) {
+  const subjectOnly = Boolean(config.subjectOnly && mask);
   const mountRef = useRef<HTMLDivElement>(null);
   const configRef = useRef(config);
   const targetMouse = useRef({ x: 0, y: 0 });
@@ -81,7 +85,27 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
     const h = mount.clientHeight || 480;
     const camera = new THREE.PerspectiveCamera(36 + config.perspective * 8, w / h, 0.1, 100);
     const dims = planeDims(image.naturalWidth / image.naturalHeight);
-    const initZ = coverDistance(camera.fov, dims.pw, dims.ph, w / h) * COVER_REST;
+    // One source of framing truth, shared with the workshop preview and the
+    // exporters (lib/rendering/scene.ts). A published scene must look here
+    // exactly as it did while being edited.
+    // Measured once from the matte; a subject-only scene is then framed to the
+    // subject instead of to the photo plane it was cut from.
+    const extent = subjectOnly && mask ? subjectExtent(mask) : undefined;
+    // Put the subject's centre at the origin so the camera (which always looks
+    // at 0,0,0) frames the subject rather than the photo it was cut from.
+    if (extent) {
+      const off = subjectRecentre(extent, dims.pw, dims.ph);
+      scene.position.set(off.x, off.y, 0);
+    }
+    const planFor = (aspect: number) =>
+      framingPlan(camera.fov, dims.pw, dims.ph, aspect, {
+        framing: config.framing,
+        subjectOnly,
+        extent,
+        // Read live: the card can be resized (and is, between breakpoints).
+        viewportPx: { w: mount.clientWidth || w, h: mount.clientHeight || h },
+      });
+    const initZ = planFor(w / h).rest;
     camera.position.set(0, 0, initZ);
     camera.lookAt(0, 0, 0);
 
@@ -230,8 +254,7 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
         orbit.current.phi += (orbitTarget.current.phi - orbit.current.phi) * oe;
         parallax.setPointer(0, 0);
         parallax.setRelief(ORBIT_RELIEF_BIAS, ORBIT_RELIEF_BOOST);
-        const fitZ = coverDistance(camera.fov, dims.pw, dims.ph, camera.aspect);
-        placeOrbit(camera, orbit.current.theta, orbit.current.phi, fitZ * ORBIT_COVER);
+        placeOrbit(camera, orbit.current.theta, orbit.current.phi, planFor(camera.aspect).orbit);
         curZ = camera.position.z; // keep cover-fit continuous if the mode switches
       } else {
         parallax.setRelief(0.5, 1.0); // default ± relief (identical to pre-orbit behavior)
@@ -264,10 +287,11 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
         camera.position.x = Math.max(-0.18, Math.min(0.18, px * gain * CAM_SWAY));
         camera.position.y = Math.max(-0.14, Math.min(0.14, py * gain * CAM_SWAY));
 
-        // Cover-fit the plane to the viewport (fill, crop overflow → no black border).
-        const fitZ = coverDistance(camera.fov, dims.pw, dims.ph, camera.aspect);
-        const breathe = mm === "auto" ? Math.sin(tick * 0.5) * 0.02 * fitZ : 0;
-        const targetZ = (hovering ? fitZ * COVER_HOVER : fitZ * COVER_REST) + breathe;
+        // Framing per the plan: cover-fit for a window scene (fill, crop
+        // overflow → no black border), contained for subject-only and pop-out.
+        const plan = planFor(camera.aspect);
+        const breathe = mm === "auto" ? Math.sin(tick * 0.5) * 0.02 * plan.rest : 0;
+        const targetZ = (hovering ? plan.hover : plan.rest) + breathe;
         curZ += (targetZ - curZ) * 0.08;
         camera.position.z = curZ;
         camera.lookAt(0, 0, 0);
@@ -303,7 +327,7 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
       if (renderer.domElement.parentNode === mount) mount.removeChild(renderer.domElement);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [image, depth, mask, background]);
+  }, [image, depth, mask, background, subjectOnly]); // subjectOnly changes the layer set → full rebuild
 
   if (webglFailed) {
     return (
@@ -314,8 +338,24 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
   }
 
   return (
-    <div className={`relative overflow-hidden bg-background ${className ?? ""}`}>
-      <div ref={mountRef} className="h-full w-full" />
+    // No opaque ground in subject-only mode — bg-background would paint a
+    // rectangle straight back in and defeat the whole point of compositing.
+    <div
+      // A pop-out or subject-only scene deliberately shows through to whatever
+      // is behind it — painting a panel colour here would put the "free" subject
+      // back in a box.
+      className={`relative overflow-hidden ${subjectOnly || config.framing === "popout" ? "" : "bg-background"} ${className ?? ""}`}
+    >
+      {/* select-none: without it a grab-drag selects the surrounding page text
+          instead of spinning the scene — the caption highlights as you drag.
+          touch-action pan-y: the viewer claims horizontal drags (orbit azimuth,
+          the wider of the two axes) while leaving vertical touch to scroll the
+          page, so a scene sitting inside a page doesn't trap the finger. */}
+      <div
+        ref={mountRef}
+        className="h-full w-full select-none"
+        style={{ touchAction: "pan-y" }}
+      />
       {showBrand && (
         <a
           href={`/?ref=${surface ?? "scene"}`}

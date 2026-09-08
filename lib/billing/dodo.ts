@@ -12,9 +12,11 @@
 //       https://docs.dodopayments.com/developer-resources/webhooks
 
 import DodoPayments from "dodopayments";
+import { PLAN_DISPLAY, type PlanId, type PaidPlanId } from "./plans";
 
-export type PlanId = "free" | "pro" | "studio";
-export type PaidPlanId = "pro" | "studio";
+// Re-exported so existing server-side imports keep working from one place.
+export type { PlanId, PaidPlanId };
+export { FREE_GENERATION_LIMIT, isPaidPlan } from "./plans";
 
 /** Map our friendly DODO_ENVIRONMENT (test|live) to the SDK's environment enum. */
 function resolveEnvironment(): "test_mode" | "live_mode" {
@@ -45,70 +47,26 @@ export function getDodoClient(): DodoPayments {
   });
 }
 
-export interface PlanDef {
-  id: PlanId;
-  name: string;
-  /** Human display price, e.g. "$0", "$12". */
-  price: string;
-  /** Billing cadence label, e.g. "forever", "/mo". */
-  cadence: string;
-  tagline: string;
-  features: string[];
+/** A plan's shared display copy plus its server-only Dodo product id. */
+export type PlanDef = (typeof PLAN_DISPLAY)[PlanId] & {
   /**
    * The Dodo product id for this plan (from env). `null` for the free plan,
-   * which has no Dodo product. May be undefined at runtime if the env var is
-   * unset — checkout validates this and returns a clear 500.
+   * which has no Dodo product, and null at runtime if the env var is unset —
+   * checkout validates this and returns a clear 500.
    */
   dodoProductId: string | null;
-}
+};
 
 /**
- * The plan catalogue. Prices here are display-only; the real amount is
- * configured on the Dodo product. `dodoProductId` links a plan to its Dodo
- * product created in the dashboard.
+ * The plan catalogue: the client-safe copy from ./plans.ts, with the secret
+ * product ids layered on. Display data lives in one place so the pricing page
+ * and this module cannot disagree.
  */
 export const PLANS: Record<PlanId, PlanDef> = {
-  free: {
-    id: "free",
-    name: "Free",
-    price: "$0",
-    cadence: "forever",
-    tagline: "Everything on-device. No account needed to make things.",
-    features: [
-      "Unlimited GIFs, stickers & 3D",
-      "Runs entirely in your browser",
-      "No watermark",
-      "Publish up to 3 scenes",
-    ],
-    dodoProductId: null,
-  },
+  free: { ...PLAN_DISPLAY.free, dodoProductId: null },
   pro: {
-    id: "pro",
-    name: "Pro",
-    price: "$12",
-    cadence: "/mo",
-    tagline: "For creators who publish and embed a lot.",
-    features: [
-      "Everything in Free",
-      "Unlimited published scenes",
-      "Interactive 3D embeds",
-      "Priority rendering",
-    ],
+    ...PLAN_DISPLAY.pro,
     dodoProductId: process.env.DODO_PRODUCT_PRO ?? null,
-  },
-  studio: {
-    id: "studio",
-    name: "Studio",
-    price: "$39",
-    cadence: "/mo",
-    tagline: "For teams and heavy commercial use.",
-    features: [
-      "Everything in Pro",
-      "Team seats & shared gallery",
-      "Custom embed branding",
-      "Commercial license & support",
-    ],
-    dodoProductId: process.env.DODO_PRODUCT_STUDIO ?? null,
   },
 };
 
@@ -116,6 +74,5 @@ export const PLANS: Record<PlanId, PlanDef> = {
 export function planForProductId(productId: string | null | undefined): PaidPlanId | null {
   if (!productId) return null;
   if (PLANS.pro.dodoProductId && productId === PLANS.pro.dodoProductId) return "pro";
-  if (PLANS.studio.dodoProductId && productId === PLANS.studio.dodoProductId) return "studio";
   return null;
 }
