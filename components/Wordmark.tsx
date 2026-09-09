@@ -8,8 +8,11 @@ import Image from "next/image";
 import Link from "next/link";
 import logo from "@/public/gifsy-logo.png";
 
+// Smaller on phones: at text-2xl the lockup alone took roughly a third of a
+// 390px bar, which is what pushed the nav links into each other. `shrink-0`
+// keeps flex from squeezing the glyphs instead of the gaps.
 const CLS =
-  "flex items-center gap-2 font-pixel text-2xl text-cloud drop-shadow-[2px_2px_0_var(--ink)]";
+  "flex shrink-0 items-center gap-1.5 font-pixel text-xl text-cloud drop-shadow-[2px_2px_0_var(--ink)] sm:gap-2 sm:text-2xl";
 
 export function Wordmark({ href = "/" }: { href?: string }) {
   const inner = (
@@ -20,7 +23,7 @@ export function Wordmark({ href = "/" }: { href?: string }) {
         width={34}
         height={34}
         priority
-        className="h-[34px] w-[34px]"
+        className="h-7 w-7 sm:h-[34px] sm:w-[34px]"
       />
       GIFSY
     </>

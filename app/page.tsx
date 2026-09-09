@@ -729,12 +729,15 @@ export default function Home() {
         {/* Nav. The section scrims above fade out to the right to reveal the
             tree art — which is exactly where these links sit, so the nav
             carries its own top-down scrim. */}
-        <nav className="nav-scrim absolute inset-x-0 top-0 z-20 flex items-center justify-between px-5 py-4 sm:px-8">
+        <nav className="nav-scrim absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 px-5 py-4 sm:px-8">
           <Wordmark href="#top" />
           <div className="flex items-center gap-2 sm:gap-3">
+            {/* Hidden on phones alongside "How it works" — the bar fits the
+                wordmark, sign-in and the CTA and no more. Both routes stay
+                reachable from the sections below and the footer. */}
             <Link
               href="/gallery"
-              className="hero-text font-pixel text-sm text-cloud hover:text-sun"
+              className="hero-text hidden font-pixel text-sm text-cloud hover:text-sun sm:block"
             >
               Gallery
             </Link>

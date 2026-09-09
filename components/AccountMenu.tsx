@@ -3,7 +3,9 @@
 // Header account control.
 //
 // Signed out: Pricing + "Sign in" as plain links — a visitor has no other
-// route to the plans page, so Pricing stays visible in this state.
+// route to the plans page, so Pricing stays visible in this state. On phones
+// Pricing hides: it was the fourth item in a bar with room for three, and the
+// landing page carries the plan cards inline plus a footer link.
 //
 // Signed in: a single avatar button (the user's picture, or the first letter
 // of their name/email) that opens a dropdown holding everything account-
@@ -93,7 +95,7 @@ export function AccountMenu() {
   if (!account) {
     return (
       <div className="order-0 flex items-center gap-2 sm:gap-3">
-        <Link href="/pricing" className={linkCls}>
+        <Link href="/pricing" className={`hidden sm:block ${linkCls}`}>
           Pricing
         </Link>
         <Link href="/login" className={linkCls}>
