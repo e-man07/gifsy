@@ -946,30 +946,33 @@ export default function Home() {
               the subject centred at its own scale, so every extra pixel of
               width is just more empty black either side of him. */}
           <div className="cinema-spill relative mx-auto w-full max-w-5xl px-4 sm:px-8">
-            <div className="relative z-10 h-[clamp(420px,68vh,760px)] w-full overflow-hidden border-[3px] border-ink bg-black shadow-[0_0_90px_rgba(46,155,240,0.22)]">
+            <div className="relative z-10 h-[52vh] min-h-[320px] w-full overflow-hidden border-[3px] border-ink bg-black sm:h-[clamp(420px,68vh,760px)] shadow-[0_0_90px_rgba(46,155,240,0.22)]">
               {/* Oversized on purpose. The embed sizes its subject to its own
                   viewport, and cross-origin we cannot zoom it — so we give the
                   iframe a box a bit over twice the size of the window it shows
                   through and centre it. The cut-out lands correspondingly
-                  bigger; all that gets cropped is black margin. */}
+                  bigger; all that gets cropped is black margin. On a phone the
+                  frame is already narrow enough to fill, so it stays 1:1 —
+                  zooming there pushes him off both edges. */}
               <iframe
                 src="https://www.gifsy.fun/embed/d41ee2f645"
                 title="A 3D scene made with Gifsy"
                 loading="lazy"
-                className="absolute left-1/2 top-1/2 h-[210%] w-[210%] -translate-x-1/2 -translate-y-1/2 border-0"
+                className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 border-0 sm:h-[210%] sm:w-[210%]"
               />
 
               {/* ── Lightning ─────────────────────────────────────────────
-                  Both bolts run the full width of the black and terminate on
-                  the subject at the centre of the viewBox, so the strike reads
-                  as hitting him rather than flickering off in the wings. Stroke
-                  widths are non-scaling, which is what lets the whole thing be
-                  stretched to any frame size without the bolt fattening. */}
+                  Both bolts terminate on the subject at the centre of the
+                  viewBox, so the strike reads as hitting him rather than
+                  flickering off in the wings. Fitted, not cropped, so a narrow
+                  phone frame still shows both bolts whole instead of just the
+                  last few centimetres of each. Stroke widths are non-scaling,
+                  so the bolt stays hairline at any frame size. */}
               <svg
                 aria-hidden
                 viewBox="0 0 1000 500"
-                preserveAspectRatio="xMidYMid slice"
-                className="bolt pointer-events-none absolute inset-0 z-30 hidden h-full w-full sm:block"
+                preserveAspectRatio="xMidYMid meet"
+                className="bolt pointer-events-none absolute inset-0 z-30 h-full w-full"
                 style={{ ["--bolt-cycle" as string]: "8s" }}
               >
                 <g
@@ -987,8 +990,8 @@ export default function Home() {
               <svg
                 aria-hidden
                 viewBox="0 0 1000 500"
-                preserveAspectRatio="xMidYMid slice"
-                className="bolt pointer-events-none absolute inset-0 z-30 hidden h-full w-full sm:block"
+                preserveAspectRatio="xMidYMid meet"
+                className="bolt pointer-events-none absolute inset-0 z-30 h-full w-full"
                 style={{
                   ["--bolt-cycle" as string]: "6.4s",
                   ["--bolt-delay" as string]: "2.3s",
@@ -1011,17 +1014,17 @@ export default function Home() {
                   instead of fogging a grey rectangle over him. */}
               <div
                 aria-hidden
-                className="bolt-flash pointer-events-none absolute left-1/2 top-1/2 z-20 hidden h-[55%] w-[38%] -translate-x-1/2 -translate-y-1/2 mix-blend-screen bg-[radial-gradient(50%_50%_at_50%_50%,rgba(214,238,255,0.85),rgba(140,200,255,0.25)_45%,rgba(140,200,255,0))] sm:block"
+                className="bolt-flash pointer-events-none absolute left-1/2 top-1/2 z-20 h-[55%] w-[38%] -translate-x-1/2 -translate-y-1/2 mix-blend-screen bg-[radial-gradient(50%_50%_at_50%_50%,rgba(214,238,255,0.85),rgba(140,200,255,0.25)_45%,rgba(140,200,255,0))]"
                 style={{ ["--bolt-cycle" as string]: "8s" }}
               />
               <div
                 aria-hidden
-                className="bolt-flash pointer-events-none absolute inset-y-0 left-0 z-20 hidden w-2/3 mix-blend-screen bg-[radial-gradient(55%_65%_at_0%_40%,rgba(150,205,255,0.35),rgba(150,205,255,0))] sm:block"
+                className="bolt-flash pointer-events-none absolute inset-y-0 left-0 z-20 w-2/3 mix-blend-screen bg-[radial-gradient(55%_65%_at_0%_40%,rgba(150,205,255,0.35),rgba(150,205,255,0))]"
                 style={{ ["--bolt-cycle" as string]: "8s" }}
               />
               <div
                 aria-hidden
-                className="bolt-flash pointer-events-none absolute inset-y-0 right-0 z-20 hidden w-2/3 mix-blend-screen bg-[radial-gradient(55%_65%_at_100%_55%,rgba(255,185,215,0.3),rgba(255,185,215,0))] sm:block"
+                className="bolt-flash pointer-events-none absolute inset-y-0 right-0 z-20 w-2/3 mix-blend-screen bg-[radial-gradient(55%_65%_at_100%_55%,rgba(255,185,215,0.3),rgba(255,185,215,0))]"
                 style={{
                   ["--bolt-cycle" as string]: "6.4s",
                   ["--bolt-delay" as string]: "2.3s",
