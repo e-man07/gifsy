@@ -14,32 +14,70 @@ forgot-password flow. `reset-password.html` is ready for when it does, and its
 shell is the one to copy for Magic Link / Change email / Invite if those are
 ever turned on.
 
-## Branding an auth email takes two changes, not one
+## Custom SMTP comes first, and it is not optional
 
-**1. Templates** (Dashboard -> Authentication -> Emails -> pick a template ->
-"Custom" -> paste the file's contents -> set the subject). This is what the
-files here are for.
+On the Free plan the template editor is locked: the Emails screen shows "Set up
+custom SMTP to edit templates" and the Subject/Body fields are read-only. So
+this is one change, not two — SMTP is a hard prerequisite for everything here,
+not a separate improvement. (The dropdown beside that banner also offers
+"Upgrade to Pro", which unlocks template editing while keeping Supabase's own
+mail service. That costs more and fixes less: the sender and footer below stay
+as they are. Custom SMTP is available on Free.)
 
-**2. Custom SMTP** (Dashboard -> Project Settings -> Authentication -> SMTP
-Settings). Without it the templates still render, but:
+Enabling it (Dashboard -> Project Settings -> Authentication -> SMTP Settings)
+is also what removes the parts of the default email no template can touch:
 
-- the sender stays `Supabase Auth <noreply@mail.app.supabase.io>`, which is the
-  part of the screenshot that looks least like Gifsy and cannot be changed any
-  other way;
-- Supabase appends its own footer ("You're receiving this email because you
-  signed up for an application powered by Supabase" + an opt-out link);
-- the built-in service is **rate limited for testing only** — a handful of
-  emails per hour, project-wide. That is a production signup blocker, not a
-  cosmetic one.
+- the sender, otherwise `Supabase Auth <noreply@mail.app.supabase.io>`;
+- Supabase's appended footer ("You're receiving this email because you signed
+  up for an application powered by Supabase" + an opt-out link);
+- the rate limit on the built-in service -- a handful of emails per hour,
+  project-wide. A production signup blocker, not a cosmetic one.
 
-Supabase's own docs are explicit that the built-in email service is not for
-production. So SMTP is the change that actually matters; the templates are the
-polish on top.
+### What is configured here
 
-An SMTP provider has to be picked and its domain verified (SPF + DKIM DNS
-records on gifsy.fun) before the sender can read `Gifsy <hello@gifsy.fun>`.
-Vercel's marketplace lists **Resend** for this (`vercel integration discover
-email`), which keeps it on the same bill as the rest of the project.
+Resend, on its own free tier (3,000/month, 100/day, SMTP relay included).
+
+**Sign up at resend.com directly, not through the Vercel marketplace.** The
+marketplace lists a free plan for Resend but rejects it on install
+("Billing plan is disabled: free"), leaving Pro at $20/month as the cheapest
+option -- $240/year for auth email on a product that charges $29 once.
+
+Supabase SMTP settings:
+
+| Field | Value |
+| --- | --- |
+| Host | `smtp.resend.com` |
+| Port | `587` (STARTTLS) |
+| Username | `resend` -- **lowercase**, and it is compared byte-for-byte |
+| Password | a Resend API key, Sending access only |
+| Sender | `Gifsy <hello@gifsy.fun>` |
+
+The lowercase username matters: `RESEND` authenticates as a bad login, and
+both that and an unverified domain surface identically in the app as
+"Error sending confirmation email". Supabase -> Logs -> Auth Logs is what
+separates them (535 = credentials, 403 = domain).
+
+### DNS on gifsy.fun
+
+Verification needs three records, and current Resend accounts use CNAMEs
+rather than the SPF TXT + MX pair older guides describe:
+
+    resend._domainkey   TXT     p=MIGfMA0GCSqGSI...   (DKIM)
+    send                CNAME   send.forge.rmta.net
+    rsend               CNAME   rsend-apne1.forge.rmta.net
+
+DNS is at Hostinger (nameservers `nebula`/`aurora.dns-parking.com`), not
+Vercel, so `vercel dns` cannot manage it. Hostinger appends the domain to the
+Name field, so enter `send`, not `send.gifsy.fun` -- the latter silently
+creates `send.gifsy.fun.gifsy.fun`.
+
+Check propagation against the authority, since a resolver that was queried
+before the records existed will hold a negative cache:
+
+    dig +short @nebula.dns-parking.com send.gifsy.fun CNAME
+
+Still missing: a `_dmarc` TXT record. Not required by Resend, but `p=none` is
+the normal next step for inbox placement.
 
 ## Why the markup looks like 2005
 
