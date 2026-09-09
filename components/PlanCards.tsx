@@ -9,13 +9,14 @@
 //
 // Tier copy comes from that client-safe module, which is the same one the
 // server reads for the enforced generation limit, so this can't advertise
-// something the API doesn't do. Amounts and Dodo product ids stay server-side:
-// the button POSTs to /api/dodo/checkout and follows the URL it returns.
+// something the API doesn't do. The checkout call itself lives in
+// lib/billing/checkout.ts, shared with components/UpgradeDialog.tsx.
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { startCheckout } from "@/lib/billing/checkout";
 import { PLAN_DISPLAY, PLAN_ORDER, type PaidPlanId } from "@/lib/billing/plans";
 
 const TIERS = PLAN_ORDER.map((id) => PLAN_DISPLAY[id]);
@@ -49,19 +50,7 @@ export function PlanCards({
     setBusy(plan);
     setErr(null);
     try {
-      const res = await fetch("/api/dodo/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan }),
-      });
-      const data = (await res.json().catch(() => ({}))) as {
-        url?: string;
-        error?: string;
-      };
-      if (!res.ok || !data.url) {
-        throw new Error(data.error || "Could not start checkout.");
-      }
-      window.location.assign(data.url);
+      await startCheckout(plan);
     } catch (e) {
       setErr(e instanceof Error ? e.message : "Something went wrong.");
       setBusy(null);

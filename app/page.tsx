@@ -25,6 +25,7 @@ import { composeSticker, cutout } from "@/lib/sticker";
 import { estimateDepth, estimateDepthGrid, depthWorkingSize, type DepthGrid } from "@/lib/depth";
 // Quoted in the hero badges so the landing page can't drift from /pricing.
 import { FREE_GENERATION_LIMIT, PLAN_DISPLAY } from "@/lib/billing/plans";
+import { UpgradeDialog } from "@/components/UpgradeDialog";
 import {
   generationsRemaining,
   getUsage,
@@ -172,6 +173,9 @@ export default function Home() {
   const [status, setStatus] = useState("");
   const [progress, setProgress] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Shown instead of an error when a free account is out of 3D generations:
+  // the red sentence it replaced named the limit but offered no way past it.
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
   const [result, setResult] = useState<Result | null>(null);
 
   const workshopRef = useRef<HTMLDivElement>(null);
@@ -344,14 +348,14 @@ export default function Home() {
         // own (see lib/depth-split/client.ts).
         const pre = await preflight3D();
         if (!pre.ok) {
-          if (pre.needsSignIn) {
+          if (pre.reason === "sign-in") {
             // Full navigation: a fresh load guarantees the session is in place
             // when they come back, same as the publish path.
             // eslint-disable-next-line @next/next/no-location-assign-relative-destination
             window.location.assign("/login?next=/");
             return;
           }
-          setError(pre.error);
+          setUpgradeOpen(true);
           setBusy(false);
           setStatus("");
           setProgress(null);
@@ -494,6 +498,10 @@ export default function Home() {
       if (e instanceof QuotaExhaustedError) {
         refreshUsage(); // the server just told us we're out; drop the cached count
         setGenerationsLeft(0);
+        // Same wall as the preflight, reached the other way: the head route
+        // refuses mid-generation when the preflight was bypassed or stale.
+        setUpgradeOpen(true);
+        return;
       }
       setError(
         e instanceof Error ? e.message : "Something went wrong. Try another image.",
@@ -618,7 +626,9 @@ export default function Home() {
    * check is bypassed or fails, the head route still refuses.
    */
   async function preflight3D(): Promise<
-    { ok: true } | { ok: false; needsSignIn: true } | { ok: false; needsSignIn: false; error: string }
+    | { ok: true }
+    | { ok: false; reason: "sign-in" }
+    | { ok: false; reason: "quota" }
   > {
     let usage: Awaited<ReturnType<typeof getUsage>>;
     try {
@@ -627,13 +637,9 @@ export default function Home() {
       return { ok: true }; // let the authoritative route decide
     }
 
-    if (usage.plan === null) return { ok: false, needsSignIn: true };
+    if (usage.plan === null) return { ok: false, reason: "sign-in" };
     if (usage.remaining !== null && usage.remaining <= 0) {
-      return {
-        ok: false,
-        needsSignIn: false,
-        error: `You've used all ${usage.limit ?? 3} free 3D generations. Pro is a one-time payment for unlimited 3D.`,
-      };
+      return { ok: false, reason: "quota" };
     }
     return { ok: true };
   }
@@ -697,6 +703,8 @@ export default function Home() {
 
   return (
     <main className="flex flex-1 flex-col">
+      <UpgradeDialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
+
       {/* ─────────────────────────── HERO ─────────────────────────── */}
       <section
         id="top"
