@@ -6,7 +6,7 @@
 
 import { getCtx, makeCanvas } from "./image";
 import { getOrt } from "./inference/session";
-import { runSplitDepth } from "./depth-split/client";
+import { getUsage, remoteSafeWorkingSize, runSplitDepth } from "./depth-split/client";
 
 export type DepthModel = "depth-anything-v2-small-fp16";
 
@@ -137,7 +137,16 @@ export async function estimateDepthGrid(
   onProgress?: (p: DepthProgress) => void,
   workingSize: number = INPUT_SIZE,
 ): Promise<DepthGrid> {
-  const { tensor, iw, ih } = preprocess(img, await getOrt(), workingSize);
+  // When the head will run on the server (free plan), the encoder's output has
+  // to fit inside the request-body limit, so the working size is clamped before
+  // any inference happens. Pro runs the head locally and keeps the full size.
+  // A failed usage lookup is treated as remote — the conservative direction.
+  const { localHead } = await getUsage().catch(() => ({ localHead: false }));
+  const size = localHead
+    ? workingSize
+    : remoteSafeWorkingSize(img.naturalWidth, img.naturalHeight, workingSize);
+
+  const { tensor, iw, ih } = preprocess(img, await getOrt(), size);
 
   onProgress?.({ stage: "compute", fraction: 1 });
   // Encoder runs here; the head runs locally for Pro or on the server for free.

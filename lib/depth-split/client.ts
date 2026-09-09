@@ -40,6 +40,56 @@ const DEPTH_OUTPUT = "predicted_depth";
 const PATCH = 14;
 const FEATURE_DIM = 384;
 
+/**
+ * Largest activation upload the remote head can actually receive.
+ *
+ * Vercel rejects a request body over 4.5MB *before it reaches the function* —
+ * measured on this project: a 4MB body gets the route's own 401, a 5MB body
+ * gets a platform 413 with no JSON at all, and nothing appears in the function
+ * logs. The 770px pass produces 3025 tokens, which is
+ *
+ *     3025 tokens x 384 dims x 2 bytes x 4 planes = 9.29MB
+ *
+ * so every free 3D generation on a capable device failed in production with
+ * "Depth generation failed (413)" while working perfectly against localhost,
+ * which has no such limit.
+ *
+ * 1100 tokens is 3.38MB, leaving room for the multipart envelope. Pro is
+ * unaffected: it runs the head locally and uploads nothing.
+ */
+export const MAX_REMOTE_TOKENS = 1100;
+
+/** Bytes the four fp16 planes will occupy for a given token count. */
+export function activationBytes(tokens: number): number {
+  return tokens * FEATURE_DIM * 2 * 4;
+}
+
+/**
+ * Shrink a requested working size until the encoder's output fits
+ * MAX_REMOTE_TOKENS, mirroring how preprocess() rounds to the patch grid.
+ * Returns the largest multiple-of-PATCH long edge that fits.
+ */
+export function remoteSafeWorkingSize(
+  naturalWidth: number,
+  naturalHeight: number,
+  requested: number,
+): number {
+  const tokensAt = (size: number) => {
+    const scale = Math.min(size / naturalWidth, size / naturalHeight);
+    const iw = Math.max(PATCH, Math.round((naturalWidth * scale) / PATCH) * PATCH);
+    const ih = Math.max(PATCH, Math.round((naturalHeight * scale) / PATCH) * PATCH);
+    return (iw / PATCH) * (ih / PATCH);
+  };
+
+  let size = requested;
+  // Step down a patch at a time — cheap (a handful of iterations) and exact,
+  // rather than solving the rounding analytically and getting it subtly wrong.
+  while (size > PATCH * 2 && tokensAt(size) > MAX_REMOTE_TOKENS) {
+    size -= PATCH;
+  }
+  return size;
+}
+
 /** Thrown when a free account is out of 3D generations (HTTP 402). */
 export class QuotaExhaustedError extends Error {
   readonly remaining = 0;
@@ -122,6 +172,14 @@ async function runRemoteHead(
   width: number,
 ): Promise<Float32Array> {
   const tokens = (height / PATCH) * (width / PATCH);
+  if (tokens > MAX_REMOTE_TOKENS) {
+    // Should be unreachable — estimateDepthGrid clamps the working size before
+    // the encoder runs. If it ever fires, say so plainly rather than letting
+    // the platform return an opaque 413.
+    throw new Error(
+      `This image needs a ${(activationBytes(tokens) / 1e6).toFixed(1)}MB upload, over the server limit. Try a smaller image.`,
+    );
+  }
   const form = new FormData();
   form.set("meta", JSON.stringify({ height, width, tokens }));
   features.forEach((f, i) => {
@@ -193,20 +251,27 @@ export async function runSplitDepth(
 
   if (localHead) {
     try {
-      const ort = await getOrt();
       const session = await getLocalHead();
+      // Feed the encoder's own output tensors straight in: the split kept the
+      // tensor names, so the encoder's outputs ARE the head's inputs, already
+      // the right dtype and shape.
+      //
+      // This used to rebuild them with `new ort.Tensor("float16", data, dims)`,
+      // which threw on current Chrome: a float16 tensor's `.data` is a
+      // Float16Array there, and the constructor wants a Uint16Array. The throw
+      // was caught by the fallback below, so every Pro generation silently went
+      // to the server instead — and then hit the request-size limit.
       const feed: Record<string, Ort.Tensor> = {};
-      FEATURE_OUTPUTS.forEach((name, i) => {
-        feed[name] = new ort.Tensor("float16", features[i], [1, tokens, FEATURE_DIM]);
-      });
-      feed[GRID_H_OUTPUT] = encoded[GRID_H_OUTPUT];
-      feed[GRID_W_OUTPUT] = encoded[GRID_W_OUTPUT];
+      for (const name of [...FEATURE_OUTPUTS, GRID_H_OUTPUT, GRID_W_OUTPUT]) {
+        feed[name] = encoded[name];
+      }
       const out = await session.run(feed);
       lastRemaining = null; // Pro: unlimited
       return out[DEPTH_OUTPUT].data as Float32Array;
     } catch (e) {
-      // A Pro user whose local head can't load or run still gets their scene:
-      // fall through to the server, which never refuses a paid plan.
+      // A Pro user whose local head genuinely can't run still gets their scene:
+      // fall through to the server. Logged loudly because this path costs them
+      // the speed and privacy they paid for, so it should never be routine.
       console.warn("Local depth head failed; using the server instead.", e);
     }
   }
