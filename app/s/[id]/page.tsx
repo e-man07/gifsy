@@ -21,10 +21,10 @@ export async function generateMetadata({
     return { title: "Scene not found", robots: { index: false, follow: false } };
   }
 
-  // The published still is already a public Blob URL — using it as the card
-  // image is what turns a shared link from a grey text row into a preview.
-  const image = manifest.assets.image.url;
-
+  // No `images` here on purpose. opengraph-image.tsx in this segment composites
+  // the still into a 1200x630 PNG and emits og:image AND twitter:image itself;
+  // setting them here would override it with the raw WebP still, which is
+  // undersized, wrongly-declared and cropped by X. See that file.
   return {
     title: TITLE,
     description: DESCRIPTION,
@@ -33,13 +33,11 @@ export async function generateMetadata({
       description: DESCRIPTION,
       type: "website",
       url: `/s/${id}`,
-      images: [{ url: image, width: 1200, height: 630, alt: TITLE }],
     },
     twitter: {
       card: "summary_large_image",
       title: TITLE,
       description: DESCRIPTION,
-      images: [image],
     },
     alternates: { canonical: `/s/${id}` },
     robots: { index: true, follow: true },

@@ -21,6 +21,7 @@
     "onnxruntime-web": "^1.21.0",
     "react": "19.2.8",
     "react-dom": "19.2.8",
+    "sharp": "^0.35.3",
     "standardwebhooks": "^1.1.1",
     "three": "^0.160.1"
   },
