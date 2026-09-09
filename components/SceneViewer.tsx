@@ -38,10 +38,15 @@ interface Props {
   // demo on the homepage, so `landing_interacted` measures the one thing that
   // matters there: did a visitor actually drag a scene before uploading?
   surface?: "share" | "embed" | "landing";
+  /** Fired once, after the first frame is actually on screen. Lets a host
+   *  cross-fade a poster out only when there is something to fade to — an
+   *  "assets loaded" signal would still leave a blank frame during WebGL
+   *  init and the first render. */
+  onReady?: () => void;
   className?: string;
 }
 
-export function SceneViewer({ image, depth, mask, background, config, showBrand = true, surface, className }: Props) {
+export function SceneViewer({ image, depth, mask, background, config, showBrand = true, surface, onReady, className }: Props) {
   const subjectOnly = Boolean(config.subjectOnly && mask);
   const mountRef = useRef<HTMLDivElement>(null);
   const configRef = useRef(config);
@@ -54,6 +59,14 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
   const orbit = useRef({ theta: 0, phi: 0 }); // eased current camera angles
   const orbitTarget = useRef({ theta: 0, phi: 0 }); // driven by drag / auto-turntable
   const rafRef = useRef(0);
+  // Held in a ref so an inline arrow from the host can't restart the scene, and
+  // synced in an effect rather than during render (refs are not render state).
+  // The callback only ever fires from a rAF, by which time effects have run.
+  const onReadyRef = useRef(onReady);
+  useEffect(() => {
+    onReadyRef.current = onReady;
+  }, [onReady]);
+  const readyFired = useRef(false);
   const interactionTracked = useRef(false); // fire `<surface>_interacted` at most once per scene
   const [webglFailed, setWebglFailed] = useState(() => {
     if (typeof window === "undefined") return false;
@@ -80,6 +93,7 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
     orbitTarget.current.theta = 0;
     orbitTarget.current.phi = 0;
 
+    readyFired.current = false;
     const scene = new THREE.Scene();
     const w = mount.clientWidth || 480;
     const h = mount.clientHeight || 480;
@@ -297,6 +311,13 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
         camera.lookAt(0, 0, 0);
       }
       renderer.render(scene, camera);
+
+      // First frame is on the canvas — safe for a host to fade its poster out.
+      // Deferred a tick so the browser has actually presented it.
+      if (!readyFired.current) {
+        readyFired.current = true;
+        requestAnimationFrame(() => onReadyRef.current?.());
+      }
     };
     animate();
 
