@@ -14,7 +14,7 @@ export default function PrivacyPage() {
   return (
     <LegalPage
       title="Privacy Policy"
-      intro="The short version: your photo itself never leaves your device. GIFs and stickers are processed entirely by your browser. Making a 3D scene on the free plan sends intermediate data — not the photo — to our server for one step. Publishing uploads the finished files. This page explains each case exactly."
+      intro="The short version: GIFs and stickers are processed entirely by your browser and never reach us. Making a 3D scene on the free plan sends intermediate data — not the photo — to our server for one step; on Pro that step is local too. Publishing is the one time your photo itself is uploaded, and published scenes are public. This page explains each case exactly."
     >
       <h2>What runs where, plainly</h2>
       <p>
@@ -31,7 +31,10 @@ export default function PrivacyPage() {
       <p>
         <strong>Publishing uploads.</strong> If you choose to publish a 3D scene
         so it has a shareable link and an embed, the finished files are uploaded
-        to our storage. Nothing is uploaded until you press Publish.
+        to our storage, and this is the one point at which your photo itself is
+        sent to us. On the free plan one other thing is sent earlier — the
+        intermediate data for the depth step, described next — but never the
+        image.
       </p>
 
       <h2>How 3D depth is calculated</h2>

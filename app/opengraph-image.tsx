@@ -87,7 +87,7 @@ export default async function Image() {
               color: "#a9c2d8",
             }}
           >
-            Runs entirely in your browser. Publish it and paste the embed into
+            Runs in your browser. Publish it and paste the embed into
             any site.
           </div>
 

@@ -62,7 +62,7 @@ function LoginForm() {
           {mode === "in" ? "Sign in" : "Create account"}
         </h1>
         <p className="mt-1 text-sm text-muted">
-          Publishing and embeds need an account. Making GIFs, stickers and 3D stays free and on-device.
+          Publishing and embeds need an account. GIFs and stickers stay free and fully on-device; 3D is free to try and never uploads your photo.
         </p>
 
         <form onSubmit={submit} className="mt-5 flex flex-col gap-3">

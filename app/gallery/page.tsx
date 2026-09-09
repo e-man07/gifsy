@@ -8,7 +8,7 @@ import { SiteNav } from "@/components/SiteNav";
 export const metadata: Metadata = {
   title: "3D Gallery",
   description:
-    "See what Gifsy's 3D mode does to a single photo — real depth, in motion, rendered in your browser. No modeling, and your photo is never uploaded.",
+    "See what Gifsy's 3D mode does to a single photo — real depth, in motion, rendered in your browser. No modeling, and your photo itself is never uploaded to make one.",
   openGraph: {
     // Standalone: the "%s · Gifsy" template applies to `title`, not to og:title.
     title: "Gifsy 3D Gallery",
@@ -42,8 +42,8 @@ export default function GalleryPage() {
           </h1>
           <p className="mt-4 max-w-xl text-base font-semibold text-cloud/95 drop-shadow-[1px_1px_0_rgba(4,16,29,0.9)] sm:text-lg">
             Every one of these {GALLERY_COUNT} scenes started as a single still
-            image. Gifsy&apos;s 3D mode gives it genuine depth and motion —
-            locally, in seconds, with nothing uploaded. Here&apos;s how it looks.
+            image. Gifsy&apos;s 3D mode gives it genuine depth and motion, in
+            seconds, without uploading your photo. Here&apos;s how it looks.
           </p>
           <Link
             href="/#make"
@@ -67,9 +67,9 @@ export default function GalleryPage() {
             Your photo, in 3D.
           </h2>
           <p className="mx-auto mt-3 max-w-md text-base font-semibold text-cloud/95 drop-shadow-[1px_1px_0_rgba(4,16,29,0.9)]">
-            Free to try, private, and instant. Drop a photo and watch it lift
-            off the page — your photo is never uploaded. 3D needs a free
-            account; GIFs and stickers don&apos;t.
+            Free to try and instant. Drop a photo and watch it lift off the
+            page — your photo itself isn&apos;t uploaded to make one. 3D needs a
+            free account; GIFs and stickers don&apos;t.
           </p>
           <Link
             href="/#make"
@@ -82,7 +82,7 @@ export default function GalleryPage() {
       </section>
 
       <footer className="mt-auto border-t-[3px] border-ink bg-panel py-5 text-center font-pixel text-xs uppercase tracking-wide text-muted">
-        Made in your browser · your photo is never uploaded
+        Made in your browser · your photo is only uploaded when you publish
       </footer>
     </main>
   );

@@ -908,8 +908,8 @@ export default function Home() {
             <p className="mt-2 text-sm text-muted sm:text-base">
               Not videos — these are rendering in your browser right now, the
               same thing you get from your own photo. Tilt one and the layers
-              pull apart. Nothing to install, and nothing uploaded — making your
-              own 3D scene just needs a free account.
+              pull apart. Nothing to install — making your own 3D scene just
+              needs a free account.
             </p>
           </div>
           <LiveScenes />
@@ -1139,7 +1139,7 @@ export default function Home() {
             [
               "1",
               "Upload",
-              "Drop in a photo. Depth and cut-out run in your browser — your photo is never uploaded. 3D needs a free account.",
+              "Drop in a photo. GIFs and stickers stay in your browser. 3D needs a free account, and one step of it runs on our server unless you're on Pro.",
             ],
             [
               "2",
@@ -1229,7 +1229,7 @@ export default function Home() {
                     <span>
                       A depth-estimation model scans the photo and moves each
                       pixel by how close it is to the camera — real parallax,
-                      all in your browser. First run downloads two small AI
+                      rendered in your browser. First run downloads two small AI
                       models.
                     </span>
                   </p>
@@ -1341,7 +1341,7 @@ export default function Home() {
                 <p className="flex items-start gap-2 rounded-xl bg-sky/10 px-3.5 py-2.5 text-xs font-semibold text-sky-deep">
                   <Box className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2.5} aria-hidden />
                   <span>
-                    A depth model turns your photo into a 3D scene, and a second model lifts the subject off the background. Move your mouse to look around — the AI runs once, then it&apos;s pure graphics at 60 fps. 3D needs a free account; your photo stays on your device, and Pro runs the whole model locally.
+                    A depth model turns your photo into a 3D scene, and a second model lifts the subject off the background. Move your mouse to look around — the AI runs once, then it&apos;s pure graphics at 60 fps. 3D needs a free account; your photo itself isn&apos;t uploaded, and Pro runs the whole model locally.
                   </span>
                 </p>
                 <Slider
@@ -1693,7 +1693,7 @@ export default function Home() {
       </section>
 
       <footer className="mt-auto border-t-[3px] border-ink bg-panel py-5 text-center font-pixel text-xs uppercase tracking-wide text-muted">
-        <p>Made in your browser · your photo never leaves your device</p>
+        <p>Made in your browser · your photo is only uploaded when you publish</p>
         <nav className="mt-2 flex flex-wrap items-center justify-center gap-4">
           <Link href="/pricing" className="hover:text-foreground">
             Pricing
