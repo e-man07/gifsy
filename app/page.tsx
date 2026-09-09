@@ -40,6 +40,12 @@ import { refineDepthGrid } from "@/lib/rendering/refine";
 import { analyzeSubject, subjectAdvice } from "@/lib/rendering/subject-fit";
 import type { ThreeDPreviewHandle } from "@/components/ThreeDPreview";
 
+// Lightning geometry for the cinema section. Drawn once here rather than
+// inline twice, since the right-hand bolt is the same shape mirrored.
+const BOLT_PATH =
+  "M0 44 L58 128 L26 142 L96 232 L64 244 L138 336 L118 348 L182 400";
+const BOLT_FORK = "M58 128 L18 206 M96 232 L150 214 M138 336 L96 372";
+
 const ThreeDPreview = dynamic(() => import("@/components/ThreeDPreview").then((m) => m.ThreeDPreview), {
   ssr: false,
   loading: () => <div className="hud-sm flex h-[360px] w-full items-center justify-center rounded-xl bg-background text-sm font-semibold text-muted">Loading 3D engine…</div>,
@@ -754,7 +760,14 @@ export default function Home() {
               Start
               <ArrowDown className="h-4 w-4" strokeWidth={2.5} aria-hidden />
             </button>
-            <AccountMenu />
+            {/* Same two links as above, for the phone hamburger — the inline
+                copies are hidden below sm. */}
+            <AccountMenu
+              links={[
+                { href: "/gallery", label: "Gallery" },
+                { href: "#how", label: "How it works" },
+              ]}
+            />
           </div>
         </nav>
 
@@ -891,6 +904,140 @@ export default function Home() {
             </p>
           </div>
           <LiveScenes />
+        </div>
+      </section>
+
+      {/* ───────────────────── EMBEDDED SCENE ─────────────────────── */}
+      {/* The one stretch of the page where a visitor watches instead of clicks,
+          so it's staged like a screening room: full-bleed, near-black, lit only
+          by the spill off the frame. Every overlay here is pointer-events-none
+          — the scene inside the iframe still has to be draggable. */}
+      <section className="cinema-room relative overflow-hidden border-y-[3px] border-ink">
+        {/* Projector beam falling from above the screen. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute left-1/2 top-0 h-64 w-[140%] -translate-x-1/2 bg-[radial-gradient(50%_100%_at_50%_0%,rgba(190,225,255,0.16),rgba(190,225,255,0))]"
+        />
+
+        <div className="relative py-8 sm:py-10">
+          <div className="mx-auto mb-5 max-w-6xl px-5 text-center sm:mb-7 sm:px-8">
+            <p className="font-pixel text-xs uppercase tracking-[0.35em] text-sky">
+              Now showing
+            </p>
+            <h2 className="mt-3 font-pixel text-2xl text-cloud drop-shadow-[0_2px_18px_rgba(46,155,240,0.45)] sm:text-4xl">
+              One photo. Shot in three dimensions.
+            </h2>
+            <p className="mx-auto mt-3 max-w-xl text-sm text-cloud/60 sm:text-base">
+              Live in the frame below — drag it. This is an embed, the same
+              snippet you can paste into your own site.
+            </p>
+          </div>
+
+          {/* Full-bleed stage: no side gutters, the screen runs edge to edge. */}
+          <div className="cinema-spill relative">
+            <div className="relative z-10 overflow-hidden border-y-[3px] border-ink bg-black shadow-[0_0_90px_rgba(46,155,240,0.22)]">
+              <iframe
+                src="https://www.gifsy.fun/embed/d41ee2f645"
+                title="A 3D scene made with Gifsy"
+                loading="lazy"
+                className="block h-[clamp(520px,86vh,1100px)] w-full border-0"
+              />
+
+              {/* Lightning in the wings. Sized in % so the bolts stay in the
+                  black margins either side of the subject at any width, and
+                  hidden on phones where there are no margins left to strike. */}
+              <div
+                aria-hidden
+                className="bolt-flash pointer-events-none absolute inset-y-0 left-0 z-20 hidden w-1/2 bg-[radial-gradient(60%_70%_at_0%_50%,rgba(160,215,255,0.45),rgba(160,215,255,0))] sm:block"
+                style={{ ["--bolt-cycle" as string]: "7s" }}
+              />
+              <div
+                aria-hidden
+                className="bolt-flash pointer-events-none absolute inset-y-0 right-0 z-20 hidden w-1/2 bg-[radial-gradient(60%_70%_at_100%_50%,rgba(255,190,215,0.4),rgba(255,190,215,0))] sm:block"
+                style={{
+                  ["--bolt-cycle" as string]: "5.6s",
+                  ["--bolt-delay" as string]: "1.9s",
+                }}
+              />
+
+              <svg
+                aria-hidden
+                viewBox="0 0 200 400"
+                preserveAspectRatio="none"
+                className="bolt pointer-events-none absolute left-0 top-1/2 z-30 hidden h-[70%] w-[26%] -translate-y-1/2 sm:block"
+                style={{ ["--bolt-cycle" as string]: "7s" }}
+              >
+                <g fill="none" stroke="#dff1ff" strokeLinecap="round" strokeLinejoin="round">
+                  <path d={BOLT_PATH} strokeWidth="9" opacity="0.35" />
+                  <path d={BOLT_PATH} strokeWidth="3" />
+                  <path d={BOLT_FORK} strokeWidth="2" opacity="0.8" />
+                </g>
+              </svg>
+
+              <svg
+                aria-hidden
+                viewBox="0 0 200 400"
+                preserveAspectRatio="none"
+                className="bolt pointer-events-none absolute right-0 top-1/2 z-30 hidden h-[70%] w-[26%] -translate-y-1/2 -scale-x-100 sm:block"
+                style={{
+                  ["--bolt-cycle" as string]: "5.6s",
+                  ["--bolt-delay" as string]: "1.9s",
+                }}
+              >
+                <g fill="none" stroke="#ffe6f0" strokeLinecap="round" strokeLinejoin="round">
+                  <path d={BOLT_PATH} strokeWidth="9" opacity="0.3" />
+                  <path d={BOLT_PATH} strokeWidth="3" />
+                  <path d={BOLT_FORK} strokeWidth="2" opacity="0.8" />
+                </g>
+              </svg>
+
+              {/* Film treatment over the top — never intercepting a drag. */}
+              <div
+                aria-hidden
+                className="cinema-vignette pointer-events-none absolute inset-0 z-20"
+              />
+              <div
+                aria-hidden
+                className="cinema-grain pointer-events-none absolute -inset-8 z-20"
+              />
+
+              {/* Letterbox bars, thin enough to frame without cropping. */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 z-20 h-6 bg-gradient-to-b from-black/85 to-transparent sm:h-10"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-6 bg-gradient-to-t from-black/85 to-transparent sm:h-10"
+              />
+
+              {/* Framing marks, the way a viewfinder brackets a shot. */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute left-4 top-4 z-30 h-7 w-7 border-l-2 border-t-2 border-cloud/40 sm:left-7 sm:top-7 sm:h-10 sm:w-10"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute right-4 top-4 z-30 h-7 w-7 border-r-2 border-t-2 border-cloud/40 sm:right-7 sm:top-7 sm:h-10 sm:w-10"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute bottom-4 left-4 z-30 h-7 w-7 border-b-2 border-l-2 border-cloud/40 sm:bottom-7 sm:left-7 sm:h-10 sm:w-10"
+              />
+              <div
+                aria-hidden
+                className="pointer-events-none absolute bottom-4 right-4 z-30 h-7 w-7 border-b-2 border-r-2 border-cloud/40 sm:bottom-7 sm:right-7 sm:h-10 sm:w-10"
+              />
+
+              {/* Slate line, bottom-left, like a burned-in timecode. */}
+              <p
+                aria-hidden
+                className="pointer-events-none absolute bottom-5 left-1/2 z-30 -translate-x-1/2 font-pixel text-[10px] uppercase tracking-[0.3em] text-cloud/50 sm:bottom-8 sm:text-xs"
+              >
+                Drag to look around
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 

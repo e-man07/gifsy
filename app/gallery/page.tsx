@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { GALLERY_COUNT } from "@/lib/gallery";
-import { SiteNav, navLinkCls } from "@/components/SiteNav";
+import { SiteNav } from "@/components/SiteNav";
 
 export const metadata: Metadata = {
   title: "3D Gallery",
@@ -30,11 +30,7 @@ export default function GalleryPage() {
         />
 
         {/* Nav — mirrors the landing chrome (cloud-on-ink) */}
-        <SiteNav>
-          <Link href="/#how" className={`hidden sm:block ${navLinkCls}`}>
-            How it works
-          </Link>
-        </SiteNav>
+        <SiteNav links={[{ href: "/#how", label: "How it works" }]} />
 
         {/* Hero content */}
         <div className="mx-auto w-full max-w-6xl px-5 pb-12 pt-10 sm:px-8 sm:pb-16 sm:pt-16">
