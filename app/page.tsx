@@ -40,11 +40,20 @@ import { refineDepthGrid } from "@/lib/rendering/refine";
 import { analyzeSubject, subjectAdvice } from "@/lib/rendering/subject-fit";
 import type { ThreeDPreviewHandle } from "@/components/ThreeDPreview";
 
-// Lightning geometry for the cinema section. Drawn once here rather than
-// inline twice, since the right-hand bolt is the same shape mirrored.
-const BOLT_PATH =
-  "M0 44 L58 128 L26 142 L96 232 L64 244 L138 336 L118 348 L182 400";
-const BOLT_FORK = "M58 128 L18 206 M96 232 L150 214 M138 336 L96 372";
+// Lightning geometry for the cinema section, in a 1000x500 viewBox scaled
+// with "slice" so nothing is stretched — the centre of the box stays the
+// centre of the frame, which is where both bolts land: (500, 250), on the
+// subject. They enter from above rather than side-on; a bolt that travels
+// horizontally in a straight-ish line reads as a laser, not weather. Many
+// short segments with alternating overshoot is what makes it look struck.
+const BOLT_LEFT =
+  "M120 -30 L168 62 L138 88 L214 150 L182 168 L262 214 L236 230 L318 250 L300 264 L392 256 L376 268 L470 252 L500 250";
+const BOLT_LEFT_FORKS =
+  "M214 150 L160 198 M318 250 L296 322 M392 256 L436 208";
+const BOLT_RIGHT =
+  "M880 -30 L836 70 L866 96 L790 152 L822 172 L742 216 L768 232 L688 252 L706 266 L614 258 L630 270 L534 254 L500 250";
+const BOLT_RIGHT_FORKS =
+  "M790 152 L844 202 M688 252 L710 324 M614 258 L572 212";
 
 const ThreeDPreview = dynamic(() => import("@/components/ThreeDPreview").then((m) => m.ThreeDPreview), {
   ssr: false,
@@ -909,9 +918,9 @@ export default function Home() {
 
       {/* ───────────────────── EMBEDDED SCENE ─────────────────────── */}
       {/* The one stretch of the page where a visitor watches instead of clicks,
-          so it's staged like a screening room: full-bleed, near-black, lit only
-          by the spill off the frame. Every overlay here is pointer-events-none
-          — the scene inside the iframe still has to be draggable. */}
+          so it's staged like a screening: full-bleed, near-black, lit only by
+          the spill off the frame and by the strikes. Every overlay in here is
+          pointer-events-none — the scene itself still has to be draggable. */}
       <section className="cinema-room relative overflow-hidden border-y-[3px] border-ink">
         {/* Projector beam falling from above the screen. */}
         <div
@@ -919,8 +928,8 @@ export default function Home() {
           className="pointer-events-none absolute left-1/2 top-0 h-64 w-[140%] -translate-x-1/2 bg-[radial-gradient(50%_100%_at_50%_0%,rgba(190,225,255,0.16),rgba(190,225,255,0))]"
         />
 
-        <div className="relative py-8 sm:py-10">
-          <div className="mx-auto mb-5 max-w-6xl px-5 text-center sm:mb-7 sm:px-8">
+        <div className="relative py-10 sm:py-16">
+          <div className="mx-auto mb-6 max-w-6xl px-5 text-center sm:mb-9 sm:px-8">
             <p className="font-pixel text-xs uppercase tracking-[0.35em] text-sky">
               Now showing
             </p>
@@ -933,106 +942,134 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Full-bleed stage: no side gutters, the screen runs edge to edge. */}
-          <div className="cinema-spill relative">
-            <div className="relative z-10 overflow-hidden border-y-[3px] border-ink bg-black shadow-[0_0_90px_rgba(46,155,240,0.22)]">
+          {/* Held to a 5xl stage rather than run edge to edge: the embed keeps
+              the subject centred at its own scale, so every extra pixel of
+              width is just more empty black either side of him. */}
+          <div className="cinema-spill relative mx-auto w-full max-w-5xl px-4 sm:px-8">
+            <div className="relative z-10 h-[clamp(420px,68vh,760px)] w-full overflow-hidden border-[3px] border-ink bg-black shadow-[0_0_90px_rgba(46,155,240,0.22)]">
+              {/* Oversized on purpose. The embed sizes its subject to its own
+                  viewport, and cross-origin we cannot zoom it — so we give the
+                  iframe a box a bit over twice the size of the window it shows
+                  through and centre it. The cut-out lands correspondingly
+                  bigger; all that gets cropped is black margin. */}
               <iframe
                 src="https://www.gifsy.fun/embed/d41ee2f645"
                 title="A 3D scene made with Gifsy"
                 loading="lazy"
-                className="block h-[clamp(520px,86vh,1100px)] w-full border-0"
+                className="absolute left-1/2 top-1/2 h-[210%] w-[210%] -translate-x-1/2 -translate-y-1/2 border-0"
               />
 
-              {/* Lightning in the wings. Sized in % so the bolts stay in the
-                  black margins either side of the subject at any width, and
-                  hidden on phones where there are no margins left to strike. */}
-              <div
-                aria-hidden
-                className="bolt-flash pointer-events-none absolute inset-y-0 left-0 z-20 hidden w-1/2 bg-[radial-gradient(60%_70%_at_0%_50%,rgba(160,215,255,0.45),rgba(160,215,255,0))] sm:block"
-                style={{ ["--bolt-cycle" as string]: "7s" }}
-              />
-              <div
-                aria-hidden
-                className="bolt-flash pointer-events-none absolute inset-y-0 right-0 z-20 hidden w-1/2 bg-[radial-gradient(60%_70%_at_100%_50%,rgba(255,190,215,0.4),rgba(255,190,215,0))] sm:block"
-                style={{
-                  ["--bolt-cycle" as string]: "5.6s",
-                  ["--bolt-delay" as string]: "1.9s",
-                }}
-              />
-
+              {/* ── Lightning ─────────────────────────────────────────────
+                  Both bolts run the full width of the black and terminate on
+                  the subject at the centre of the viewBox, so the strike reads
+                  as hitting him rather than flickering off in the wings. Stroke
+                  widths are non-scaling, which is what lets the whole thing be
+                  stretched to any frame size without the bolt fattening. */}
               <svg
                 aria-hidden
-                viewBox="0 0 200 400"
-                preserveAspectRatio="none"
-                className="bolt pointer-events-none absolute left-0 top-1/2 z-30 hidden h-[70%] w-[26%] -translate-y-1/2 sm:block"
-                style={{ ["--bolt-cycle" as string]: "7s" }}
+                viewBox="0 0 1000 500"
+                preserveAspectRatio="xMidYMid slice"
+                className="bolt pointer-events-none absolute inset-0 z-30 hidden h-full w-full sm:block"
+                style={{ ["--bolt-cycle" as string]: "8s" }}
               >
-                <g fill="none" stroke="#dff1ff" strokeLinecap="round" strokeLinejoin="round">
-                  <path d={BOLT_PATH} strokeWidth="9" opacity="0.35" />
-                  <path d={BOLT_PATH} strokeWidth="3" />
-                  <path d={BOLT_FORK} strokeWidth="2" opacity="0.8" />
+                <g
+                  fill="none"
+                  stroke="#eaf6ff"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d={BOLT_LEFT} strokeWidth="7" opacity="0.22" vectorEffect="non-scaling-stroke" />
+                  <path d={BOLT_LEFT} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                  <path d={BOLT_LEFT_FORKS} strokeWidth="1.25" opacity="0.75" vectorEffect="non-scaling-stroke" />
                 </g>
               </svg>
 
               <svg
                 aria-hidden
-                viewBox="0 0 200 400"
-                preserveAspectRatio="none"
-                className="bolt pointer-events-none absolute right-0 top-1/2 z-30 hidden h-[70%] w-[26%] -translate-y-1/2 -scale-x-100 sm:block"
+                viewBox="0 0 1000 500"
+                preserveAspectRatio="xMidYMid slice"
+                className="bolt pointer-events-none absolute inset-0 z-30 hidden h-full w-full sm:block"
                 style={{
-                  ["--bolt-cycle" as string]: "5.6s",
-                  ["--bolt-delay" as string]: "1.9s",
+                  ["--bolt-cycle" as string]: "6.4s",
+                  ["--bolt-delay" as string]: "2.3s",
                 }}
               >
-                <g fill="none" stroke="#ffe6f0" strokeLinecap="round" strokeLinejoin="round">
-                  <path d={BOLT_PATH} strokeWidth="9" opacity="0.3" />
-                  <path d={BOLT_PATH} strokeWidth="3" />
-                  <path d={BOLT_FORK} strokeWidth="2" opacity="0.8" />
+                <g
+                  fill="none"
+                  stroke="#fff0f6"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d={BOLT_RIGHT} strokeWidth="7" opacity="0.2" vectorEffect="non-scaling-stroke" />
+                  <path d={BOLT_RIGHT} strokeWidth="2" vectorEffect="non-scaling-stroke" />
+                  <path d={BOLT_RIGHT_FORKS} strokeWidth="1.25" opacity="0.75" vectorEffect="non-scaling-stroke" />
                 </g>
               </svg>
+
+              {/* Impact bloom where the bolts land, plus the room lighting up
+                  from that side. Screen-blended so it brightens the subject
+                  instead of fogging a grey rectangle over him. */}
+              <div
+                aria-hidden
+                className="bolt-flash pointer-events-none absolute left-1/2 top-1/2 z-20 hidden h-[55%] w-[38%] -translate-x-1/2 -translate-y-1/2 mix-blend-screen bg-[radial-gradient(50%_50%_at_50%_50%,rgba(214,238,255,0.85),rgba(140,200,255,0.25)_45%,rgba(140,200,255,0))] sm:block"
+                style={{ ["--bolt-cycle" as string]: "8s" }}
+              />
+              <div
+                aria-hidden
+                className="bolt-flash pointer-events-none absolute inset-y-0 left-0 z-20 hidden w-2/3 mix-blend-screen bg-[radial-gradient(55%_65%_at_0%_40%,rgba(150,205,255,0.35),rgba(150,205,255,0))] sm:block"
+                style={{ ["--bolt-cycle" as string]: "8s" }}
+              />
+              <div
+                aria-hidden
+                className="bolt-flash pointer-events-none absolute inset-y-0 right-0 z-20 hidden w-2/3 mix-blend-screen bg-[radial-gradient(55%_65%_at_100%_55%,rgba(255,185,215,0.3),rgba(255,185,215,0))] sm:block"
+                style={{
+                  ["--bolt-cycle" as string]: "6.4s",
+                  ["--bolt-delay" as string]: "2.3s",
+                }}
+              />
 
               {/* Film treatment over the top — never intercepting a drag. */}
               <div
                 aria-hidden
-                className="cinema-vignette pointer-events-none absolute inset-0 z-20"
+                className="cinema-vignette pointer-events-none absolute inset-0 z-40"
               />
               <div
                 aria-hidden
-                className="cinema-grain pointer-events-none absolute -inset-8 z-20"
+                className="cinema-grain pointer-events-none absolute -inset-8 z-40"
               />
 
               {/* Letterbox bars, thin enough to frame without cropping. */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-0 z-20 h-6 bg-gradient-to-b from-black/85 to-transparent sm:h-10"
+                className="pointer-events-none absolute inset-x-0 top-0 z-40 h-6 bg-gradient-to-b from-black/85 to-transparent sm:h-10"
               />
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-x-0 bottom-0 z-20 h-6 bg-gradient-to-t from-black/85 to-transparent sm:h-10"
+                className="pointer-events-none absolute inset-x-0 bottom-0 z-40 h-6 bg-gradient-to-t from-black/85 to-transparent sm:h-10"
               />
 
               {/* Framing marks, the way a viewfinder brackets a shot. */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute left-4 top-4 z-30 h-7 w-7 border-l-2 border-t-2 border-cloud/40 sm:left-7 sm:top-7 sm:h-10 sm:w-10"
+                className="pointer-events-none absolute left-4 top-4 z-50 h-7 w-7 border-l-2 border-t-2 border-cloud/40 sm:left-7 sm:top-7 sm:h-10 sm:w-10"
               />
               <div
                 aria-hidden
-                className="pointer-events-none absolute right-4 top-4 z-30 h-7 w-7 border-r-2 border-t-2 border-cloud/40 sm:right-7 sm:top-7 sm:h-10 sm:w-10"
+                className="pointer-events-none absolute right-4 top-4 z-50 h-7 w-7 border-r-2 border-t-2 border-cloud/40 sm:right-7 sm:top-7 sm:h-10 sm:w-10"
               />
               <div
                 aria-hidden
-                className="pointer-events-none absolute bottom-4 left-4 z-30 h-7 w-7 border-b-2 border-l-2 border-cloud/40 sm:bottom-7 sm:left-7 sm:h-10 sm:w-10"
+                className="pointer-events-none absolute bottom-4 left-4 z-50 h-7 w-7 border-b-2 border-l-2 border-cloud/40 sm:bottom-7 sm:left-7 sm:h-10 sm:w-10"
               />
               <div
                 aria-hidden
-                className="pointer-events-none absolute bottom-4 right-4 z-30 h-7 w-7 border-b-2 border-r-2 border-cloud/40 sm:bottom-7 sm:right-7 sm:h-10 sm:w-10"
+                className="pointer-events-none absolute bottom-4 right-4 z-50 h-7 w-7 border-b-2 border-r-2 border-cloud/40 sm:bottom-7 sm:right-7 sm:h-10 sm:w-10"
               />
 
-              {/* Slate line, bottom-left, like a burned-in timecode. */}
+              {/* Slate line, like a burned-in timecode. */}
               <p
                 aria-hidden
-                className="pointer-events-none absolute bottom-5 left-1/2 z-30 -translate-x-1/2 font-pixel text-[10px] uppercase tracking-[0.3em] text-cloud/50 sm:bottom-8 sm:text-xs"
+                className="pointer-events-none absolute bottom-5 left-1/2 z-50 -translate-x-1/2 font-pixel text-[10px] uppercase tracking-[0.3em] text-cloud/50 sm:bottom-8 sm:text-xs"
               >
                 Drag to look around
               </p>

@@ -273,3 +273,171 @@ html {
   background-position: 0 0, 0 10px, 10px -10px, -10px 0;
   background-color: #fff;
 }
+
+/* ── Cinema stage (embedded scene) ─────────────────────────────────────── */
+/* The embed is the one place on the page where a visitor watches instead of
+   clicks, so it gets treated like a screening: a near-black room, a warm spill
+   of light behind the frame, a vignette pulling the eye to the middle, and a
+   fine grain so the flat panel reads as projected film rather than a div. */
+.cinema-room {
+  background:
+    radial-gradient(
+      120% 80% at 50% 0%,
+      rgba(46, 155, 240, 0.18) 0%,
+      rgba(46, 155, 240, 0) 60%
+    ),
+    radial-gradient(
+      100% 90% at 50% 110%,
+      rgba(232, 80, 107, 0.14) 0%,
+      rgba(232, 80, 107, 0) 65%
+    ),
+    linear-gradient(180deg, #050b13 0%, #060d17 50%, #04080f 100%);
+}
+
+/* Light spilling off the screen onto the room around it. */
+.cinema-spill::before {
+  content: "";
+  position: absolute;
+  inset: -12% -6%;
+  background: radial-gradient(
+    60% 55% at 50% 50%,
+    rgba(120, 190, 255, 0.28) 0%,
+    rgba(120, 190, 255, 0.08) 45%,
+    rgba(120, 190, 255, 0) 75%
+  );
+  filter: blur(28px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Vignette + grain sit *over* the frame, so they must never eat a drag. */
+.cinema-vignette {
+  background: radial-gradient(
+    75% 75% at 50% 50%,
+    rgba(0, 0, 0, 0) 55%,
+    rgba(0, 0, 0, 0.35) 85%,
+    rgba(0, 0, 0, 0.6) 100%
+  );
+}
+
+.cinema-grain {
+  /* One tiny tiled SVG of fractal noise — no image request, no JS. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  animation: cinema-grain-shift 0.7s steps(3) infinite;
+}
+
+@keyframes cinema-grain-shift {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  33% {
+    transform: translate3d(-3%, 2%, 0);
+  }
+  66% {
+    transform: translate3d(2%, -3%, 0);
+  }
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinema-grain {
+    animation: none;
+  }
+}
+
+/* ── Lightning striking the subject ────────────────────────────────────── */
+/* A real strike is over in about a tenth of a second and comes with a couple
+   of return flickers, so the timeline is mostly dead air with two short bursts
+   in it. Anything smoother than these hard steps reads as a glowing wire. */
+@keyframes bolt-strike {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  0.6% {
+    opacity: 1;
+  }
+  1.6% {
+    opacity: 0.1;
+  }
+  2.4% {
+    opacity: 0.95;
+  }
+  3.4% {
+    opacity: 0;
+  }
+  5% {
+    opacity: 0.75;
+  }
+  6% {
+    opacity: 0;
+  }
+  40% {
+    opacity: 0;
+  }
+  40.8% {
+    opacity: 0.9;
+  }
+  42% {
+    opacity: 0;
+  }
+  43% {
+    opacity: 0.55;
+  }
+  44.2% {
+    opacity: 0;
+  }
+}
+
+/* The room and the subject lighting up as the bolt lands. Trails the strike
+   by a hair and decays, the way a flash bleaches then falls off. */
+@keyframes bolt-flash {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  0.8% {
+    opacity: 0.9;
+  }
+  3% {
+    opacity: 0.25;
+  }
+  8% {
+    opacity: 0;
+  }
+  40.8% {
+    opacity: 0.6;
+  }
+  46% {
+    opacity: 0;
+  }
+}
+
+.bolt {
+  animation: bolt-strike var(--bolt-cycle, 8s) linear infinite;
+  animation-delay: var(--bolt-delay, 0s);
+  filter: drop-shadow(0 0 3px rgba(230, 245, 255, 1))
+    drop-shadow(0 0 10px rgba(120, 195, 255, 0.9))
+    drop-shadow(0 0 34px rgba(46, 155, 240, 0.55));
+  will-change: opacity;
+}
+
+.bolt-flash {
+  animation: bolt-flash var(--bolt-cycle, 8s) linear infinite;
+  animation-delay: var(--bolt-delay, 0s);
+  will-change: opacity;
+}
+
+/* Motion-sensitive visitors get the bolts as faint static filaments, never a
+   strobe — this section flashes hard enough to matter. */
+@media (prefers-reduced-motion: reduce) {
+  .bolt,
+  .bolt-flash {
+    animation: none;
+    opacity: 0.28;
+  }
+}
