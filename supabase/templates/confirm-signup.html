@@ -1,0 +1,107 @@
+<!-- Gifsy &mdash; Supabase auth email: "Confirm signup"
+     Paste into Supabase Dashboard -&gt; Authentication -&gt; Emails -&gt; Confirm signup.
+     Subject line: Confirm your Gifsy account
+     Uses {{ .ConfirmationURL }}, the same variable as the Supabase default, so
+     the verification flow is unchanged &mdash; this restyles the email, nothing else.
+     See README.md in this folder for the constraints behind the markup. -->
+<div style="margin:0;padding:0;background:#eaf4ff;color-scheme:light;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#eaf4ff;">
+  <tr>
+    <td align="center" style="padding:32px 16px 40px;font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;">
+
+      <!-- wordmark -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
+        <tr>
+          <td style="padding:0 8px 0 0;" valign="middle">
+            <img src="https://www.gifsy.fun/gifsy-logo.png" width="36" height="36" alt=""
+                 style="display:block;width:36px;height:36px;border:0;outline:none;text-decoration:none;">
+          </td>
+          <td valign="middle" style="font-size:20px;line-height:1;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#0e2438;">
+            Gifsy
+          </td>
+        </tr>
+      </table>
+
+      <!-- card. The hard ink offset shadow is an ink-filled outer cell with
+           asymmetric padding: box-shadow is stripped by Gmail and nested spacer
+           tables collapse, but cell padding is supported everywhere. -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="486" style="width:486px;max-width:100%;">
+        <tr>
+          <td bgcolor="#0e2438" style="padding:0 6px 6px 0;border-radius:18px;">
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+                   style="background:#ffffff;border:3px solid #0e2438;border-radius:16px;">
+              <tr>
+                <td style="padding:32px 28px 28px;">
+
+                  <h1 style="margin:0;font-size:24px;line-height:1.2;font-weight:800;letter-spacing:0.5px;color:#0e2438;">
+                    Confirm your email
+                  </h1>
+
+                  <p style="margin:14px 0 0;font-size:15px;line-height:1.6;color:#0e2438;">
+                    One click and your Gifsy account is live. Confirming this address is
+                    what lets you publish scenes and get share links and embed codes.
+                  </p>
+
+                  <!-- button: table-based so Outlook renders the fill, and the
+                       same ink-padding trick for its offset shadow. -->
+                  <table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:26px 0 0;">
+                    <tr>
+                      <td bgcolor="#0e2438" style="padding:0 4px 4px 0;border-radius:14px;">
+                      <table role="presentation" cellpadding="0" cellspacing="0" border="0">
+                        <tr>
+                      <td bgcolor="#2e9bf0" style="border:3px solid #0e2438;border-radius:12px;">
+                        <a href="{{ .ConfirmationURL }}"
+                           style="display:block;padding:13px 26px;font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;color:#ffffff;text-decoration:none;">
+                          Confirm my email
+                        </a>
+                      </td>
+                        </tr>
+                      </table>
+                      </td>
+                    </tr>
+                  </table>
+
+                  <p style="margin:22px 0 0;font-size:13px;line-height:1.6;color:#5b6b7d;">
+                    Button not working? Paste this into your browser:
+                  </p>
+                  <p style="margin:6px 0 0;font-size:12px;line-height:1.5;word-break:break-all;">
+                    <a href="{{ .ConfirmationURL }}" style="color:#1466b4;text-decoration:underline;">{{ .ConfirmationURL }}</a>
+                  </p>
+
+                  <hr style="margin:26px 0 0;border:0;border-top:2px solid #eaf4ff;">
+
+                  <p style="margin:18px 0 0;font-size:13px;line-height:1.6;color:#5b6b7d;">
+                    <span style="color:#0e2438;font-weight:700;">You don't need an account to make things.</span>
+                    GIFs, stickers and 3D scenes all run in your browser, free. An account
+                    is only for publishing and embeds.
+                  </p>
+
+                </td>
+              </tr>
+            </table>
+          </td>
+        </tr>
+      </table>
+
+      <!-- footer -->
+      <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="486" style="width:486px;max-width:100%;">
+        <tr>
+          <td align="center" style="padding:24px 12px 0;font-family:'Nunito',-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:12px;line-height:1.7;color:#5b6b7d;">
+            Someone signed up at
+            <a href="https://www.gifsy.fun" style="color:#5b6b7d;text-decoration:underline;">gifsy.fun</a>
+            with this address. If it wasn't you, ignore this email &mdash; the address stays
+            unconfirmed and the link expires on its own.
+            <br><br>
+            <a href="mailto:aman@metamemory.tech" style="color:#5b6b7d;text-decoration:underline;">aman@metamemory.tech</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://www.gifsy.fun/privacy" style="color:#5b6b7d;text-decoration:underline;">Privacy</a>
+            &nbsp;&middot;&nbsp;
+            <a href="https://www.gifsy.fun/terms" style="color:#5b6b7d;text-decoration:underline;">Terms</a>
+          </td>
+        </tr>
+      </table>
+
+    </td>
+  </tr>
+</table>
+</div>
