@@ -1,8 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { Source, Uploader } from "@/components/Uploader";
+import { ScrollReveal } from "@/components/ScrollReveal";
 import { ImportGuide } from "@/components/ImportGuide";
 import dynamic from "next/dynamic";
 import Link from "next/link";
@@ -723,6 +724,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-1 flex-col">
+      <ScrollReveal />
       <UpgradeDialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
 
       {/* Nav: a frosted pill pinned to the viewport, so it stays reachable the
@@ -935,12 +937,14 @@ export default function Home() {
       {/* Two rows of real published embeds, streaming past in opposite
           directions — social proof before the pitch, not after it. */}
       <section className="overflow-hidden border-t border-ink/10 bg-white py-12 sm:py-16">
-        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8" data-reveal>
           <p className="mb-6 font-display text-xl text-ink sm:text-2xl">
             See what people are building 👀
           </p>
         </div>
-        <CommunityShowcase />
+        <div data-reveal style={{ "--reveal-delay": "100ms" } as CSSProperties}>
+          <CommunityShowcase />
+        </div>
       </section>
 
       {/* ───────────────────── EMBEDDED SCENE ─────────────────────── */}
@@ -951,7 +955,7 @@ export default function Home() {
           pointer-events-none — the scene itself still has to be draggable. */}
       <section className="relative overflow-hidden border-y border-foreground/10 bg-panel">
         <div className="relative py-10 sm:py-16">
-          <div className="mx-auto mb-6 max-w-6xl px-5 text-center sm:mb-9 sm:px-8">
+          <div className="mx-auto mb-6 max-w-6xl px-5 text-center sm:mb-9 sm:px-8" data-reveal>
             <p className="font-display text-xs uppercase tracking-[0.35em] text-sky-deep">
               Now showing
             </p>
@@ -1112,7 +1116,7 @@ export default function Home() {
           and each card only fetches its video once it scrolls into view. */}
       <section className="border-t border-foreground/10 bg-background">
         <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-          <div className="flex items-end justify-between gap-4">
+          <div className="flex items-end justify-between gap-4" data-reveal>
             <div>
               <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">
                 Made with Gifsy
@@ -1138,7 +1142,7 @@ export default function Home() {
             <GalleryStrip />
           </div>
 
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3" data-reveal>
             <button
               onClick={goToWorkshop}
               className="btn inline-flex items-center gap-2 rounded-full bg-sky px-6 py-3 font-display text-base text-cloud"
@@ -1159,7 +1163,7 @@ export default function Home() {
       {/* ─────────────────────────── STEPS ─────────────────────────── */}
       <section id="how" className="scroll-mt-24 border-y border-foreground/10 bg-panel">
         <div className="mx-auto max-w-4xl px-5 py-16 text-center sm:px-8 sm:py-20">
-          <h2 className="font-editorial text-3xl text-foreground sm:text-4xl">
+          <h2 className="font-editorial text-3xl text-foreground sm:text-4xl" data-reveal>
             How it works
           </h2>
           <div className="mt-10 divide-y divide-foreground/10 sm:mt-14 sm:flex sm:divide-x sm:divide-y-0">
@@ -1181,9 +1185,11 @@ export default function Home() {
                   desc: "Paste the 3D embed into any site — or download the GIF or sticker.",
                 },
               ] satisfies { icon: LucideIcon; title: string; desc: string }[]
-            ).map(({ icon: Icon, title, desc }) => (
+            ).map(({ icon: Icon, title, desc }, i) => (
               <div
                 key={title}
+                data-reveal
+                style={{ "--reveal-delay": `${i * 110}ms` } as CSSProperties}
                 className="flex flex-1 flex-col items-center gap-2 py-6 sm:py-0 sm:px-8"
               >
                 <Icon className="h-7 w-7 text-sky" strokeWidth={1.75} aria-hidden />
@@ -1705,7 +1711,7 @@ export default function Home() {
           /pricing page renders, so the two can never disagree. */}
       <section id="plans" className="scroll-mt-24 border-t border-foreground/10 bg-panel">
         <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
-          <div className="mx-auto mb-9 max-w-2xl text-center">
+          <div className="mx-auto mb-9 max-w-2xl text-center" data-reveal>
             <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">
               Plans
             </p>
@@ -1718,7 +1724,9 @@ export default function Home() {
               badge, and runs the whole model on your own device.
             </p>
           </div>
-          <PlanCards next="/#plans" freeHref="#make" />
+          <div data-reveal style={{ "--reveal-delay": "120ms" } as CSSProperties}>
+            <PlanCards next="/#plans" freeHref="#make" />
+          </div>
         </div>
       </section>
 

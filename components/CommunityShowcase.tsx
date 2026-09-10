@@ -22,12 +22,12 @@ function fillRow(offset: number) {
 
 function Embed({ id }: { id: string }) {
   return (
-    <div className="card w-[170px] shrink-0 overflow-hidden rounded-xl bg-black sm:w-[200px]">
+    <div className="card w-[240px] shrink-0 overflow-hidden rounded-xl bg-black sm:w-[300px]">
       <iframe
         src={`https://www.gifsy.fun/embed/${id}`}
         title={`Community scene ${id}`}
         loading="lazy"
-        className="block h-[220px] w-full border-0 bg-black sm:h-[260px]"
+        className="block h-[320px] w-full border-0 bg-black sm:h-[380px]"
       />
     </div>
   );
@@ -70,8 +70,8 @@ function Row({
 export function CommunityShowcase() {
   return (
     <div className="space-y-5">
-      <Row ids={fillRow(0)} reverse duration="90s" />
-      <Row ids={fillRow(2)} duration="80s" />
+      <Row ids={fillRow(0)} reverse duration="130s" />
+      <Row ids={fillRow(2)} duration="115s" />
     </div>
   );
 }

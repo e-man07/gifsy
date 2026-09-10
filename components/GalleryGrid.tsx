@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { Box, Pause, Play } from "lucide-react";
 import {
   FEATURED,
@@ -125,7 +125,12 @@ export function GalleryGrid() {
 
           <div className={MASONRY}>
             {cat.items.map((it, i) => (
-              <div key={it.id} className={MASONRY_ITEM}>
+              <div
+                key={it.id}
+                className={MASONRY_ITEM}
+                data-reveal
+                style={{ "--reveal-delay": `${(i % 3) * 90}ms` } as CSSProperties}
+              >
                 <Card
                   id={it.id}
                   title={it.title}
@@ -202,7 +207,12 @@ export function GalleryStrip() {
           moving strip is a worse way to browse when six cards already fit. */}
       <div className={`hidden sm:block ${MASONRY}`}>
         {FEATURED.map((it, i) => (
-          <div key={it.id} className={MASONRY_ITEM}>
+          <div
+            key={it.id}
+            className={MASONRY_ITEM}
+            data-reveal
+            style={{ "--reveal-delay": `${(i % 3) * 90}ms` } as CSSProperties}
+          >
             {card(it.id, it.title, it.accent, aspectFor(i))}
           </div>
         ))}

@@ -52,6 +52,19 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${editorial.variable} ${inter.variable} h-full antialiased`}
     >
+      <head>
+        {/* Scroll reveals hide their element in CSS and are un-hidden by an
+            observer. With scripting off that observer never runs, so the
+            content would stay hidden permanently — this puts it back. */}
+        <noscript>
+          <style
+            dangerouslySetInnerHTML={{
+              __html:
+                "[data-reveal]{opacity:1!important;transform:none!important}",
+            }}
+          />
+        </noscript>
+      </head>
       <body className="min-h-full flex flex-col">
       {children}
       <Analytics />
