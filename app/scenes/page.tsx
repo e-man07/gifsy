@@ -34,17 +34,17 @@ export default async function MyScenesPage() {
 
   return (
     <main className="flex min-h-screen flex-1 flex-col bg-background">
-      <section className="border-b-[3px] border-ink bg-ink text-cloud">
+      <section className="border-b border-foreground/10 bg-panel">
         <SiteNav />
 
         <div className="mx-auto w-full max-w-5xl px-5 pb-10 pt-6 sm:px-8 sm:pb-12 sm:pt-8">
-          <p className="font-pixel text-xs uppercase tracking-[0.2em] text-sun drop-shadow-[1px_1px_0_var(--ink)]">
+          <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">
             Your account
           </p>
-          <h1 className="mt-2 font-pixel text-3xl text-cloud drop-shadow-[2px_2px_0_var(--ink)] sm:text-4xl">
+          <h1 className="mt-2 font-editorial text-4xl text-foreground sm:text-5xl">
             My scenes
           </h1>
-          <Link href="/account" className="mt-3 inline-block text-sm text-cloud/70 underline decoration-dotted hover:text-sun">
+          <Link href="/account" className="mt-3 inline-block text-sm text-muted underline decoration-dotted hover:text-sky-deep">
             {user.email}
           </Link>
         </div>
@@ -53,12 +53,12 @@ export default async function MyScenesPage() {
       <div className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8 sm:py-10">
 
       {scenes.length === 0 ? (
-        <div className="hud rounded-2xl bg-panel p-10 text-center">
-          <p className="font-pixel text-lg text-foreground">No published scenes yet</p>
+        <div className="card rounded-2xl bg-panel p-10 text-center">
+          <p className="font-display text-lg text-foreground">No published scenes yet</p>
           <p className="mt-2 text-sm text-muted">
             Make a 3D scene and hit Publish — it&apos;ll show up here with a shareable link and embed code.
           </p>
-          <Link href="/" className="btn-pixel mt-5 inline-block rounded-xl bg-grass px-5 py-2.5 font-pixel text-sm text-ink">
+          <Link href="/" className="btn mt-5 inline-block rounded-xl bg-grass px-5 py-2.5 font-display text-sm text-ink">
             Create one
           </Link>
         </div>
@@ -68,9 +68,9 @@ export default async function MyScenesPage() {
             <Link
               key={s.id}
               href={`/s/${s.id}`}
-              className="hud group overflow-hidden rounded-xl bg-panel transition hover:-translate-y-0.5"
+              className="card group overflow-hidden rounded-xl bg-panel transition hover:-translate-y-0.5"
             >
-              <div className="aspect-square w-full overflow-hidden bg-background">
+              <div className="aspect-square w-full overflow-hidden bg-surface">
                 {s.thumb_url ?? s.image_url ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
@@ -82,13 +82,13 @@ export default async function MyScenesPage() {
                 ) : null}
               </div>
               <div className="flex items-center justify-between px-3 py-2">
-                <span className="font-pixel text-[11px] uppercase tracking-wide text-muted">
+                <span className="font-display text-[11px] uppercase tracking-wide text-muted">
                   {new Date(s.created_at).toLocaleDateString()}
                 </span>
                 {s.watermark ? (
-                  <span className="font-pixel text-[10px] uppercase tracking-wide text-sun">Free</span>
+                  <span className="font-display text-[10px] uppercase tracking-wide text-sun">Free</span>
                 ) : (
-                  <span className="font-pixel text-[10px] uppercase tracking-wide text-grass">Pro</span>
+                  <span className="font-display text-[10px] uppercase tracking-wide text-grass">Pro</span>
                 )}
               </div>
             </Link>

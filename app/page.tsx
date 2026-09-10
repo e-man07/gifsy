@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import Image from "next/image";
 import { Source, Uploader } from "@/components/Uploader";
 import { ImportGuide } from "@/components/ImportGuide";
 import dynamic from "next/dynamic";
@@ -9,7 +10,7 @@ import { track } from "@vercel/analytics";
 import { AccountMenu } from "@/components/AccountMenu";
 import { Wordmark } from "@/components/Wordmark";
 import { GalleryStrip } from "@/components/GalleryGrid";
-import { LiveScenes } from "@/components/LiveScenes";
+import { CommunityShowcase } from "@/components/CommunityShowcase";
 import { PlanCards } from "@/components/PlanCards";
 import { GALLERY_COUNT } from "@/lib/gallery";
 import { createClient as createSupabaseClient } from "@/lib/supabase/client";
@@ -57,7 +58,7 @@ const BOLT_RIGHT_FORKS =
 
 const ThreeDPreview = dynamic(() => import("@/components/ThreeDPreview").then((m) => m.ThreeDPreview), {
   ssr: false,
-  loading: () => <div className="hud-sm flex h-[360px] w-full items-center justify-center rounded-xl bg-background text-sm font-semibold text-muted">Loading 3D engine…</div>,
+  loading: () => <div className="card-sm flex h-[360px] w-full items-center justify-center rounded-xl bg-surface text-sm font-semibold text-muted">Loading 3D engine…</div>,
 });
 import {
   Activity,
@@ -83,6 +84,7 @@ import {
   RotateCw,
   Sparkles,
   Tv,
+  Upload,
   Vibrate,
   Wand2,
   ZoomIn,
@@ -194,13 +196,16 @@ export default function Home() {
   const [result, setResult] = useState<Result | null>(null);
 
   const workshopRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
 
-  // Respect reduced-motion: freeze the ambient hero video on its poster frame.
+  // The nav is fixed, so it crosses from the hero photo onto the white panels
+  // below. The glass treatment stays put the whole way; only the type flips
+  // from white to ink, which is what actually decides legibility.
+  const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      videoRef.current?.pause();
-    }
+    const onScroll = () => setScrolled(window.scrollY > 24);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
   const multiple = mode === "gif" && gifMode === "combine";
@@ -720,51 +725,53 @@ export default function Home() {
     <main className="flex flex-1 flex-col">
       <UpgradeDialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
 
-      {/* ─────────────────────────── HERO ─────────────────────────── */}
-      <section
-        id="top"
-        className="relative isolate flex min-h-[92vh] flex-col justify-center overflow-hidden"
-      >
-        <video
-          ref={videoRef}
-          className="absolute inset-0 -z-20 h-full w-full object-cover"
-          poster="/bgm-poster.jpg"
-          autoPlay
-          muted
-          loop
-          playsInline
-          aria-hidden
+      {/* Nav: a frosted pill pinned to the viewport, so it stays reachable the
+          whole way down the page. It lives outside the hero deliberately —
+          `fixed` inside a section with `overflow-hidden` invites clipping the
+          moment any ancestor grows a transform or filter. */}
+      <nav className="fixed inset-x-0 top-4 z-50 flex justify-center px-5 sm:top-6 sm:px-8">
+        {/* The pill is fixed, so it crosses the hero photo AND the white
+            panels below it. It stays frosted glass throughout — only the type
+            flips from white to ink, since that is what actually decides
+            legibility. The tint firms up from 15% to 70% when scrolled so the
+            pill still reads as a pill against a plain white page. */}
+        <div
+          className={`flex w-full max-w-5xl items-center justify-between gap-3 rounded-full px-5 py-3 shadow-[0_8px_32px_rgba(4,16,29,0.18)] ring-1 backdrop-blur-xl transition-colors duration-300 sm:px-7 ${
+            scrolled
+              ? "bg-white/70 ring-ink/10"
+              : "bg-white/15 ring-white/25"
+          }`}
         >
-          <source src="/bgm.mp4" type="video/mp4" />
-        </video>
-        {/* Legibility scrims */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-r from-ink/85 via-ink/40 to-transparent" />
-        <div className="absolute inset-0 -z-10 bg-gradient-to-t from-ink/50 via-transparent to-ink/30" />
-
-        {/* Nav. The section scrims above fade out to the right to reveal the
-            tree art — which is exactly where these links sit, so the nav
-            carries its own top-down scrim. */}
-        <nav className="nav-scrim absolute inset-x-0 top-0 z-20 flex items-center justify-between gap-2 px-5 py-4 sm:px-8">
-          <Wordmark href="#top" />
-          <div className="flex items-center gap-2 sm:gap-3">
+          <Wordmark href="#top" className={scrolled ? "text-ink" : "text-cloud"} />
+          <div className="flex items-center gap-3 sm:gap-5">
             {/* Hidden on phones alongside "How it works" — the bar fits the
                 wordmark, sign-in and the CTA and no more. Both routes stay
                 reachable from the sections below and the footer. */}
             <Link
               href="/gallery"
-              className="hero-text hidden font-pixel text-sm text-cloud hover:text-sun sm:block"
+              className={`hidden font-display text-sm transition-colors sm:block ${
+                scrolled ? "text-ink hover:text-sky-deep" : "text-cloud hover:text-white"
+              }`}
             >
               Gallery
             </Link>
             <a
               href="#how"
-              className="hero-text hidden font-pixel text-sm text-cloud hover:text-sun sm:block"
+              className={`hidden font-display text-sm transition-colors sm:block ${
+                scrolled ? "text-ink hover:text-sky-deep" : "text-cloud hover:text-white"
+              }`}
             >
               How it works
             </a>
+            {/* The CTA inverts too: a white button vanishes into the frosted
+                white pill once scrolled, so it goes solid sky there. */}
             <button
               onClick={goToWorkshop}
-              className="btn-pixel order-1 flex items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-pixel text-sm text-cloud"
+              className={`order-1 flex items-center gap-1.5 rounded-full px-4 py-2 font-display text-sm font-semibold shadow-sm transition ${
+                scrolled
+                  ? "bg-sky text-white hover:bg-sky-deep"
+                  : "bg-white text-sky-deep hover:bg-white/90"
+              }`}
             >
               Start
               <ArrowDown className="h-4 w-4" strokeWidth={2.5} aria-hidden />
@@ -772,171 +779,186 @@ export default function Home() {
             {/* Same two links as above, for the phone hamburger — the inline
                 copies are hidden below sm. */}
             <AccountMenu
+              tone={scrolled ? "dark" : "light"}
               links={[
                 { href: "/gallery", label: "Gallery" },
                 { href: "#how", label: "How it works" },
               ]}
             />
           </div>
-        </nav>
+        </div>
+      </nav>
 
-        {/* Hero content */}
-        <div className="mx-auto grid w-full max-w-6xl grid-cols-1 items-center gap-10 px-5 pb-16 pt-28 sm:px-8 lg:grid-cols-[1.1fr_0.9fr]">
-          <div className="max-w-xl">
-            <p className="font-pixel text-xs uppercase tracking-[0.2em] text-sun drop-shadow-[1px_1px_0_var(--ink)]">
-              For portfolios, product pages & hero sections
-            </p>
-            <h1 className="mt-3 font-pixel text-4xl leading-[1.08] text-cloud drop-shadow-[3px_3px_0_var(--ink)] sm:text-5xl md:text-6xl">
-              Turn any photo into a{" "}
-              <span className="text-sun">live 3D photo</span> you can{" "}
-              <span className="text-sky">embed anywhere</span>.
-            </h1>
-            <p className="mt-4 max-w-md text-base font-semibold text-cloud/95 drop-shadow-[1px_1px_0_rgba(4,16,29,0.9)] sm:text-lg">
-              Upload one image. Gifsy gives it real depth right here in your
-              browser, then hands you an embed you can paste into Webflow,
-              Framer or any site. GIFs and stickers are always free, no account.
-            </p>
+      {/* ─────────────────────────── HERO ─────────────────────────── */}
+      <section
+        id="top"
+        className="relative isolate flex min-h-[92vh] flex-col justify-center overflow-hidden"
+      >
+        {/* Blurred back plate. `scale-105` matters: a blur samples past the
+            element's own edges, so at 1:1 the sides fade to transparent and
+            leak the page background — scaling up pushes that soft margin
+            outside the section's overflow-hidden box. */}
+        <Image
+          src="/hero-valley.png"
+          alt=""
+          fill
+          priority
+          aria-hidden
+          className="absolute inset-0 -z-20 scale-105 object-cover blur-[3px]"
+        />
+        {/* Legibility scrim: a soft top-down fade keeps the floating nav and
+            the headline readable over open sky, without flattening the
+            meadow the card sits on further down. */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/45 via-ink/10 to-ink/25" />
 
-            {/* Controls: mode + (for GIF) sub-mode — one compact, light row */}
-            <div className="mt-5 flex flex-wrap items-center gap-2">
-              <div className="hud-sm inline-flex gap-0.5 rounded-lg bg-cloud/95 p-0.5">
-                {(["3d", "gif", "sticker"] as Mode[]).map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => switchMode(m)}
-                    className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-pixel text-xs transition ${
-                      mode === m ? "bg-sky text-cloud" : "text-ink hover:bg-ink/5"
-                    }`}
-                  >
-                    {m === "gif" ? (
-                      <Film className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
-                    ) : m === "sticker" ? (
-                      <Sparkles className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
-                    ) : (
-                      <Box className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
-                    )}
-                    {m === "gif" ? "GIF" : m === "sticker" ? "Sticker" : "3D"}
-                  </button>
-                ))}
-              </div>
+        {/* Hero content: centered, single column, matching the reference —
+            one message in the middle of the frame instead of text pinned
+            against an empty second column. */}
+        <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-5 pb-20 pt-36 text-center sm:px-8 sm:pt-40">
+          <p className="font-display text-xs uppercase tracking-[0.22em] text-white/70 drop-shadow-[0_1px_8px_rgba(4,16,29,0.5)]">
+            For portfolios, product pages & hero sections
+          </p>
+          {/* One colour. The old yellow/blue accent spans fought the sky —
+              the blue phrase in particular all but vanished into it.
+              `max-w-4xl` keeps this to two roomy lines on a desktop; at 2xl it
+              broke into three cramped ones. */}
+          <h1 className="mt-5 max-w-4xl text-balance font-editorial text-4xl leading-[1.1] text-white drop-shadow-[0_4px_20px_rgba(4,16,29,0.45)] sm:text-5xl md:text-6xl">
+            Turn any photo into a live 3D photo you can embed anywhere.
+          </h1>
+          <p className="mt-7 max-w-2xl text-pretty text-base font-medium leading-relaxed text-white/85 drop-shadow-[0_2px_10px_rgba(4,16,29,0.5)] sm:text-lg">
+            Upload one image. Gifsy gives it real depth right here in your
+            browser, then hands you an embed you can paste into any site.
+          </p>
 
-              {mode === "gif" && (
-                <div className="hud-sm inline-flex gap-0.5 rounded-lg bg-cloud/95 p-0.5">
-                  {(
-                    [
-                      { gm: "animate", label: "Animate one", Icon: Clapperboard },
-                      { gm: "combine", label: "Combine several", Icon: Images },
-                    ] as { gm: GifMode; label: string; Icon: LucideIcon }[]
-                  ).map(({ gm, label, Icon }) => (
-                    <button
-                      key={gm}
-                      onClick={() => {
-                        setGifMode(gm);
-                        resetResult();
-                        if (gm === "animate") setSources((p) => p.slice(0, 1));
-                      }}
-                      className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-pixel text-xs transition ${
-                        gifMode === gm
-                          ? "bg-sky text-cloud"
-                          : "text-ink hover:bg-ink/5"
-                      }`}
-                    >
-                      <Icon className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
-                      {label}
-                    </button>
-                  ))}
+          {/* Upload card — a prompt box, not a file input: the drop target is
+              the whole card, with the mode switch riding in its control row.
+              Colours are explicit white/ink rather than panel tokens so the
+              card stays light when the OS is in dark mode. */}
+          <div className="mt-11 w-full max-w-2xl">
+            <Uploader
+              multiple={multiple}
+              sources={sources}
+              onAdd={addFiles}
+              onRemove={removeFile}
+              onClear={clearFiles}
+              controls={
+                <div className="flex flex-wrap items-center gap-1.5">
+                  <div className="inline-flex gap-0.5 rounded-full bg-ink/[0.06] p-0.5">
+                    {(["3d", "gif", "sticker"] as Mode[]).map((m) => (
+                      <button
+                        key={m}
+                        onClick={() => switchMode(m)}
+                        className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-display text-xs transition ${
+                          mode === m
+                            ? "bg-white text-ink shadow-sm"
+                            : "text-ink/55 hover:text-ink"
+                        }`}
+                      >
+                        {m === "gif" ? (
+                          <Film className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
+                        ) : m === "sticker" ? (
+                          <Sparkles className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
+                        ) : (
+                          <Box className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
+                        )}
+                        {m === "gif" ? "GIF" : m === "sticker" ? "Sticker" : "3D"}
+                      </button>
+                    ))}
+                  </div>
+
+                  {mode === "gif" && (
+                    <div className="inline-flex gap-0.5 rounded-full bg-ink/[0.06] p-0.5">
+                      {(
+                        [
+                          { gm: "animate", label: "Animate one", Icon: Clapperboard },
+                          { gm: "combine", label: "Combine several", Icon: Images },
+                        ] as { gm: GifMode; label: string; Icon: LucideIcon }[]
+                      ).map(({ gm, label, Icon }) => (
+                        <button
+                          key={gm}
+                          onClick={() => {
+                            setGifMode(gm);
+                            resetResult();
+                            if (gm === "animate") setSources((p) => p.slice(0, 1));
+                          }}
+                          className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 font-display text-xs transition ${
+                            gifMode === gm
+                              ? "bg-white text-ink shadow-sm"
+                              : "text-ink/55 hover:text-ink"
+                          }`}
+                        >
+                          <Icon className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
+              }
+            />
+          </div>
 
-            {/* Upload */}
-            <div className="mt-4 max-w-sm">
-              <Uploader
-                multiple={multiple}
-                sources={sources}
-                onAdd={addFiles}
-                onRemove={removeFile}
-                onClear={clearFiles}
-              />
-            </div>
-
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 font-pixel text-[11px] uppercase tracking-wide text-cloud/85 drop-shadow-[1px_1px_0_var(--ink)]">
-              {[
-                { figure: String(FREE_GENERATION_LIMIT), rest: "free 3D generations" },
-                { figure: null, rest: "GIFs & stickers always free" },
-                { figure: PLAN_DISPLAY.pro.price, rest: "once for unlimited 3D" },
-              ].map(({ figure, rest }) => (
-                <span key={rest} className="flex items-center gap-1">
-                  <Check
-                    className="h-3.5 w-3.5 text-grass"
-                    strokeWidth={3}
-                    aria-hidden
-                  />
-                  {/* Digits get .num — the pixel face draws "$29" as "$89". */}
-                  {figure ? <span className="num normal-case">{figure}</span> : null}
-                  {rest}
-                </span>
-              ))}
-            </div>
+          {/* Full white and a tight, dark halo rather than the wide diffuse
+              one these had: at 11px over a bright photo a soft 8px shadow
+              spreads too thin to separate the strokes from the sky. */}
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 font-display text-xs font-semibold uppercase tracking-wide text-white [text-shadow:0_1px_3px_rgba(4,16,29,0.95),0_2px_12px_rgba(4,16,29,0.7)]">
+            {[
+              { figure: String(FREE_GENERATION_LIMIT), rest: "free 3D generations" },
+              { figure: null, rest: "GIFs & stickers always free" },
+              { figure: PLAN_DISPLAY.pro.price, rest: "once for unlimited 3D" },
+            ].map(({ figure, rest }) => (
+              <span key={rest} className="flex items-center gap-1.5">
+                <Check
+                  className="h-4 w-4 text-white"
+                  strokeWidth={3.5}
+                  aria-hidden
+                />
+                {/* Digits get .num for tabular, bold figures. */}
+                {figure ? <span className="num normal-case">{figure}</span> : null}
+                {rest}
+              </span>
+            ))}
           </div>
         </div>
 
         {/* Scroll cue */}
         <button
           onClick={goToWorkshop}
-          className="absolute bottom-4 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 font-pixel text-xs uppercase tracking-widest text-cloud/80 drop-shadow-[1px_1px_0_var(--ink)] hover:text-sun"
+          className="absolute bottom-4 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1 font-display text-xs uppercase tracking-widest text-cloud/80 drop-shadow-[0_1px_8px_rgba(4,16,29,0.6)] hover:text-sun"
         >
           <ChevronDown className="h-4 w-4" strokeWidth={2.5} aria-hidden />
           Customize
         </button>
       </section>
 
-      {/* ────────────────────── LIVE DEMO SCENES ───────────────────── */}
-      {/* Real, draggable scenes — not recordings. These render from pre-baked
-          image+depth pairs, so they need no AI model and no upload: a visitor
-          can feel the product seconds after landing, which is the moment the
-          funnel used to lose them. */}
-      <section className="border-t-[3px] border-ink bg-panel">
-        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
-          <div className="mb-9 max-w-2xl">
-            <p className="font-pixel text-xs uppercase tracking-[0.2em] text-sky-deep">
-              Live, right here
-            </p>
-            <h2 className="mt-2 font-pixel text-2xl text-foreground sm:text-3xl">
-              Real depth. Drag one and see.
-            </h2>
-            <p className="mt-2 text-sm text-muted sm:text-base">
-              Not videos — these are rendering in your browser right now, the
-              same thing you get from your own photo. Tilt one and the layers
-              pull apart. Nothing to install — making your own 3D scene just
-              needs a free account.
-            </p>
-          </div>
-          <LiveScenes />
+      {/* ─────────────────── COMMUNITY SHOWCASE ────────────────────── */}
+      {/* Two rows of real published embeds, streaming past in opposite
+          directions — social proof before the pitch, not after it. */}
+      <section className="overflow-hidden border-t border-ink/10 bg-white py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
+          <p className="mb-6 font-display text-xl text-ink sm:text-2xl">
+            See what people are building 👀
+          </p>
         </div>
+        <CommunityShowcase />
       </section>
 
       {/* ───────────────────── EMBEDDED SCENE ─────────────────────── */}
-      {/* The one stretch of the page where a visitor watches instead of clicks,
-          so it's staged like a screening: full-bleed, near-black, lit only by
-          the spill off the frame and by the strikes. Every overlay in here is
+      {/* The one stretch of the page where a visitor watches instead of clicks.
+          The room around the screen is white like the rest of the site; the
+          screening stays inside the frame, where the strikes, vignette and
+          grain still play against the scene. Every overlay in there is
           pointer-events-none — the scene itself still has to be draggable. */}
-      <section className="cinema-room relative overflow-hidden border-y-[3px] border-ink">
-        {/* Projector beam falling from above the screen. */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute left-1/2 top-0 h-64 w-[140%] -translate-x-1/2 bg-[radial-gradient(50%_100%_at_50%_0%,rgba(190,225,255,0.16),rgba(190,225,255,0))]"
-        />
-
+      <section className="relative overflow-hidden border-y border-foreground/10 bg-panel">
         <div className="relative py-10 sm:py-16">
           <div className="mx-auto mb-6 max-w-6xl px-5 text-center sm:mb-9 sm:px-8">
-            <p className="font-pixel text-xs uppercase tracking-[0.35em] text-sky">
+            <p className="font-display text-xs uppercase tracking-[0.35em] text-sky-deep">
               Now showing
             </p>
-            <h2 className="mt-3 font-pixel text-2xl text-cloud drop-shadow-[0_2px_18px_rgba(46,155,240,0.45)] sm:text-4xl">
+            <h2 className="mt-3 font-editorial text-3xl text-foreground sm:text-4xl">
               One photo. Shot in three dimensions.
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-sm text-cloud/60 sm:text-base">
+            <p className="mx-auto mt-3 max-w-xl text-sm text-muted sm:text-base">
               Live in the frame below — drag it. This is an embed, the same
               snippet you can paste into your own site.
             </p>
@@ -945,8 +967,10 @@ export default function Home() {
           {/* Held to a 5xl stage rather than run edge to edge: the embed keeps
               the subject centred at its own scale, so every extra pixel of
               width is just more empty black either side of him. */}
-          <div className="cinema-spill relative mx-auto w-full max-w-5xl px-4 sm:px-8">
-            <div className="relative z-10 h-[52vh] min-h-[320px] w-full overflow-hidden border-[3px] border-ink bg-black sm:h-[clamp(420px,68vh,760px)] shadow-[0_0_90px_rgba(46,155,240,0.22)]">
+          <div className="relative mx-auto w-full max-w-5xl px-4 sm:px-8">
+            {/* Elevation, not glow: the old blue bloom only read as light
+                because the room behind it was near-black. */}
+            <div className="relative z-10 h-[52vh] min-h-[320px] w-full overflow-hidden rounded-xl border border-foreground/10 bg-black sm:h-[clamp(420px,68vh,760px)] shadow-[0_24px_60px_rgba(14,36,56,0.28)]">
               {/* Oversized on purpose. The embed sizes its subject to its own
                   viewport, and cross-origin we cannot zoom it — so we give the
                   iframe a box a bit over twice the size of the window it shows
@@ -1072,7 +1096,7 @@ export default function Home() {
               {/* Slate line, like a burned-in timecode. */}
               <p
                 aria-hidden
-                className="pointer-events-none absolute bottom-5 left-1/2 z-50 -translate-x-1/2 font-pixel text-[10px] uppercase tracking-[0.3em] text-cloud/50 sm:bottom-8 sm:text-xs"
+                className="pointer-events-none absolute bottom-5 left-1/2 z-50 -translate-x-1/2 font-display text-[10px] uppercase tracking-[0.3em] text-cloud/50 sm:bottom-8 sm:text-xs"
               >
                 Drag to look around
               </p>
@@ -1086,14 +1110,14 @@ export default function Home() {
           the 3D effect working on real photos BEFORE being asked for one of
           their own. These are recorded clips, so this costs no model download —
           and each card only fetches its video once it scrolls into view. */}
-      <section className="border-t-[3px] border-ink bg-background">
+      <section className="border-t border-foreground/10 bg-background">
         <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
           <div className="flex items-end justify-between gap-4">
             <div>
-              <p className="font-pixel text-xs uppercase tracking-[0.2em] text-sky-deep">
+              <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">
                 Made with Gifsy
               </p>
-              <h2 className="mt-2 font-pixel text-2xl text-foreground sm:text-3xl">
+              <h2 className="mt-2 font-editorial text-3xl text-foreground sm:text-4xl">
                 Every one of these was a flat photo.
               </h2>
               <p className="mt-2 max-w-xl text-sm text-muted sm:text-base">
@@ -1103,7 +1127,7 @@ export default function Home() {
             </div>
             <Link
               href="/gallery"
-              className="hidden shrink-0 items-center gap-1.5 font-pixel text-sm text-sky-deep hover:text-sky sm:flex"
+              className="hidden shrink-0 items-center gap-1.5 font-display text-sm text-sky-deep hover:text-sky sm:flex"
             >
               All {GALLERY_COUNT} scenes
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
@@ -1117,14 +1141,14 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <button
               onClick={goToWorkshop}
-              className="btn-pixel inline-flex items-center gap-2 rounded-full bg-sky px-6 py-3 font-pixel text-base text-cloud"
+              className="btn inline-flex items-center gap-2 rounded-full bg-sky px-6 py-3 font-display text-base text-cloud"
             >
               Try it with your photo
               <ArrowDown className="h-5 w-5" strokeWidth={2.5} aria-hidden />
             </button>
             <Link
               href="/gallery"
-              className="font-pixel text-sm text-sky-deep hover:text-sky sm:hidden"
+              className="font-display text-sm text-sky-deep hover:text-sky sm:hidden"
             >
               See all {GALLERY_COUNT} scenes →
             </Link>
@@ -1133,35 +1157,41 @@ export default function Home() {
       </section>
 
       {/* ─────────────────────────── STEPS ─────────────────────────── */}
-      <section id="how" className="border-y-[3px] border-ink bg-panel">
-        <div className="mx-auto grid max-w-5xl grid-cols-1 gap-5 px-5 py-8 sm:grid-cols-3 sm:px-8">
-          {[
-            [
-              "1",
-              "Upload",
-              "Drop in a photo. GIFs and stickers stay in your browser. 3D needs a free account, and one step of it runs on our server unless you're on Pro.",
-            ],
-            [
-              "2",
-              "Customize",
-              "Pick 3D, GIF or sticker, then tune the depth and motion live.",
-            ],
-            [
-              "3",
-              "Publish",
-              "Paste the 3D embed into any site — or download the GIF or sticker.",
-            ],
-          ].map(([n, title, desc]) => (
-            <div key={n} className="flex items-start gap-3">
-              <span className="hud-sm flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky font-pixel text-lg text-cloud">
-                {n}
-              </span>
-              <div>
-                <h3 className="font-pixel text-base text-foreground">{title}</h3>
-                <p className="text-sm text-muted">{desc}</p>
+      <section id="how" className="scroll-mt-24 border-y border-foreground/10 bg-panel">
+        <div className="mx-auto max-w-4xl px-5 py-16 text-center sm:px-8 sm:py-20">
+          <h2 className="font-editorial text-3xl text-foreground sm:text-4xl">
+            How it works
+          </h2>
+          <div className="mt-10 divide-y divide-foreground/10 sm:mt-14 sm:flex sm:divide-x sm:divide-y-0">
+            {(
+              [
+                {
+                  icon: Upload,
+                  title: "Upload",
+                  desc: "Drop in a photo. GIFs and stickers stay in your browser.",
+                },
+                {
+                  icon: Wand2,
+                  title: "Customize",
+                  desc: "Pick 3D, GIF or sticker, then tune the depth and motion live.",
+                },
+                {
+                  icon: Code,
+                  title: "Publish",
+                  desc: "Paste the 3D embed into any site — or download the GIF or sticker.",
+                },
+              ] satisfies { icon: LucideIcon; title: string; desc: string }[]
+            ).map(({ icon: Icon, title, desc }) => (
+              <div
+                key={title}
+                className="flex flex-1 flex-col items-center gap-2 py-6 sm:py-0 sm:px-8"
+              >
+                <Icon className="h-7 w-7 text-sky" strokeWidth={1.75} aria-hidden />
+                <h3 className="mt-1 font-display text-base text-foreground">{title}</h3>
+                <p className="max-w-[240px] text-sm text-muted">{desc}</p>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
       </section>
 
@@ -1169,10 +1199,10 @@ export default function Home() {
       <section
         ref={workshopRef}
         id="make"
-        className="mx-auto w-full max-w-2xl scroll-mt-4 px-5 py-12 sm:py-16"
+        className="mx-auto w-full max-w-2xl scroll-mt-24 px-5 py-12 sm:py-16"
       >
-        <div className="hud rounded-2xl bg-panel p-5 sm:p-7">
-          <h2 className="font-pixel text-2xl text-foreground">
+        <div className="card rounded-2xl bg-panel p-5 sm:p-7">
+          <h2 className="font-editorial text-3xl text-foreground">
             {mode === "gif" ? "Customize your GIF" : mode === "sticker" ? "Customize your sticker" : "Customize your 3D"}
           </h2>
 
@@ -1199,12 +1229,12 @@ export default function Home() {
                         className={`relative flex flex-col items-center gap-1 rounded-lg border-2 py-2.5 text-xs transition ${
                           effect === e.id
                             ? "border-ink bg-sky text-cloud"
-                            : "border-transparent bg-background text-foreground hover:border-ink/25"
+                            : "border-transparent bg-surface text-foreground hover:border-ink/25"
                         }`}
                       >
                         {e.ai && (
                           <span
-                            className={`absolute right-1 top-1 rounded px-1 font-pixel text-[8px] leading-tight ${
+                            className={`absolute right-1 top-1 rounded px-1 font-display text-[8px] leading-tight ${
                               effect === e.id
                                 ? "bg-cloud/25 text-cloud"
                                 : "bg-sky/15 text-sky-deep"
@@ -1214,7 +1244,7 @@ export default function Home() {
                           </span>
                         )}
                         <Icon className="h-5 w-5" strokeWidth={2.5} aria-hidden />
-                        <span className="font-pixel">{e.label}</span>
+                        <span className="font-display">{e.label}</span>
                       </button>
                     );
                   })}
@@ -1278,18 +1308,18 @@ export default function Home() {
                       format={(v) => (v === 0 ? "none" : `${v}px`)}
                     />
                   </div>
-                  <label className="flex flex-col items-center gap-1 font-pixel text-xs uppercase tracking-wide text-foreground">
+                  <label className="flex flex-col items-center gap-1 font-display text-xs uppercase tracking-wide text-foreground">
                     Color
                     <input
                       type="color"
                       value={outlineColor}
                       onChange={(e) => setOutlineColor(e.target.value)}
-                      className="hud-sm h-9 w-12 cursor-pointer rounded-lg bg-transparent"
+                      className="card-sm h-9 w-12 cursor-pointer rounded-lg bg-transparent"
                     />
                   </label>
                 </div>
                 <label className="flex flex-col gap-1.5">
-                  <span className="font-pixel text-xs uppercase tracking-wide text-foreground">
+                  <span className="font-display text-xs uppercase tracking-wide text-foreground">
                     Caption (optional)
                   </span>
                   <input
@@ -1298,7 +1328,7 @@ export default function Home() {
                     maxLength={24}
                     placeholder="e.g. LOL"
                     onChange={(e) => setCaption(e.target.value)}
-                    className="hud-sm rounded-lg bg-panel px-3 py-2 font-semibold text-foreground outline-none focus-visible:ring-4 focus-visible:ring-sun"
+                    className="card-sm rounded-lg bg-panel px-3 py-2 font-semibold text-foreground outline-none focus-visible:ring-4 focus-visible:ring-sun"
                   />
                 </label>
                 <Toggle
@@ -1330,10 +1360,10 @@ export default function Home() {
                         // Do not clear depthGrid — presets are graphics-only, no re-inference needed.
                       }}
                       className={`flex flex-col items-start gap-0.5 rounded-lg border-2 px-2.5 py-2 text-left transition ${
-                        preset === p.id ? "border-ink bg-sky text-cloud" : "border-transparent bg-background text-foreground hover:border-ink/25"
+                        preset === p.id ? "border-ink bg-sky text-cloud" : "border-transparent bg-surface text-foreground hover:border-ink/25"
                       }`}
                     >
-                      <span className="font-pixel text-xs">{p.label}</span>
+                      <span className="font-display text-xs">{p.label}</span>
                       <span className={`text-[11px] leading-tight ${preset === p.id ? "text-cloud/80" : "text-muted"}`}>{p.hint}</span>
                     </button>
                   ))}
@@ -1394,14 +1424,14 @@ export default function Home() {
                   format={(v) => `${Math.round(v * 100)}%`}
                 />
                 <div className="flex flex-col gap-1.5">
-                  <span className="font-pixel text-xs uppercase tracking-wide text-foreground">Motion</span>
+                  <span className="font-display text-xs uppercase tracking-wide text-foreground">Motion</span>
                   <div className="flex flex-wrap gap-1.5">
                     {(["orbit", "mouse", "auto", "static"] as MotionMode[]).map((mm) => (
                       <button
                         key={mm}
                         onClick={() => setMotionMode(mm)}
-                        className={`flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 font-pixel text-xs transition ${
-                          motionMode === mm ? "border-ink bg-sky text-cloud" : "border-transparent bg-background text-foreground hover:border-ink/25"
+                        className={`flex items-center gap-1.5 rounded-lg border-2 px-3 py-1.5 font-display text-xs transition ${
+                          motionMode === mm ? "border-ink bg-sky text-cloud" : "border-transparent bg-surface text-foreground hover:border-ink/25"
                         }`}
                       >
                         {mm === "orbit" ? <Rotate3d className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden /> : mm === "mouse" ? <MousePointer2 className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden /> : mm === "auto" ? <Layers className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden /> : <Box className="h-3.5 w-3.5" strokeWidth={2.5} aria-hidden />}
@@ -1439,7 +1469,7 @@ export default function Home() {
             <button
               onClick={handleGenerate}
               disabled={!canGenerate}
-              className="btn-pixel rounded-xl bg-grass py-3.5 font-pixel text-lg uppercase tracking-wide text-ink disabled:cursor-not-allowed disabled:opacity-40"
+              className="btn rounded-xl bg-grass py-3.5 font-display text-lg uppercase tracking-wide text-ink disabled:cursor-not-allowed disabled:opacity-40"
             >
               {busy ? (
                 status || "Working…"
@@ -1456,7 +1486,7 @@ export default function Home() {
             </button>
 
             {busy && (
-              <div className="hud-sm h-3 w-full overflow-hidden rounded-full bg-background">
+              <div className="card-sm h-3 w-full overflow-hidden rounded-full bg-surface">
                 <div
                   className="h-full bg-gradient-to-r from-sky to-grass transition-all"
                   style={{
@@ -1468,7 +1498,7 @@ export default function Home() {
             )}
 
             {error && (
-              <p className="hud-sm rounded-xl bg-petal/15 px-4 py-3 text-sm font-bold text-petal">
+              <p className="card-sm rounded-xl bg-petal/15 px-4 py-3 text-sm font-bold text-petal">
                 {error}
               </p>
             )}
@@ -1476,7 +1506,7 @@ export default function Home() {
           </div>
 
         {mode === "3d" && threedGrid && threedImage && (
-          <div className="hud popin mt-8 flex flex-col gap-4 rounded-2xl bg-panel p-6">
+          <div className="card popin mt-8 flex flex-col gap-4 rounded-2xl bg-panel p-6">
             <ThreeDPreview
               ref={threedRef}
               image={threedImage}
@@ -1497,7 +1527,7 @@ export default function Home() {
               // bg-sun/20 with text-ink put dark text on a dark panel — legible
               // in the light theme, muddy in the dark one. A left-aligned list
               // on the page ground with a sun-coloured icon reads in both.
-              <ul className="hud-sm flex flex-col gap-2 rounded-xl bg-background px-4 py-3">
+              <ul className="card-sm flex flex-col gap-2 rounded-xl bg-surface px-4 py-3">
                 {threedNotes.map((note) => (
                   <li key={note} className="flex items-start gap-2 text-left text-xs leading-relaxed text-muted">
                     <AlertTriangle
@@ -1514,7 +1544,7 @@ export default function Home() {
               <button
                 onClick={exportThreeDGif}
                 disabled={busy}
-                className="btn-pixel flex items-center gap-2 rounded-xl bg-sky px-4 py-2 font-pixel text-sm text-cloud disabled:opacity-40"
+                className="btn flex items-center gap-2 rounded-xl bg-sky px-4 py-2 font-display text-sm text-cloud disabled:opacity-40"
               >
                 <Download className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                 GIF
@@ -1522,7 +1552,7 @@ export default function Home() {
               <button
                 onClick={exportThreeDPng}
                 disabled={busy}
-                className="btn-pixel flex items-center gap-2 rounded-xl bg-sky px-4 py-2 font-pixel text-sm text-cloud disabled:opacity-40"
+                className="btn flex items-center gap-2 rounded-xl bg-sky px-4 py-2 font-display text-sm text-cloud disabled:opacity-40"
               >
                 <Download className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                 PNG
@@ -1530,7 +1560,7 @@ export default function Home() {
               <button
                 onClick={exportThreeDWebm}
                 disabled={busy || !webmOk}
-                className="btn-pixel flex items-center gap-2 rounded-xl bg-sky px-4 py-2 font-pixel text-sm text-cloud disabled:opacity-40"
+                className="btn flex items-center gap-2 rounded-xl bg-sky px-4 py-2 font-display text-sm text-cloud disabled:opacity-40"
               >
                 <Download className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                 WebM
@@ -1538,7 +1568,7 @@ export default function Home() {
               <button
                 onClick={exportThreeDConfig}
                 disabled={busy}
-                className="btn-pixel flex items-center gap-2 rounded-xl bg-panel px-4 py-2 font-pixel text-sm text-ink ring-2 ring-ink disabled:opacity-40"
+                className="btn flex items-center gap-2 rounded-xl bg-panel px-4 py-2 font-display text-sm text-ink ring-2 ring-ink disabled:opacity-40"
               >
                 <Download className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                 Scene JSON
@@ -1547,15 +1577,15 @@ export default function Home() {
             <button
               onClick={handlePublish}
               disabled={busy}
-              className="btn-pixel flex w-full items-center justify-center gap-2 rounded-xl bg-grass py-3 font-pixel text-sm uppercase tracking-wide text-ink disabled:opacity-40"
+              className="btn flex w-full items-center justify-center gap-2 rounded-xl bg-grass py-3 font-display text-sm uppercase tracking-wide text-ink disabled:opacity-40"
             >
               <Link2 className="h-4 w-4" strokeWidth={2.5} aria-hidden />
               Publish
             </button>
 
             {published?.persistence === "local" && (
-              <div className="flex flex-col gap-2 rounded-xl bg-background p-4">
-                <p className="flex items-center gap-1.5 font-pixel text-xs uppercase tracking-wide text-sun">
+              <div className="flex flex-col gap-2 rounded-xl bg-surface p-4">
+                <p className="flex items-center gap-1.5 font-display text-xs uppercase tracking-wide text-sun">
                   <AlertTriangle className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
                   Not published
                 </p>
@@ -1570,29 +1600,29 @@ export default function Home() {
             )}
 
             {published?.persistence === "server" && (
-              <div className="flex flex-col gap-3 rounded-xl bg-background p-4">
-                <p className="flex items-center gap-1.5 font-pixel text-xs uppercase tracking-wide text-grass">
+              <div className="flex flex-col gap-3 rounded-xl bg-surface p-4">
+                <p className="flex items-center gap-1.5 font-display text-xs uppercase tracking-wide text-grass">
                   <Check className="h-3.5 w-3.5" strokeWidth={3} aria-hidden />
                   Published
                 </p>
                 <div className="flex items-center gap-2">
-                  <span className="shrink-0 font-pixel text-[10px] uppercase tracking-wide text-muted">Link</span>
+                  <span className="shrink-0 font-display text-[10px] uppercase tracking-wide text-muted">Link</span>
                   <input
                     readOnly
                     value={`${embedOrigin()}/s/${published.record.id}`}
                     onFocus={(e) => e.currentTarget.select()}
-                    className="hud-sm w-full min-w-0 rounded-lg bg-panel px-2.5 py-1.5 text-xs font-semibold text-foreground outline-none"
+                    className="card-sm w-full min-w-0 rounded-lg bg-panel px-2.5 py-1.5 text-xs font-semibold text-foreground outline-none"
                   />
                   <button
                     onClick={() => copyText(`${embedOrigin()}/s/${published.record.id}`, "url")}
-                    className="btn-pixel flex shrink-0 items-center gap-1 rounded-lg bg-sky px-2.5 py-1.5 font-pixel text-[10px] text-cloud"
+                    className="btn flex shrink-0 items-center gap-1 rounded-lg bg-sky px-2.5 py-1.5 font-display text-[10px] text-cloud"
                   >
                     {copied === "url" ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
                     {copied === "url" ? "Done" : "Copy"}
                   </button>
                 </div>
                 <div className="relative">
-                  <pre className="hud-sm overflow-x-auto rounded-lg bg-panel p-2.5 text-[11px] leading-relaxed text-foreground">
+                  <pre className="card-sm overflow-x-auto rounded-lg bg-panel p-2.5 text-[11px] leading-relaxed text-foreground">
                     <code>{`<iframe src="${embedOrigin()}/embed/${published.record.id}" style="width:100%;height:500px;border:0" loading="lazy"></iframe>`}</code>
                   </pre>
                   <button
@@ -1602,7 +1632,7 @@ export default function Home() {
                         "code",
                       )
                     }
-                    className="btn-pixel absolute right-2 top-2 flex items-center gap-1 rounded-lg bg-sky px-2 py-1 font-pixel text-[10px] text-cloud"
+                    className="btn absolute right-2 top-2 flex items-center gap-1 rounded-lg bg-sky px-2 py-1 font-display text-[10px] text-cloud"
                   >
                     {copied === "code" ? <Check className="h-3 w-3" /> : <Code className="h-3 w-3" />}
                     {copied === "code" ? "Done" : "Copy"}
@@ -1613,7 +1643,7 @@ export default function Home() {
                 </p>
               </div>
             )}
-            <p className="text-center font-pixel text-[11px] uppercase tracking-wide text-muted">
+            <p className="text-center font-display text-[11px] uppercase tracking-wide text-muted">
               {generationsLeft === null
                 ? "Rendered on your device. Your photo never leaves it."
                 : `${generationsLeft} free 3D generation${generationsLeft === 1 ? "" : "s"} left`}
@@ -1622,10 +1652,10 @@ export default function Home() {
         )}
 
         {result && (
-          <div className="hud popin mt-8 flex flex-col items-center gap-5 rounded-2xl bg-panel p-6">
+          <div className="card popin mt-8 flex flex-col items-center gap-5 rounded-2xl bg-panel p-6">
             <div
               className={`flex items-center justify-center rounded-xl p-4 ${
-                result.transparent ? "checkerboard" : "bg-background"
+                result.transparent ? "checkerboard" : "bg-surface"
               }`}
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -1654,7 +1684,7 @@ export default function Home() {
                             : "download",
                     )
                   }
-                  className="btn-pixel flex items-center gap-2 rounded-xl bg-sky px-5 py-2.5 font-pixel text-sm text-cloud"
+                  className="btn flex items-center gap-2 rounded-xl bg-sky px-5 py-2.5 font-display text-sm text-cloud"
                 >
                   <Download className="h-4 w-4" strokeWidth={2.5} aria-hidden />
                   {f.label}
@@ -1673,13 +1703,13 @@ export default function Home() {
           scene — and watched the "N free 3D generations left" counter — is at
           the moment where the price is a real question. Same <PlanCards /> the
           /pricing page renders, so the two can never disagree. */}
-      <section id="plans" className="scroll-mt-4 border-t-[3px] border-ink bg-panel">
+      <section id="plans" className="scroll-mt-24 border-t border-foreground/10 bg-panel">
         <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
           <div className="mx-auto mb-9 max-w-2xl text-center">
-            <p className="font-pixel text-xs uppercase tracking-[0.2em] text-sky-deep">
+            <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">
               Plans
             </p>
-            <h2 className="mt-2 font-pixel text-2xl text-foreground sm:text-3xl">
+            <h2 className="mt-2 font-editorial text-3xl text-foreground sm:text-4xl">
               Keep going for {PLAN_DISPLAY.pro.price}, once.
             </h2>
             <p className="mt-2 text-sm text-muted sm:text-base">
@@ -1692,7 +1722,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="mt-auto border-t-[3px] border-ink bg-panel py-5 text-center font-pixel text-xs uppercase tracking-wide text-muted">
+      <footer className="mt-auto border-t border-foreground/10 bg-panel py-5 text-center font-display text-xs uppercase tracking-wide text-muted">
         <p>Made in your browser · your photo is only uploaded when you publish</p>
         <nav className="mt-2 flex flex-wrap items-center justify-center gap-4">
           <Link href="/pricing" className="hover:text-foreground">
@@ -1737,7 +1767,7 @@ function Slider({
 }) {
   return (
     <label className="flex flex-col gap-1.5">
-      <span className="flex justify-between font-pixel text-xs uppercase tracking-wide text-foreground">
+      <span className="flex justify-between font-display text-xs uppercase tracking-wide text-foreground">
         {label}
         <span className="tabular-nums text-muted">{format(value)}</span>
       </span>
@@ -1776,18 +1806,18 @@ function Toggle({
       className="flex items-center justify-between gap-3 text-left disabled:cursor-not-allowed disabled:opacity-50"
     >
       <span className="flex flex-col">
-        <span className="font-pixel text-xs uppercase tracking-wide text-foreground">
+        <span className="font-display text-xs uppercase tracking-wide text-foreground">
           {label}
         </span>
         {hint && <span className="text-xs text-muted">{hint}</span>}
       </span>
       <span
-        className={`hud-sm relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-          checked ? "bg-sky" : "bg-background"
+        className={`card-sm relative h-6 w-11 shrink-0 rounded-full transition-colors ${
+          checked ? "bg-sky" : "bg-foreground/15"
         }`}
       >
         <span
-          className={`absolute top-0.5 h-4 w-4 rounded-full border-2 border-ink bg-cloud transition-all ${
+          className={`absolute top-0.5 h-4 w-4 rounded-full bg-cloud shadow-[0_1px_3px_rgba(14,36,56,0.35)] transition-all ${
             checked ? "left-[1.4rem]" : "left-0.5"
           }`}
         />

@@ -75,7 +75,7 @@ export function UpgradeDialog({
         role="dialog"
         aria-modal="true"
         aria-labelledby="upgrade-title"
-        className="hud popin relative w-full max-w-md rounded-2xl bg-panel p-6 sm:p-7"
+        className="card popin relative w-full max-w-md rounded-2xl bg-panel p-6 sm:p-7"
       >
         <button
           ref={closeBtn}
@@ -87,12 +87,12 @@ export function UpgradeDialog({
           <X className="h-5 w-5" strokeWidth={2.5} aria-hidden />
         </button>
 
-        <p className="font-pixel text-xs uppercase tracking-wide text-petal">
+        <p className="font-display text-xs uppercase tracking-wide text-petal">
           Out of free 3D
         </p>
         <h2
           id="upgrade-title"
-          className="mt-2 font-pixel text-2xl uppercase tracking-wide text-foreground"
+          className="mt-2 font-display text-2xl uppercase tracking-wide text-foreground"
         >
           That was your last one
         </h2>
@@ -103,7 +103,7 @@ export function UpgradeDialog({
         </p>
 
         <div className="mt-5 flex items-end gap-1">
-          {/* .num, not font-pixel: the pixel face renders "$29" as "$89". */}
+          {/* .num, not font-display: tabular, bold figures for the price. */}
           <span className="num text-4xl text-foreground">{PRO.price}</span>
           <span className="pb-1 text-sm font-semibold text-muted">
             {PRO.cadence}
@@ -127,7 +127,7 @@ export function UpgradeDialog({
         </ul>
 
         {err && (
-          <p className="hud-sm mt-4 rounded-lg bg-petal/15 px-3 py-2 text-sm font-bold text-petal">
+          <p className="card-sm mt-4 rounded-lg bg-petal/15 px-3 py-2 text-sm font-bold text-petal">
             {err}
           </p>
         )}
@@ -136,7 +136,7 @@ export function UpgradeDialog({
           type="button"
           onClick={upgrade}
           disabled={busy}
-          className="btn-pixel mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-sky py-3 font-pixel text-sm uppercase tracking-wide text-ink disabled:opacity-50"
+          className="btn mt-5 flex w-full items-center justify-center gap-2 rounded-xl bg-sky py-3 font-display text-sm uppercase tracking-wide text-ink disabled:opacity-50"
         >
           {busy ? "Starting…" : "Get lifetime access"}
           {!busy && (

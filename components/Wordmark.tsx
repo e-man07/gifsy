@@ -11,10 +11,21 @@ import logo from "@/public/gifsy-logo.png";
 // Smaller on phones: at text-2xl the lockup alone took roughly a third of a
 // 390px bar, which is what pushed the nav links into each other. `shrink-0`
 // keeps flex from squeezing the glyphs instead of the gaps.
-const CLS =
-  "flex shrink-0 items-center gap-1.5 font-pixel text-xl text-cloud drop-shadow-[2px_2px_0_var(--ink)] sm:gap-2 sm:text-2xl";
+//
+// Colour is a parameter rather than baked in: the landing nav is fixed and
+// crosses both the hero photo and the white panels below it, so it needs to
+// flip the lockup to ink mid-scroll. Every other header keeps the default.
+const BASE =
+  "flex shrink-0 items-center gap-1.5 font-display text-xl transition-colors sm:gap-2 sm:text-2xl";
 
-export function Wordmark({ href = "/" }: { href?: string }) {
+export function Wordmark({
+  href = "/",
+  className = "text-cloud",
+}: {
+  href?: string;
+  className?: string;
+}) {
+  const CLS = `${BASE} ${className}`;
   const inner = (
     <>
       <Image

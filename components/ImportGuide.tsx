@@ -23,13 +23,13 @@ export function ImportGuide({ png, webp }: ImportGuideProps) {
 
   return (
     <div className="flex w-full flex-col gap-3">
-      <p className="text-center font-pixel text-xs uppercase tracking-wide text-muted">
+      <p className="text-center font-display text-xs uppercase tracking-wide text-muted">
         Add it to a messaging app
       </p>
 
       {/* Telegram — fully works from the web */}
-      <details className="hud-sm group rounded-xl bg-background p-4">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-pixel text-sm text-foreground">
+      <details className="card-sm group rounded-xl bg-surface p-4">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-2 font-display text-sm text-foreground">
           <span className="flex items-center gap-2">
             <Send className="h-4 w-4" strokeWidth={2.5} aria-hidden /> Telegram
             <span className="rounded-full bg-grass/20 px-2 py-0.5 text-[11px] font-bold text-grass-deep">
@@ -50,7 +50,7 @@ export function ImportGuide({ png, webp }: ImportGuideProps) {
           </p>
           <button
             onClick={openStickersBot}
-            className="btn-pixel flex items-center gap-2 self-start rounded-lg bg-sky px-4 py-2 font-pixel text-sm text-cloud"
+            className="btn flex items-center gap-2 self-start rounded-lg bg-sky px-4 py-2 font-display text-sm text-cloud"
           >
             <Download className="h-4 w-4" strokeWidth={2.5} aria-hidden />
             Download + open @Stickers
@@ -90,7 +90,7 @@ export function ImportGuide({ png, webp }: ImportGuideProps) {
               />
             </li>
           </ol>
-          <div className="flex items-start gap-2 rounded-lg border-2 border-ink/15 bg-sun/15 p-3 text-xs text-foreground">
+          <div className="flex items-start gap-2 rounded-lg border border-ink/15 bg-sun/15 p-3 text-xs text-foreground">
             <Info
               className="mt-0.5 h-4 w-4 shrink-0 text-ink"
               strokeWidth={2.5}

@@ -170,7 +170,7 @@ function LiveScene({
           </div>
         )}
 
-        <span className="pointer-events-none absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-ink/80 px-1.5 py-0.5 font-pixel text-[9px] uppercase tracking-wide text-cloud sm:px-2 sm:py-1 sm:text-[10px]">
+        <span className="pointer-events-none absolute bottom-2 right-2 flex items-center gap-1 rounded-full bg-ink/80 px-1.5 py-0.5 font-display text-[9px] uppercase tracking-wide text-cloud sm:px-2 sm:py-1 sm:text-[10px]">
           <Hand className="h-3 w-3" strokeWidth={2.5} aria-hidden />
           Drag me
         </span>
@@ -178,8 +178,8 @@ function LiveScene({
 
       {/* Stacked on phones — side by side, these two collide in a ~180px card. */}
       <figcaption className="mt-2 flex flex-col gap-0.5 sm:mt-3 sm:flex-row sm:items-baseline sm:justify-between sm:gap-2">
-        <span className="font-pixel text-xs text-foreground sm:text-sm">{scene.title}</span>
-        <span className="font-pixel text-[9px] uppercase tracking-wide text-muted sm:text-[10px]">
+        <span className="font-display text-xs text-foreground sm:text-sm">{scene.title}</span>
+        <span className="font-display text-[9px] uppercase tracking-wide text-muted sm:text-[10px]">
           {scene.blurb}
         </span>
       </figcaption>

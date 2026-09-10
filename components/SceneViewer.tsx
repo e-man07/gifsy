@@ -383,7 +383,7 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
           target="_blank"
           rel="noreferrer"
           onClick={() => track("brand_clicked", { surface: surface ?? "scene" })}
-          className="absolute bottom-2 right-2 rounded bg-ink/60 px-2 py-0.5 font-pixel text-[10px] text-cloud/90 hover:text-sun"
+          className="absolute bottom-2 right-2 rounded bg-ink/60 px-2 py-0.5 font-display text-[10px] text-cloud/90 hover:text-sun"
         >
           Made with Gifsy
         </a>

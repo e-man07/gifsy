@@ -60,7 +60,7 @@ export function PlanCards({
   return (
     <>
       {err && (
-        <div className="hud-sm mx-auto mb-6 max-w-xl rounded-lg bg-petal px-4 py-3 text-center text-sm font-semibold text-cloud">
+        <div className="card-sm mx-auto mb-6 max-w-xl rounded-lg bg-petal px-4 py-3 text-center text-sm font-semibold text-cloud">
           {err}
         </div>
       )}
@@ -69,21 +69,21 @@ export function PlanCards({
         {TIERS.map((tier) => (
           <div
             key={tier.id}
-            className={`hud relative flex flex-col rounded-2xl bg-panel p-6 sm:p-7 ${
+            className={`card relative flex flex-col rounded-2xl bg-panel p-6 sm:p-7 ${
               tier.featured ? "md:-translate-y-2" : ""
             }`}
           >
             {tier.featured && (
-              <span className="hud-sm absolute -top-3 left-6 rounded-full bg-sky px-3 py-1 font-pixel text-[10px] uppercase tracking-wide text-cloud">
+              <span className="card-sm absolute -top-3 left-6 rounded-full bg-sky px-3 py-1 font-display text-[10px] uppercase tracking-wide text-cloud">
                 Most popular
               </span>
             )}
 
-            <h3 className="font-pixel text-xl uppercase tracking-wide text-foreground">
+            <h3 className="font-display text-xl uppercase tracking-wide text-foreground">
               {tier.name}
             </h3>
             <div className="mt-3 flex items-end gap-1">
-              {/* .num, not font-pixel: the pixel face renders "$29" as "$89". */}
+              {/* .num, not font-display: tabular, bold figures for the price. */}
               <span className="num text-4xl text-foreground">{tier.price}</span>
               <span className="pb-1 text-sm font-semibold text-muted">{tier.cadence}</span>
             </div>
@@ -106,14 +106,14 @@ export function PlanCards({
               {tier.id === "free" ? (
                 <Link
                   href={freeHref}
-                  className="btn-pixel flex w-full items-center justify-center gap-2 rounded-xl bg-grass py-3 font-pixel text-sm uppercase tracking-wide text-ink"
+                  className="btn flex w-full items-center justify-center gap-2 rounded-xl bg-grass py-3 font-display text-sm uppercase tracking-wide text-ink"
                 >
                   Start free
                 </Link>
               ) : signedIn === false ? (
                 <Link
                   href={`/login?next=${encodeURIComponent(next)}`}
-                  className={`btn-pixel flex w-full items-center justify-center gap-2 rounded-xl ${tier.accent} py-3 font-pixel text-sm uppercase tracking-wide text-ink`}
+                  className={`btn flex w-full items-center justify-center gap-2 rounded-xl ${tier.accent} py-3 font-display text-sm uppercase tracking-wide text-ink`}
                 >
                   Sign in to upgrade
                 </Link>
@@ -122,7 +122,7 @@ export function PlanCards({
                   type="button"
                   disabled={signedIn === null || busy !== null}
                   onClick={() => upgrade(tier.id as PaidPlanId)}
-                  className={`btn-pixel flex w-full items-center justify-center gap-2 rounded-xl ${tier.accent} py-3 font-pixel text-sm uppercase tracking-wide text-ink disabled:opacity-50`}
+                  className={`btn flex w-full items-center justify-center gap-2 rounded-xl ${tier.accent} py-3 font-display text-sm uppercase tracking-wide text-ink disabled:opacity-50`}
                 >
                   {busy === tier.id ? "Starting…" : "Get lifetime access"}
                   {busy !== tier.id && (

@@ -11,8 +11,22 @@ import {
 } from "@/lib/gallery";
 
 // A card's box is reserved up front from the known clip aspect ratio, so the
-// masonry never reflows as the .webm files stream in behind their posters.
+// grid never reflows as the .webm files stream in behind their posters.
 const ASPECT = `${GALLERY_W} / ${GALLERY_H}`;
+
+// Masonry wants cards of differing heights, but every clip is authored at the
+// same 578×420 — so the variety has to come from the crop, not the source.
+// Cycling three ratios by index gives a stagger that repeats predictably
+// (reads as designed rather than random) while object-cover keeps each
+// subject centred in whatever box it lands in.
+const MASONRY_ASPECTS = ["4 / 3", "1 / 1", "4 / 5"] as const;
+const aspectFor = (i: number) => MASONRY_ASPECTS[i % MASONRY_ASPECTS.length];
+
+// Multi-column is what actually staggers the cards: each flows under the one
+// above it in its column rather than onto a shared row baseline.
+// `break-inside-avoid` stops a card being split across a column boundary.
+const MASONRY = "gap-5 [column-fill:_balance] sm:columns-2 lg:columns-3";
+const MASONRY_ITEM = "mb-5 break-inside-avoid";
 
 function setSrc(v: HTMLVideoElement) {
   if (!v.src && v.dataset.src) v.src = v.dataset.src;
@@ -97,30 +111,32 @@ export function GalleryGrid() {
           <header className="mb-5 flex items-end justify-between gap-4">
             <div>
               <h2
-                className="font-pixel text-2xl text-ink sm:text-3xl"
+                className="font-display text-2xl text-ink sm:text-3xl"
                 style={{ filter: `drop-shadow(3px 3px 0 var(--${cat.accent}))` }}
               >
                 {cat.label}
               </h2>
               <p className="mt-1 text-sm font-semibold text-muted">{cat.blurb}</p>
             </div>
-            <span className="hidden shrink-0 font-pixel text-xs uppercase tracking-wide text-muted sm:block">
+            <span className="hidden shrink-0 font-display text-xs uppercase tracking-wide text-muted sm:block">
               {cat.items.length} {cat.items.length === 1 ? "scene" : "scenes"}
             </span>
           </header>
 
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {cat.items.map((it) => (
-              <Card
-                key={it.id}
-                id={it.id}
-                title={it.title}
-                accent={cat.accent}
-                playing={playing.has(it.id)}
-                onToggle={toggle}
-                onPlay={() => mark(it.id, true)}
-                onPause={() => mark(it.id, false)}
-              />
+          <div className={MASONRY}>
+            {cat.items.map((it, i) => (
+              <div key={it.id} className={MASONRY_ITEM}>
+                <Card
+                  id={it.id}
+                  title={it.title}
+                  accent={cat.accent}
+                  aspect={aspectFor(i)}
+                  playing={playing.has(it.id)}
+                  onToggle={toggle}
+                  onPlay={() => mark(it.id, true)}
+                  onPause={() => mark(it.id, false)}
+                />
+              </div>
             ))}
           </div>
         </section>
@@ -137,11 +153,12 @@ export function GalleryGrid() {
 export function GalleryStrip() {
   const { rootRef, playing, toggle, mark } = useGalleryPlayback();
 
-  const card = (id: string, title: string, accent: Accent) => (
+  const card = (id: string, title: string, accent: Accent, aspect?: string) => (
     <Card
       id={id}
       title={title}
       accent={accent}
+      aspect={aspect}
       playing={playing.has(id)}
       onToggle={toggle}
       onPlay={() => mark(id, true)}
@@ -181,11 +198,13 @@ export function GalleryStrip() {
         </div>
       </div>
 
-      {/* Tablet and up: the original grid — there is room for it, and a moving
-          strip is a worse way to browse when six cards already fit. */}
-      <div className="hidden gap-5 sm:grid sm:grid-cols-2 lg:grid-cols-3">
-        {FEATURED.map((it) => (
-          <div key={it.id}>{card(it.id, it.title, it.accent)}</div>
+      {/* Tablet and up: a masonry of the same six — there is room for it, and a
+          moving strip is a worse way to browse when six cards already fit. */}
+      <div className={`hidden sm:block ${MASONRY}`}>
+        {FEATURED.map((it, i) => (
+          <div key={it.id} className={MASONRY_ITEM}>
+            {card(it.id, it.title, it.accent, aspectFor(i))}
+          </div>
         ))}
       </div>
     </div>
@@ -196,6 +215,7 @@ function Card({
   id,
   title,
   accent,
+  aspect = ASPECT,
   playing,
   onToggle,
   onPlay,
@@ -204,19 +224,22 @@ function Card({
   id: string;
   title: string;
   accent: Accent;
+  /** Crop for this card's box. Defaults to the clip's own ratio; the masonry
+   *  layouts pass a cycled one to vary card heights. */
+  aspect?: string;
   playing: boolean;
   onToggle: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onPlay: () => void;
   onPause: () => void;
 }) {
   return (
-    <figure className="hud group flex flex-col overflow-hidden rounded-xl bg-cloud transition-transform hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none">
+    <figure className="card group flex flex-col overflow-hidden rounded-xl bg-cloud transition-transform hover:-translate-y-0.5 motion-reduce:transform-none motion-reduce:transition-none">
       <button
         type="button"
         onClick={onToggle}
         aria-label={`${playing ? "Pause" : "Play"} ${title} — 3D preview`}
-        className="relative block w-full border-b-[3px] border-ink bg-ink"
-        style={{ aspectRatio: ASPECT }}
+        className="relative block w-full border-b border-foreground/10 bg-ink"
+        style={{ aspectRatio: aspect }}
       >
         <video
           data-src={`/gallery/${id}.webm`}
@@ -232,7 +255,7 @@ function Card({
 
         {/* corner badge: signals these are 3D scenes */}
         <span
-          className="absolute left-2 top-2 flex items-center gap-1 border-2 border-ink px-1.5 py-0.5 font-pixel text-[10px] uppercase leading-none text-ink"
+          className="absolute left-2 top-2 flex items-center gap-1 rounded px-1.5 py-0.5 font-display text-[10px] uppercase leading-none text-ink shadow-[0_1px_4px_rgba(14,36,56,0.25)]"
           style={{ backgroundColor: `var(--${accent})` }}
         >
           <Box className="h-3 w-3" strokeWidth={2.5} aria-hidden />
@@ -246,7 +269,7 @@ function Card({
             playing ? "opacity-0" : "opacity-100"
           }`}
         >
-          <span className="hud-sm flex h-12 w-12 items-center justify-center rounded-full bg-cloud/95 text-ink">
+          <span className="card-sm flex h-12 w-12 items-center justify-center rounded-full bg-cloud/95 text-ink">
             {playing ? (
               <Pause className="h-5 w-5 fill-ink" strokeWidth={2} aria-hidden />
             ) : (
@@ -256,7 +279,7 @@ function Card({
         </span>
       </button>
 
-      <figcaption className="px-3 py-2 font-pixel text-sm text-ink">{title}</figcaption>
+      <figcaption className="px-3 py-2 font-display text-sm text-ink">{title}</figcaption>
     </figure>
   );
 }
