@@ -10,4 +10,4 @@
 // reload) — everyone sees the same countdown, and it ends for good the
 // moment this timestamp passes.
 export const OFFER_PRICE = "$5";
-export const OFFER_ENDS_AT = "2026-09-12T12:02:24.000Z";
+export const OFFER_ENDS_AT = "2026-09-12T13:50:00.000Z";
