@@ -14,18 +14,20 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Flame } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { startCheckout } from "@/lib/billing/checkout";
 import { PLAN_DISPLAY, PLAN_ORDER, type PaidPlanId } from "@/lib/billing/plans";
+import { OFFER_ENDS_AT, OFFER_PRICE } from "@/lib/billing/offer";
+import { useCountdown } from "@/lib/use-countdown";
 
 const TIERS = PLAN_ORDER.map((id) => PLAN_DISPLAY[id]);
 
 export function PlanCards({
   /** Where to send a signed-out visitor after they sign in. */
   next = "/pricing",
-  /** The Free card's CTA target — an in-page anchor on the landing page. */
-  freeHref = "/#make",
+  /** The Free card's CTA target — the landing page, where every mode starts. */
+  freeHref = "/",
   /** Hide the USD/merchant-of-record line when the surrounding page already
    *  carries it. */
   showFinePrint = true,
@@ -37,6 +39,7 @@ export function PlanCards({
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [busy, setBusy] = useState<PaidPlanId | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const offer = useCountdown(OFFER_ENDS_AT);
 
   useEffect(() => {
     const supabase = createClient();
@@ -73,20 +76,41 @@ export function PlanCards({
               tier.featured ? "md:-translate-y-2" : ""
             }`}
           >
-            {tier.featured && (
-              <span className="card-sm absolute -top-3 left-6 rounded-full bg-sky px-3 py-1 font-display text-[10px] uppercase tracking-wide text-cloud">
-                Most popular
+            {tier.id === "pro" && offer.active ? (
+              <span className="card-sm absolute -top-3 left-6 flex items-center gap-1 rounded-full bg-sun px-3 py-1 font-display text-[10px] uppercase tracking-wide text-ink">
+                <Flame className="h-3 w-3" strokeWidth={3} aria-hidden />
+                Launch offer
               </span>
+            ) : (
+              tier.featured && (
+                <span className="card-sm absolute -top-3 left-6 rounded-full bg-sky px-3 py-1 font-display text-[10px] uppercase tracking-wide text-cloud">
+                  Most popular
+                </span>
+              )
             )}
 
             <h3 className="font-display text-xl uppercase tracking-wide text-foreground">
               {tier.name}
             </h3>
-            <div className="mt-3 flex items-end gap-1">
-              {/* .num, not font-display: tabular, bold figures for the price. */}
-              <span className="num text-4xl text-foreground">{tier.price}</span>
-              <span className="pb-1 text-sm font-semibold text-muted">{tier.cadence}</span>
-            </div>
+            {tier.id === "pro" && offer.active ? (
+              <>
+                <div className="mt-3 flex items-end gap-2">
+                  {/* .num, not font-display: tabular, bold figures for the price. */}
+                  <span className="num text-4xl text-foreground">{OFFER_PRICE}</span>
+                  <span className="num pb-1 text-lg text-muted line-through">{tier.price}</span>
+                  <span className="pb-1 text-sm font-semibold text-muted">{tier.cadence}</span>
+                </div>
+                <p className="num mt-1.5 text-xs font-semibold uppercase tracking-wide text-petal">
+                  Ends in {offer.label}
+                </p>
+              </>
+            ) : (
+              <div className="mt-3 flex items-end gap-1">
+                {/* .num, not font-display: tabular, bold figures for the price. */}
+                <span className="num text-4xl text-foreground">{tier.price}</span>
+                <span className="pb-1 text-sm font-semibold text-muted">{tier.cadence}</span>
+              </div>
+            )}
             <p className="mt-3 text-sm text-muted">{tier.tagline}</p>
 
             <ul className="mt-5 flex flex-1 flex-col gap-2.5">

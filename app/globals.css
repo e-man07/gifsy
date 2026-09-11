@@ -261,9 +261,59 @@ body {
   animation: popin 0.55s ease-out both;
 }
 
+/* Offer banner flare: a light sweeping across the bar, a flickering flame,
+   and a soft pulse ring on the CTA — enough movement to read as "live/
+   urgent" without being as busy as the marquee or cinema effects. */
+@keyframes offer-shimmer {
+  0% {
+    background-position: -150% 0;
+  }
+  100% {
+    background-position: 250% 0;
+  }
+}
+.offer-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: offer-shimmer 3s ease-in-out infinite;
+}
+@keyframes offer-flame {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.18) rotate(-8deg);
+  }
+}
+.offer-flame {
+  animation: offer-flame 1.4s ease-in-out infinite;
+  transform-origin: 50% 60%;
+}
+@keyframes offer-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(4, 16, 29, 0.28);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(4, 16, 29, 0);
+  }
+}
+.offer-pulse {
+  animation: offer-pulse 2s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .floaty,
-  .popin {
+  .popin,
+  .offer-shimmer,
+  .offer-flame,
+  .offer-pulse {
     animation: none;
   }
   .btn {
