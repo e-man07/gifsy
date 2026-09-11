@@ -157,6 +157,8 @@ export function GalleryGrid() {
  * so the two sections read as one visual language. Shares the playback hook
  * with the full gallery, so autoplay/lazy-load behaviour can't drift.
  */
+const STRIP_PLAYBACK_RATE = 1.6;
+
 const SHOWCASE_ROWS = [
   SHOWCASE.filter((_, i) => i % 2 === 0),
   SHOWCASE.filter((_, i) => i % 2 === 1),
@@ -193,7 +195,7 @@ export function GalleryStrip() {
         <div
           key={r}
           className="marquee overflow-hidden motion-reduce:overflow-x-auto"
-          style={{ "--marquee-duration": r === 0 ? "170s" : "150s" } as CSSProperties}
+          style={{ "--marquee-duration": r === 0 ? "80s" : "70s" } as CSSProperties}
         >
           <div className={`marquee-track flex w-max${r === 0 ? " marquee-track-reverse" : ""}`}>
             {half(items, false)}
@@ -237,6 +239,11 @@ function ScreenCard({
       className="relative block h-[320px] w-[240px] shrink-0 overflow-hidden rounded-xl bg-black text-left shadow-[0_20px_45px_rgba(14,36,56,0.25)] ring-1 ring-inset ring-white/10 sm:h-[380px] sm:w-[300px]"
     >
       <video
+        // The recorded orbit is a slow sweep; at 1x in a small card it barely
+        // reads as moving. The rate survives load, so once on mount is enough.
+        ref={(v) => {
+          if (v) v.playbackRate = STRIP_PLAYBACK_RATE;
+        }}
         data-src={`/gallery/${id}.webm`}
         poster={`/gallery/${id}.jpg`}
         muted
