@@ -9,7 +9,7 @@
 // Usage (dev server running on :3000, ffmpeg on PATH):
 //   npm i --no-save playwright-core
 //   node scripts/capture-showcase.mjs ae14f65c7f 0f0fbe28ea ...
-//   SIZE=600x800 node scripts/capture-showcase.mjs edb9be6b58 ...   (persona cards, 3:4)
+//   SIZE=600x800 node scripts/capture-showcase.mjs <id>              (other card shapes)
 //
 // Headless is deliberate: a real tab that is not the focused, unoccluded
 // window stops running requestAnimationFrame, so the viewer never paints and
