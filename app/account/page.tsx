@@ -15,7 +15,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { createClient } from "@/lib/supabase/server";
 import { FREE_GENERATION_LIMIT, PLAN_DISPLAY, type PlanId } from "@/lib/billing/plans";
 
-export const metadata = { title: "Account" };
+export const metadata = { title: "Account", robots: { index: false, follow: false } };
 
 /** A plan value read from the database, narrowed to a PlanId we can render. */
 function toPlanId(v: unknown): PlanId {

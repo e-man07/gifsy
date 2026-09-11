@@ -6,7 +6,7 @@ import { redirect } from "next/navigation";
 import { SiteNav } from "@/components/SiteNav";
 import { createClient } from "@/lib/supabase/server";
 
-export const metadata = { title: "My scenes" };
+export const metadata = { title: "My scenes", robots: { index: false, follow: false } };
 
 interface SceneRow {
   id: string;
