@@ -53,6 +53,16 @@ const linkClsFor = (tone: NavTone) =>
     ? "font-display text-sm text-ink transition-colors hover:text-sky-deep"
     : "font-display text-sm text-cloud transition-colors hover:text-sun";
 
+/** "Sign in" as the bar's primary button. It inverts with the tone: a white
+ *  button vanishes into the landing nav's frosted white pill once scrolled,
+ *  so it goes solid sky there. */
+const signInBtnClsFor = (tone: NavTone) =>
+  `order-1 rounded-full px-4 py-2 font-display text-sm font-semibold shadow-sm transition ${
+    tone === "dark"
+      ? "bg-sky text-white hover:bg-sky-deep"
+      : "bg-white text-sky-deep hover:bg-white/90"
+  }`;
+
 /** One row in either dropdown. */
 const itemCls =
   "block w-full px-3 py-2.5 text-left font-display text-sm text-foreground hover:bg-sky hover:text-cloud";
@@ -69,9 +79,15 @@ interface Account {
 export function AccountMenu({
   links = [],
   tone = "light",
+  signIn = "link",
 }: {
   links?: NavLink[];
   tone?: NavTone;
+  /** How the signed-out "Sign in" renders: a plain nav link beside Pricing
+   *  (SiteNav, which has its own CTA), or the bar's button — the landing nav
+   *  has no other CTA, so it takes the button slot and stays visible on
+   *  phones too. */
+  signIn?: "link" | "button";
 }) {
   const linkCls = linkClsFor(tone);
   // undefined = still loading; null = signed out.
@@ -150,10 +166,17 @@ export function AccountMenu({
           <Link href="/pricing" className={linkCls}>
             Pricing
           </Link>
-          <Link href="/login" className={linkCls}>
-            Sign in
-          </Link>
+          {signIn === "link" && (
+            <Link href="/login" className={linkCls}>
+              Sign in
+            </Link>
+          )}
         </div>
+      )}
+      {account === null && signIn === "button" && (
+        <Link href="/login" className={signInBtnClsFor(tone)}>
+          Sign in
+        </Link>
       )}
 
       {/* ── Desktop, signed in ── */}

@@ -160,23 +160,14 @@ export default function Home() {
               >
                 How it works
               </a>
-              {/* The CTA inverts too: a white button vanishes into the frosted
-                  white pill once scrolled, so it goes solid sky there. */}
-              <button
-                onClick={scrollToUploader}
-                className={`order-1 flex items-center gap-1.5 rounded-full px-4 py-2 font-display text-sm font-semibold shadow-sm transition ${
-                  scrolled
-                    ? "bg-sky text-white hover:bg-sky-deep"
-                    : "bg-white text-sky-deep hover:bg-white/90"
-                }`}
-              >
-                Start
-                <ArrowDown className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-              </button>
-              {/* Same two links as above, for the phone hamburger — the inline
-                  copies are hidden below sm. */}
+              {/* Sign in is the bar's one button (there is no "Start" — the
+                  uploader is already the hero, right under this). Signed in,
+                  the same slot holds the avatar. Same two links as above go
+                  in for the phone hamburger — the inline copies are hidden
+                  below sm. */}
               <AccountMenu
                 tone={scrolled ? "dark" : "light"}
+                signIn="button"
                 links={[
                   { href: "/gallery", label: "Gallery" },
                   { href: "#how", label: "How it works" },
