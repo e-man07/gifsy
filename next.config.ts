@@ -15,6 +15,11 @@ const ORT_RUNTIME_FILES = [
 ];
 
 const nextConfig: NextConfig = {
+  // Next 16 refuses dev-resource requests (chunks, HMR, fonts) from any origin
+  // other than localhost, so opening the dev server via the LAN IP renders the
+  // server HTML but never hydrates. Allow private-network hosts so the site
+  // can be checked from a phone or another machine on the same network.
+  allowedDevOrigins: ["192.168.*.*", "10.*.*.*", "172.16.*.*"],
   // onnxruntime-web ships its own WASM assets and expects to load them at
   // runtime — keep it external so the server bundler doesn't try to inline it.
   serverExternalPackages: ["onnxruntime-web"],

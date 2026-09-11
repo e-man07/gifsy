@@ -3,11 +3,12 @@
 import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { Box, Pause, Play } from "lucide-react";
 import {
-  FEATURED,
   GALLERY,
   GALLERY_H,
   GALLERY_W,
+  SHOWCASE,
   type Accent,
+  type FeaturedItem,
 } from "@/lib/gallery";
 
 // A card's box is reserved up front from the known clip aspect ratio, so the
@@ -151,73 +152,144 @@ export function GalleryGrid() {
 }
 
 /**
- * Compact, flat version for the landing page: six curated clips, no category
- * headers. Shares Card and the playback hook with the full gallery, so the
- * two can't drift in look or behaviour.
+ * Landing-page version: every curated clip, streaming past in two rows that
+ * move opposite ways — the same "screening room" strip as CommunityShowcase,
+ * so the two sections read as one visual language. Shares the playback hook
+ * with the full gallery, so autoplay/lazy-load behaviour can't drift.
  */
+const SHOWCASE_ROWS = [
+  SHOWCASE.filter((_, i) => i % 2 === 0),
+  SHOWCASE.filter((_, i) => i % 2 === 1),
+];
+
 export function GalleryStrip() {
   const { rootRef, playing, toggle, mark } = useGalleryPlayback();
 
-  const card = (id: string, title: string, accent: Accent, aspect?: string) => (
-    <Card
-      id={id}
-      title={title}
-      accent={accent}
-      aspect={aspect}
-      playing={playing.has(id)}
-      onToggle={toggle}
-      onPlay={() => mark(id, true)}
-      onPause={() => mark(id, false)}
-    />
-  );
-
-  // One half of the marquee. The list is rendered twice and the CSS translates
-  // the track by -50%, so the copy arrives exactly where the first began and
-  // the strip never visibly restarts.
-  const half = (clone: boolean) => (
+  // One half of a row's track. The list is rendered twice and the CSS
+  // translates the track by -50%, so the copy arrives exactly where the first
+  // began and the strip never visibly restarts.
+  const half = (items: FeaturedItem[], clone: boolean) => (
     <div className="flex gap-5 pr-5" aria-hidden={clone || undefined}>
-      {FEATURED.map((it) => (
-        <div key={`${clone ? "clone-" : ""}${it.id}`} className="w-[260px] shrink-0">
-          {card(it.id, it.title, it.accent)}
-        </div>
+      {items.map((it) => (
+        <ScreenCard
+          key={`${clone ? "clone-" : ""}${it.id}`}
+          id={it.id}
+          title={it.title}
+          playing={playing.has(it.id)}
+          onToggle={toggle}
+          onPlay={() => mark(it.id, true)}
+          onPause={() => mark(it.id, false)}
+        />
       ))}
     </div>
   );
 
-  // Both layouts live in the DOM and CSS picks one. The extra <video> elements
-  // in the hidden layout cost nothing: they are display:none, so they never
-  // intersect the viewport, and the playback hook only ever loads (preload=none
-  // + data-src) and plays what is actually on screen.
+  // The clones are inside rootRef too, so the playback hook loads and plays
+  // whichever copy is actually on screen — the video elements in the copy
+  // that's off-screen never fetch anything (preload=none + data-src).
   return (
-    <div ref={rootRef}>
-      {/* Phones: a single continuously scrolling row. Stacking six of these
-          full-width turned the section into six screens of scrolling.
-          motion-reduce stops the animation (globals.css) and turns this into an
-          ordinary swipeable scroller so the clips stay reachable. */}
-      <div className="marquee overflow-hidden motion-reduce:overflow-x-auto sm:hidden">
-        <div className="marquee-track flex w-max">
-          {half(false)}
-          {/* Hidden under reduced motion: with no animation the copy is just
-              duplicate cards in a scroller. */}
-          <div className="flex motion-reduce:hidden">{half(true)}</div>
-        </div>
-      </div>
-
-      {/* Tablet and up: a masonry of the same six — there is room for it, and a
-          moving strip is a worse way to browse when six cards already fit. */}
-      <div className={`hidden sm:block ${MASONRY}`}>
-        {FEATURED.map((it, i) => (
-          <div
-            key={it.id}
-            className={MASONRY_ITEM}
-            data-reveal
-            style={{ "--reveal-delay": `${(i % 3) * 90}ms` } as CSSProperties}
-          >
-            {card(it.id, it.title, it.accent, aspectFor(i))}
+    <div ref={rootRef} className="space-y-5">
+      {SHOWCASE_ROWS.map((items, r) => (
+        <div
+          key={r}
+          className="marquee overflow-hidden motion-reduce:overflow-x-auto"
+          style={{ "--marquee-duration": r === 0 ? "170s" : "150s" } as CSSProperties}
+        >
+          <div className={`marquee-track flex w-max${r === 0 ? " marquee-track-reverse" : ""}`}>
+            {half(items, false)}
+            {/* Hidden under reduced motion: with no animation the copy is just
+                duplicate cards in a scroller. */}
+            <div className="flex motion-reduce:hidden">{half(items, true)}</div>
           </div>
-        ))}
-      </div>
+        </div>
+      ))}
     </div>
+  );
+}
+
+/**
+ * A clip in the CommunityShowcase's "screening room" box: a dark elevated
+ * stage with a vignette, a letterbox bar, corner marks and a caption sitting
+ * on the bar. The bar is drawn over the video regardless of what it's
+ * showing, so the caption always has a guaranteed-dark strip under it even
+ * before the poster paints.
+ */
+function ScreenCard({
+  id,
+  title,
+  playing,
+  onToggle,
+  onPlay,
+  onPause,
+}: {
+  id: string;
+  title: string;
+  playing: boolean;
+  onToggle: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  onPlay: () => void;
+  onPause: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      aria-label={`${playing ? "Pause" : "Play"} ${title} — 3D preview`}
+      className="relative block h-[320px] w-[240px] shrink-0 overflow-hidden rounded-xl bg-black text-left shadow-[0_20px_45px_rgba(14,36,56,0.25)] ring-1 ring-inset ring-white/10 sm:h-[380px] sm:w-[300px]"
+    >
+      <video
+        data-src={`/gallery/${id}.webm`}
+        poster={`/gallery/${id}.jpg`}
+        muted
+        loop
+        playsInline
+        preload="none"
+        onPlay={onPlay}
+        onPause={onPause}
+        className="absolute inset-0 h-full w-full object-cover"
+      />
+
+      {/* Vignette: darkens the corners so the frame reads as a stage the
+          subject sits inside, not a flat rectangle. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,transparent_55%,rgba(0,0,0,0.45)_100%)]"
+      />
+
+      {/* Letterbox bar — see comment above for why this is load-bearing. */}
+      <span
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-10 bg-gradient-to-t from-black/90 to-transparent"
+      />
+
+      <span
+        aria-hidden
+        className="pointer-events-none absolute left-2 top-2 h-4 w-4 border-l-2 border-t-2 border-white/50"
+      />
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-2 right-2 h-4 w-4 border-b-2 border-r-2 border-white/50"
+      />
+
+      {/* play affordance — only while the clip is stopped (reduced motion, or
+          a click paused it), so a running card is nothing but the scene */}
+      <span
+        aria-hidden
+        className={`pointer-events-none absolute inset-0 flex items-center justify-center transition-opacity ${
+          playing ? "opacity-0" : "opacity-100"
+        }`}
+      >
+        <span className="flex h-11 w-11 items-center justify-center rounded-full bg-black/40 text-white ring-1 ring-white/50 backdrop-blur-sm">
+          <Play className="ml-0.5 h-4 w-4 fill-white" strokeWidth={2} aria-hidden />
+        </span>
+      </span>
+
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 whitespace-nowrap font-display text-[8px] uppercase tracking-[0.25em] text-white/80 sm:text-[9px]"
+      >
+        {title}
+      </span>
+    </button>
   );
 }
 

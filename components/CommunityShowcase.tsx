@@ -1,13 +1,25 @@
 "use client";
 
-import { useEffect, useState } from "react";
-
-// Live embeds of scenes people actually published, streaming past in two
+// Recordings of scenes people actually published, streaming past in two
 // rows moving opposite directions — proof the product works on more than our
-// own curated shots. Each row holds the same five embeds repeated (there
+// own curated shots. Each row holds the same five clips repeated (there
 // aren't more yet) at a different offset so the two rows don't mirror each
 // other, then doubled so the CSS -50% translate loops seamlessly.
-const EMBED_IDS = [
+//
+// These are pre-rendered clips, not live <iframe> embeds of gifsy.fun. The
+// live version mounted ~32 WebGL viewers on page load, each fetching its
+// assets from Blob storage — a burst Vercel's firewall reads as an attack,
+// so it served a challenge page instead of the image and roughly half the
+// cards came up as a broken-image icon (staggering the mounts only lowered
+// the odds). A local clip can't fail that way, costs no WebGL, and the
+// browser downloads each of the five files once for all of its copies.
+//
+// Each clip under /public/showcase/<id>.mp4 is the embed's own auto-orbit
+// self-demo, captured off the canvas at 600×760 (2× the card) and played
+// forward then backward so the loop point is invisible. <id>.jpg is its
+// first frame, painted immediately so the card never shows a blank box.
+// Re-record with scripts/capture-showcase.mjs when the set changes.
+const CLIP_IDS = [
   "ae14f65c7f",
   "0f0fbe28ea",
   "326d47ec42",
@@ -17,49 +29,34 @@ const EMBED_IDS = [
 
 const ROW_LENGTH = 8;
 
-// All ~32 cards mount at once on page load, and each independently fetches
-// its scene's assets from the same handful of Blob-storage URLs — a burst of
-// near-simultaneous requests to one host that Vercel's firewall reads as an
-// attack pattern, serving an HTML challenge page instead of the image (shows
-// up as a broken-image icon on roughly whichever half loses the race).
-// Staggering when each iframe's `src` gets set spreads that burst out so it
-// never crosses the threshold.
-const MOUNT_STAGGER_MS = 120;
-
 function fillRow(offset: number) {
   return Array.from(
     { length: ROW_LENGTH },
-    (_, i) => EMBED_IDS[(i + offset) % EMBED_IDS.length],
+    (_, i) => CLIP_IDS[(i + offset) % CLIP_IDS.length],
   );
 }
 
-function Embed({ id, mountDelay }: { id: string; mountDelay: number }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    const timer = setTimeout(() => setMounted(true), mountDelay);
-    return () => clearTimeout(timer);
-  }, [mountDelay]);
-
+function Clip({ id }: { id: string }) {
   return (
     // A scaled-down "screening room" box, same family as the big EMBEDDED
     // SCENE section further down the page: a dark elevated stage rather than
     // a flat bordered card, with a letterbox bar guaranteeing a dark strip
-    // for the caption to sit on. That last part matters beyond looks — a
-    // card whose iframe hasn't rendered yet (or failed to) shows the
-    // browser's plain white document, and light text/marks drawn straight
-    // on top of that were unreadable. The letterbox bar is ours, drawn over
-    // the iframe regardless of what it's showing, so the caption always has
-    // a guaranteed-dark strip under it.
+    // for the caption to sit on. The poster paints before the clip has a
+    // frame, so there is never a white document showing through, but the
+    // bar still earns its place: it keeps the caption legible over whatever
+    // the clip's bottom edge happens to be.
     <div className="relative w-[240px] shrink-0 overflow-hidden rounded-xl bg-black shadow-[0_20px_45px_rgba(14,36,56,0.25)] ring-1 ring-inset ring-white/10 sm:w-[300px]">
-      {mounted && (
-        <iframe
-          src={`https://www.gifsy.fun/embed/${id}`}
-          title={`Community scene ${id}`}
-          loading="lazy"
-          className="block h-[320px] w-full border-0 bg-black sm:h-[380px]"
-        />
-      )}
+      <video
+        src={`/showcase/${id}.mp4`}
+        poster={`/showcase/${id}.jpg`}
+        autoPlay
+        muted
+        loop
+        playsInline
+        preload="metadata"
+        aria-label={`Community scene ${id}`}
+        className="block h-[320px] w-full bg-black object-cover sm:h-[380px]"
+      />
 
       {/* Vignette: darkens the corners so the frame reads as a stage the
           subject sits inside, not a flat rectangle. */}
@@ -87,7 +84,7 @@ function Embed({ id, mountDelay }: { id: string; mountDelay: number }) {
         aria-hidden
         className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 font-display text-[8px] uppercase tracking-[0.25em] text-white/80 sm:text-[9px]"
       >
-        Drag to explore
+        3D · Made with Gifsy
       </p>
     </div>
   );
@@ -97,21 +94,15 @@ function Row({
   ids,
   reverse,
   duration,
-  startIndex,
 }: {
   ids: string[];
   reverse?: boolean;
   duration: string;
-  startIndex: number;
 }) {
   const half = (clone: boolean) => (
     <div className="flex gap-5 pr-5" aria-hidden={clone || undefined}>
       {ids.map((id, i) => (
-        <Embed
-          key={`${clone ? "clone-" : ""}${id}-${i}`}
-          id={id}
-          mountDelay={(startIndex + i) * MOUNT_STAGGER_MS}
-        />
+        <Clip key={`${clone ? "clone-" : ""}${id}-${i}`} id={id} />
       ))}
     </div>
   );
@@ -136,8 +127,8 @@ function Row({
 export function CommunityShowcase() {
   return (
     <div className="space-y-5">
-      <Row ids={fillRow(0)} reverse duration="200s" startIndex={0} />
-      <Row ids={fillRow(2)} duration="180s" startIndex={ROW_LENGTH} />
+      <Row ids={fillRow(0)} reverse duration="200s" />
+      <Row ids={fillRow(2)} duration="180s" />
     </div>
   );
 }

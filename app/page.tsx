@@ -333,7 +333,7 @@ export default function Home() {
       </section>
 
       {/* ─────────────────── COMMUNITY SHOWCASE ────────────────────── */}
-      {/* Two rows of real published embeds, streaming past in opposite
+      {/* Two rows of real published scenes, streaming past in opposite
           directions — social proof before the pitch, not after it. */}
       <section className="overflow-hidden border-t border-ink/10 bg-white py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-5 sm:px-8" data-reveal>
@@ -341,8 +341,8 @@ export default function Home() {
             See what people are building 👀
           </p>
           <p className="mb-6 mt-1.5 text-sm text-muted">
-            Every card below is live and draggable — real embeds, the same
-            snippet you&rsquo;d paste into your own site.
+            Real scenes published by Gifsy users, playing back on loop. Want
+            to grab one and spin it? The live embed is further down.
           </p>
         </div>
         <div data-reveal style={{ "--reveal-delay": "100ms" } as CSSProperties}>
@@ -537,9 +537,11 @@ export default function Home() {
       {/* Directly under the hero on purpose: a first-time visitor should see
           the 3D effect working on real photos BEFORE being asked for one of
           their own. These are recorded clips, so this costs no model download —
-          and each card only fetches its video once it scrolls into view. */}
-      <section className="border-t border-foreground/10 bg-background">
-        <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+          and each card only fetches its video once it scrolls into view.
+          Same full-bleed two-row marquee as the community section above, so
+          the two showcases read as one strip family. */}
+      <section className="overflow-hidden border-t border-foreground/10 bg-background py-12 sm:py-16">
+        <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <div className="flex items-end justify-between gap-4" data-reveal>
             <div>
               <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">
@@ -561,11 +563,13 @@ export default function Home() {
               <ArrowRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
             </Link>
           </div>
+        </div>
 
-          <div className="mt-7">
-            <GalleryStrip />
-          </div>
+        <div className="mt-7" data-reveal style={{ "--reveal-delay": "100ms" } as CSSProperties}>
+          <GalleryStrip />
+        </div>
 
+        <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3" data-reveal>
             <button
               onClick={scrollToUploader}
