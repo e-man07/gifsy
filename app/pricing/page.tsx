@@ -18,17 +18,17 @@ export default function PricingPage() {
   return (
     <main className="flex min-h-screen flex-1 flex-col bg-background">
       {/* Nav — mirrors the landing / gallery chrome. */}
-      <section className="border-b-[3px] border-ink bg-ink text-cloud">
+      <section className="border-b border-foreground/10 bg-panel">
         <SiteNav />
 
         <div className="mx-auto w-full max-w-6xl px-5 pb-12 pt-8 text-center sm:px-8 sm:pb-16 sm:pt-12">
-          <p className="font-pixel text-xs uppercase tracking-[0.2em] text-sun drop-shadow-[1px_1px_0_var(--ink)]">
+          <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">
             Pricing
           </p>
-          <h1 className="mx-auto mt-3 max-w-2xl font-pixel text-3xl leading-tight text-cloud drop-shadow-[2px_2px_0_var(--ink)] sm:text-4xl">
+          <h1 className="mx-auto mt-3 max-w-2xl font-editorial text-4xl leading-tight text-foreground sm:text-5xl">
             GIFs and stickers, free forever. 3D is where Pro shines.
           </h1>
-          <p className="mx-auto mt-4 max-w-xl text-sm text-cloud/80 sm:text-base">
+          <p className="mx-auto mt-4 max-w-xl text-sm text-muted sm:text-base">
             GIFs and stickers are unlimited and always free — they never leave
             your device, and need no account. Pro is a one-time payment for
             unlimited 3D generations and no Gifsy badge.

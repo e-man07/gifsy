@@ -36,7 +36,6 @@ export const contentType = "image/png";
 const INK = "#0e2438";
 const PANEL = "#0b1a2b";
 const CLOUD = "#f5faff";
-const SUN = "#f2c230";
 const SKY = "#2e9bf0";
 const DIM = "#a9c2d8";
 
@@ -170,7 +169,7 @@ export default async function Image({
           </div>
         </div>
 
-        {/* Same hard pixel-border treatment as the site-wide card. objectFit is
+        {/* Same soft-shadow card treatment as the site-wide card. objectFit is
             `contain`, not `cover`: a portrait or square scene would otherwise
             lose its edges, and clipping the subject is the failure this card
             exists to avoid. */}
@@ -180,9 +179,9 @@ export default async function Image({
             width: `${FRAME_W}px`,
             height: `${FRAME_H}px`,
             backgroundColor: PANEL,
-            border: `6px solid ${CLOUD}`,
+            border: `1px solid rgba(14,36,56,0.12)`,
             borderRadius: "22px",
-            boxShadow: `14px 14px 0 ${SUN}`,
+            boxShadow: `0 24px 60px rgba(14,36,56,0.35)`,
             overflow: "hidden",
           }}
         >

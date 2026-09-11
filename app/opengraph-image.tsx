@@ -18,7 +18,6 @@ export const contentType = "image/png";
 // these are duplicated deliberately rather than imported.
 const INK = "#0e2438";
 const CLOUD = "#f5faff";
-const SUN = "#f2c230";
 const SKY = "#2e9bf0";
 
 export default async function Image() {
@@ -124,15 +123,15 @@ export default async function Image() {
           </div>
         </div>
 
-        {/* Hero still, with the hard pixel-border treatment used across the UI. */}
+        {/* Hero still, with the soft-shadow card treatment used across the UI. */}
         <div
           style={{
             display: "flex",
             width: "460px",
             height: "440px",
-            border: `6px solid ${CLOUD}`,
+            border: `1px solid rgba(14,36,56,0.12)`,
             borderRadius: "22px",
-            boxShadow: `14px 14px 0 ${SUN}`,
+            boxShadow: `0 24px 60px rgba(14,36,56,0.35)`,
             overflow: "hidden",
           }}
         >

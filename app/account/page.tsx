@@ -15,7 +15,7 @@ import { SiteNav } from "@/components/SiteNav";
 import { createClient } from "@/lib/supabase/server";
 import { FREE_GENERATION_LIMIT, PLAN_DISPLAY, type PlanId } from "@/lib/billing/plans";
 
-export const metadata = { title: "Account" };
+export const metadata = { title: "Account", robots: { index: false, follow: false } };
 
 /** A plan value read from the database, narrowed to a PlanId we can render. */
 function toPlanId(v: unknown): PlanId {
@@ -84,14 +84,14 @@ export default async function AccountPage() {
     <main className="flex min-h-screen flex-1 flex-col bg-background">
       {/* Header band — the same chrome as pricing / gallery / the legal pages,
           so the wordmark always leads back to the landing page. */}
-      <section className="border-b-[3px] border-ink bg-ink text-cloud">
+      <section className="border-b border-foreground/10 bg-panel">
         <SiteNav />
 
         <div className="mx-auto w-full max-w-3xl px-5 pb-10 pt-6 sm:px-8 sm:pb-12 sm:pt-8">
-          <p className="font-pixel text-xs uppercase tracking-[0.2em] text-sun drop-shadow-[1px_1px_0_var(--ink)]">
+          <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">
             Your account
           </p>
-          <h1 className="mt-2 font-pixel text-3xl text-cloud drop-shadow-[2px_2px_0_var(--ink)] sm:text-4xl">
+          <h1 className="mt-2 font-editorial text-4xl text-foreground sm:text-5xl">
             Profile
           </h1>
         </div>
@@ -100,7 +100,7 @@ export default async function AccountPage() {
       <div className="mx-auto w-full max-w-3xl px-5 py-8 sm:px-8 sm:py-10">
 
       {/* ── Identity ─────────────────────────────────────────────────────── */}
-      <section className="hud rounded-2xl bg-panel p-5 sm:p-6">
+      <section className="card rounded-2xl bg-panel p-5 sm:p-6">
         <div className="flex items-center gap-4">
           {avatarUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
@@ -111,12 +111,12 @@ export default async function AccountPage() {
             />
           ) : (
             <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-sky">
-              <span className="font-pixel text-xl text-cloud">{initial}</span>
+              <span className="font-display text-xl text-cloud">{initial}</span>
             </div>
           )}
           <div className="min-w-0">
             {name ? (
-              <p className="truncate font-pixel text-lg text-foreground">{name}</p>
+              <p className="truncate font-display text-lg text-foreground">{name}</p>
             ) : null}
             <p className="truncate text-sm text-muted">{user.email}</p>
             {memberSince ? (
@@ -127,13 +127,13 @@ export default async function AccountPage() {
       </section>
 
       {/* ── Plan ─────────────────────────────────────────────────────────── */}
-      <section className="hud mt-4 rounded-2xl bg-panel p-5 sm:p-6">
+      <section className="card mt-4 rounded-2xl bg-panel p-5 sm:p-6">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <p className="font-pixel text-xs uppercase tracking-[0.2em] text-muted">Plan</p>
+            <p className="font-display text-xs uppercase tracking-[0.2em] text-muted">Plan</p>
             <div className="mt-1.5 flex items-center gap-2">
               <span
-                className={`btn-pixel rounded-lg ${display.accent} px-2.5 py-1 font-pixel text-xs uppercase tracking-wide text-ink`}
+                className={`btn rounded-lg ${display.accent} px-2.5 py-1 font-display text-xs uppercase tracking-wide text-ink`}
               >
                 {display.name}
               </span>
@@ -159,7 +159,7 @@ export default async function AccountPage() {
           </div>
           <Link
             href="/pricing"
-            className={`btn-pixel rounded-xl px-4 py-2 font-pixel text-sm ${
+            className={`btn rounded-xl px-4 py-2 font-display text-sm ${
               plan === "free" ? "bg-grass text-ink" : "bg-panel text-foreground"
             }`}
           >
@@ -178,13 +178,13 @@ export default async function AccountPage() {
       </section>
 
       {/* ── Usage ────────────────────────────────────────────────────────── */}
-      <section className="hud mt-4 rounded-2xl bg-panel p-5 sm:p-6">
+      <section className="card mt-4 rounded-2xl bg-panel p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-pixel text-xs uppercase tracking-[0.2em] text-muted">
+            <p className="font-display text-xs uppercase tracking-[0.2em] text-muted">
               3D generations
             </p>
-            {/* .num so the quota can't be misread — the pixel face draws 0 like 8. */}
+            {/* .num for tabular, bold figures. */}
             <p className="num mt-1.5 text-2xl text-foreground">
               {genCount}
               {genLimit !== null ? <span className="text-muted"> / {genLimit}</span> : null}
@@ -195,7 +195,7 @@ export default async function AccountPage() {
           </div>
           <Link
             href="/scenes"
-            className="btn-pixel rounded-xl bg-panel px-4 py-2 font-pixel text-sm text-foreground"
+            className="btn rounded-xl bg-panel px-4 py-2 font-display text-sm text-foreground"
           >
             My scenes
           </Link>
@@ -203,7 +203,7 @@ export default async function AccountPage() {
 
         {genLimit !== null ? (
           <>
-            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-background">
+            <div className="mt-4 h-2.5 w-full overflow-hidden rounded-full bg-foreground/10">
               <div
                 className={`h-full rounded-full ${atLimit ? "bg-sun" : "bg-grass"}`}
                 style={{ width: `${Math.min(100, (genCount / genLimit) * 100)}%` }}
@@ -232,10 +232,10 @@ export default async function AccountPage() {
       </section>
 
       {/* ── Session ──────────────────────────────────────────────────────── */}
-      <section className="hud mt-4 rounded-2xl bg-panel p-5 sm:p-6">
+      <section className="card mt-4 rounded-2xl bg-panel p-5 sm:p-6">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <div>
-            <p className="font-pixel text-sm text-foreground">Signed in as {user.email}</p>
+            <p className="font-display text-sm text-foreground">Signed in as {user.email}</p>
             <p className="mt-0.5 text-xs text-muted">
               GIFs and stickers never need an account. 3D generations are tied to yours.
             </p>
@@ -243,7 +243,7 @@ export default async function AccountPage() {
           <form action="/auth/signout" method="post">
             <button
               type="submit"
-              className="btn-pixel rounded-xl bg-panel px-4 py-2 font-pixel text-sm text-foreground"
+              className="btn rounded-xl bg-panel px-4 py-2 font-display text-sm text-foreground"
             >
               Sign out
             </button>

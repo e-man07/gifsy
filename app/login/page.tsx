@@ -54,11 +54,11 @@ function LoginForm() {
 
   return (
     <main className="flex min-h-[80vh] flex-1 items-center justify-center px-5 py-10">
-      <div className="hud w-full max-w-sm rounded-2xl bg-panel p-6 sm:p-8">
-        <Link href="/" className="font-pixel text-sm uppercase tracking-widest text-sky">
+      <div className="card w-full max-w-sm rounded-2xl bg-panel p-6 sm:p-8">
+        <Link href="/" className="font-display text-sm uppercase tracking-widest text-sky">
           ← Gifsy
         </Link>
-        <h1 className="mt-3 font-pixel text-2xl text-foreground">
+        <h1 className="mt-3 font-editorial text-3xl text-foreground">
           {mode === "in" ? "Sign in" : "Create account"}
         </h1>
         <p className="mt-1 text-sm text-muted">
@@ -67,18 +67,18 @@ function LoginForm() {
 
         <form onSubmit={submit} className="mt-5 flex flex-col gap-3">
           <label className="flex flex-col gap-1">
-            <span className="font-pixel text-xs uppercase tracking-wide text-muted">Email</span>
+            <span className="font-display text-xs uppercase tracking-wide text-muted">Email</span>
             <input
               type="email"
               required
               autoComplete="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="hud-sm rounded-lg bg-background px-3 py-2 text-sm font-semibold text-foreground outline-none"
+              className="card-sm rounded-lg bg-surface px-3 py-2 text-sm font-semibold text-foreground outline-none"
             />
           </label>
           <label className="flex flex-col gap-1">
-            <span className="font-pixel text-xs uppercase tracking-wide text-muted">Password</span>
+            <span className="font-display text-xs uppercase tracking-wide text-muted">Password</span>
             <input
               type="password"
               required
@@ -86,7 +86,7 @@ function LoginForm() {
               autoComplete={mode === "in" ? "current-password" : "new-password"}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="hud-sm rounded-lg bg-background px-3 py-2 text-sm font-semibold text-foreground outline-none"
+              className="card-sm rounded-lg bg-surface px-3 py-2 text-sm font-semibold text-foreground outline-none"
             />
           </label>
 
@@ -96,7 +96,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={busy}
-            className="btn-pixel mt-1 rounded-xl bg-grass py-3 font-pixel text-sm uppercase tracking-wide text-ink disabled:opacity-40"
+            className="btn mt-1 rounded-xl bg-grass py-3 font-display text-sm uppercase tracking-wide text-ink disabled:opacity-40"
           >
             {busy ? "…" : mode === "in" ? "Sign in" : "Create account"}
           </button>
@@ -108,7 +108,7 @@ function LoginForm() {
             setErr(null);
             setMsg(null);
           }}
-          className="mt-4 font-pixel text-xs uppercase tracking-wide text-sky hover:underline"
+          className="mt-4 font-display text-xs uppercase tracking-wide text-sky hover:underline"
         >
           {mode === "in" ? "Need an account? Sign up" : "Have an account? Sign in"}
         </button>

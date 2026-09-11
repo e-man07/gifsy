@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ── Palette sampled from the pixel-art hero video ─────────────────────── */
+/* ── Palette sampled from the hero art ──────────────────────────────────── */
 :root {
   --sky: #2e9bf0; /* primary — the vivid sky */
   --sky-deep: #1466b4; /* depth / hovers */
@@ -8,20 +8,25 @@
   --grass-deep: #3c6b27;
   --bark: #7a4e22; /* warm neutral */
   --cloud: #f5faff; /* light panels / text-on-dark */
-  --ink: #0e2438; /* text + every pixel border & hard shadow */
+  --ink: #0e2438; /* text + headings */
   --sun: #f2c230; /* playful pop */
   --petal: #e8506b; /* playful pop */
 
-  --background: #eaf4ff; /* soft daytime-sky page tint */
-  --foreground: #0e2438;
+  --background: #ffffff; /* the page is white end to end */
+  --foreground: #14181f; /* near-black for headings and body */
   --panel: #ffffff;
-  --muted: #5b6b7d;
+  --muted: #6b7280; /* gray for secondary copy */
+  /* Recessed surfaces — inputs, wells, progress tracks. These used to lean on
+     --background being tinted to separate from a white panel; now that the
+     page itself is white they need a tone of their own. */
+  --surface: #f3f4f6;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-panel: var(--panel);
+  --color-surface: var(--surface);
   --color-muted: var(--muted);
   --color-sky: var(--sky);
   --color-sky-deep: var(--sky-deep);
@@ -33,18 +38,18 @@
   --color-sun: var(--sun);
   --color-petal: var(--petal);
   --font-sans: var(--font-body);
-  --font-pixel: var(--font-pixel);
+  /* `font-serif` is Tailwind's own utility — pointing it at the editorial
+     face means headlines just take `font-serif`, no bespoke class. */
+  --font-serif: var(--font-editorial);
+  --font-display: var(--font-body);
 }
 
-/* Night-time variant: the sky video stays bright, the workshop goes dark. */
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0b1a2b;
-    --foreground: #eaf3ff;
-    --panel: #12263c;
-    --muted: #9fb4c9;
-    --ink: #04101d;
-  }
+/* The site is a light theme on purpose, so it does NOT follow the OS into
+   dark mode — a white page that flips to navy on half the machines that open
+   it is two designs to maintain, and the hero art is lit for daylight either
+   way. color-scheme keeps form controls and scrollbars light to match. */
+:root {
+  color-scheme: light;
 }
 
 body {
@@ -53,8 +58,21 @@ body {
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
 }
 
-.font-pixel {
-  font-family: var(--font-pixel), ui-monospace, "Courier New", monospace;
+/* UI type: nav, buttons, labels, badges. Slightly heavier than body copy so
+   it still reads as "chrome" now that it shares the body face. */
+.font-display {
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+}
+
+/* Headlines. Variable weight — 500 keeps the thick/thin contrast that makes
+   the face worth using; heavier fills in the thins and it stops reading as
+   editorial. Slight negative tracking tightens the wide default fit. */
+.font-editorial {
+  font-family: var(--font-editorial), ui-serif, Georgia, serif;
+  font-weight: 500;
+  letter-spacing: -0.02em;
 }
 
 /* ── Continuous horizontal marquee ─────────────────────────────────────── */
@@ -77,6 +95,11 @@ body {
   animation: marquee-x var(--marquee-duration, 48s) linear infinite;
   will-change: transform;
 }
+/* Same keyframes played backwards, so a second row can stream the opposite
+   way without a second animation to keep in sync. */
+.marquee-track-reverse {
+  animation-direction: reverse;
+}
 .marquee:hover .marquee-track,
 .marquee:focus-within .marquee-track {
   animation-play-state: paused;
@@ -88,13 +111,9 @@ body {
 }
 
 /* ── Numbers that must not be misread ──────────────────────────────────── */
-/* Pixelify Sans draws "2" with a closed lower loop, so "$29" reads as "$89" —
-   and its "0" reads as "8" the same way ("80%" looks like "88%"). Heavier
-   weight makes it worse and letter-spacing doesn't touch the glyph shape, so
-   the only fix is a different typeface for the digits.
-   Use .num on any figure a user could act on incorrectly: prices, quota
-   counts. Body font, extra bold to hold weight against the pixel type around
-   it, and tabular figures so columns of numbers still line up. */
+/* Use .num on any figure a user could act on incorrectly: prices, quota
+   counts. Extra bold to hold its own next to the display type around it, and
+   tabular figures so columns of numbers still line up. */
 .num {
   font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-weight: 800;
@@ -102,74 +121,45 @@ body {
   letter-spacing: -0.01em;
 }
 
-/* ── Signature: chunky 8-bit borders + hard, blur-less offset shadows ──── */
-.hud {
-  border: 3px solid var(--ink);
-  box-shadow: 5px 5px 0 0 var(--ink);
+/* ── Signature: soft-shadow cards ───────────────────────────────────────── */
+.card {
+  border: 1px solid rgba(14, 36, 56, 0.08);
+  box-shadow:
+    0 1px 2px rgba(14, 36, 56, 0.04),
+    0 8px 24px rgba(14, 36, 56, 0.08);
 }
-.hud-sm {
-  border: 2px solid var(--ink);
-  box-shadow: 3px 3px 0 0 var(--ink);
+.card-sm {
+  border: 1px solid rgba(14, 36, 56, 0.08);
+  box-shadow:
+    0 1px 2px rgba(14, 36, 56, 0.05),
+    0 4px 12px rgba(14, 36, 56, 0.06);
 }
 
-/* Physical "press-to-click" button. */
-.btn-pixel {
-  border: 3px solid var(--ink);
-  box-shadow: 4px 4px 0 0 var(--ink);
+/* Buttons: a gentle lift on hover/press instead of a hard offset shadow. */
+.btn {
+  box-shadow:
+    0 1px 2px rgba(14, 36, 56, 0.08),
+    0 6px 16px rgba(14, 36, 56, 0.12);
   transition:
-    transform 0.06s ease,
-    box-shadow 0.06s ease,
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
     filter 0.15s ease;
 }
-.btn-pixel:hover {
-  transform: translate(1px, 1px);
-  box-shadow: 3px 3px 0 0 var(--ink);
-  filter: brightness(1.05);
+.btn:hover {
+  transform: translateY(-1px);
+  box-shadow:
+    0 2px 4px rgba(14, 36, 56, 0.1),
+    0 10px 24px rgba(14, 36, 56, 0.16);
+  filter: brightness(1.03);
 }
-.btn-pixel:active {
-  transform: translate(4px, 4px);
-  box-shadow: 0 0 0 0 var(--ink);
+.btn:active {
+  transform: translateY(0);
+  box-shadow: 0 1px 2px rgba(14, 36, 56, 0.08);
 }
-.btn-pixel:disabled {
+.btn:disabled {
   transform: none;
-  box-shadow: 4px 4px 0 0 var(--ink);
   filter: none;
-}
-
-/* ── Legibility over the hero art ──────────────────────────────────────── */
-/* The landing nav floats over a video whose frames swing from dark sky to
-   bright sunlit foliage. A single 1px offset shadow disappears against the
-   light greens, so links need a hard 4-way ink outline (keeps the pixel look)
-   plus a soft halo underneath, which is what actually does the separating on
-   the bright frames. */
-.hero-text {
-  text-shadow:
-    1px 1px 0 var(--ink),
-    -1px 1px 0 var(--ink),
-    1px -1px 0 var(--ink),
-    -1px -1px 0 var(--ink),
-    0 2px 7px rgba(4, 16, 29, 0.9);
-}
-
-/* Belt-and-braces for the same problem: a gradient scrim that guarantees a
-   dark ground under the nav no matter what frame the video is on.
-   The nav is `absolute … z-20`, so it establishes its own stacking context and
-   a negative z-index here paints behind the nav's own links while still
-   sitting above the hero video. pointer-events:none so the taller scrim box
-   can't swallow clicks meant for the hero. */
-.nav-scrim::before {
-  content: "";
-  position: absolute;
-  inset: 0 0 auto 0;
-  height: 190%;
-  z-index: -1;
-  pointer-events: none;
-  background: linear-gradient(
-    to bottom,
-    rgba(4, 16, 29, 0.82) 0%,
-    rgba(4, 16, 29, 0.5) 50%,
-    rgba(4, 16, 29, 0) 100%
-  );
+  opacity: 0.6;
 }
 
 /* ── Long-form policy copy (privacy / terms / refund) ──────────────────── */
@@ -179,7 +169,7 @@ body {
   margin-top: 1rem;
 }
 .legal h2 {
-  font-family: var(--font-pixel), ui-monospace, monospace;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-size: 1.25rem;
   color: var(--foreground);
   margin-top: 2.25rem;
@@ -188,7 +178,7 @@ body {
   margin-top: 0;
 }
 .legal h3 {
-  font-family: var(--font-pixel), ui-monospace, monospace;
+  font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
   font-size: 1rem;
   color: var(--foreground);
   margin-top: 1.5rem;
@@ -218,6 +208,32 @@ body {
   color: var(--sky);
 }
 
+/* ── Scroll reveals ─────────────────────────────────────────────────────── */
+/* Driven by <ScrollReveal />, which adds .is-visible as an element scrolls in.
+   The easing is a soft overshoot-free ease-out, so sections settle rather
+   than spring. --reveal-delay staggers siblings; see the component for why
+   nothing above the fold should carry the attribute. */
+[data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0s),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) var(--reveal-delay, 0s);
+}
+[data-reveal].is-visible {
+  opacity: 1;
+  transform: none;
+}
+/* Belt and braces: with no JS the observer never runs, and content that is
+   only hidden by CSS would stay hidden for good. */
+@media (prefers-reduced-motion: reduce) {
+  [data-reveal] {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 /* ── Motion ────────────────────────────────────────────────────────────── */
 @keyframes floaty {
   0%,
@@ -245,12 +261,62 @@ body {
   animation: popin 0.55s ease-out both;
 }
 
+/* Offer banner flare: a light sweeping across the bar, a flickering flame,
+   and a soft pulse ring on the CTA — enough movement to read as "live/
+   urgent" without being as busy as the marquee or cinema effects. */
+@keyframes offer-shimmer {
+  0% {
+    background-position: -150% 0;
+  }
+  100% {
+    background-position: 250% 0;
+  }
+}
+.offer-shimmer {
+  background-image: linear-gradient(
+    100deg,
+    transparent 40%,
+    rgba(255, 255, 255, 0.6) 50%,
+    transparent 60%
+  );
+  background-size: 200% 100%;
+  animation: offer-shimmer 3s ease-in-out infinite;
+}
+@keyframes offer-flame {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
+  50% {
+    transform: scale(1.18) rotate(-8deg);
+  }
+}
+.offer-flame {
+  animation: offer-flame 1.4s ease-in-out infinite;
+  transform-origin: 50% 60%;
+}
+@keyframes offer-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(4, 16, 29, 0.28);
+  }
+  50% {
+    box-shadow: 0 0 0 6px rgba(4, 16, 29, 0);
+  }
+}
+.offer-pulse {
+  animation: offer-pulse 2s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .floaty,
-  .popin {
+  .popin,
+  .offer-shimmer,
+  .offer-flame,
+  .offer-pulse {
     animation: none;
   }
-  .btn-pixel {
+  .btn {
     transition: none;
   }
   html {
@@ -275,42 +341,12 @@ html {
 }
 
 /* ── Cinema stage (embedded scene) ─────────────────────────────────────── */
-/* The embed is the one place on the page where a visitor watches instead of
-   clicks, so it gets treated like a screening: a near-black room, a warm spill
-   of light behind the frame, a vignette pulling the eye to the middle, and a
-   fine grain so the flat panel reads as projected film rather than a div. */
-.cinema-room {
-  background:
-    radial-gradient(
-      120% 80% at 50% 0%,
-      rgba(46, 155, 240, 0.18) 0%,
-      rgba(46, 155, 240, 0) 60%
-    ),
-    radial-gradient(
-      100% 90% at 50% 110%,
-      rgba(232, 80, 107, 0.14) 0%,
-      rgba(232, 80, 107, 0) 65%
-    ),
-    linear-gradient(180deg, #050b13 0%, #060d17 50%, #04080f 100%);
-}
-
-/* Light spilling off the screen onto the room around it. */
-.cinema-spill::before {
-  content: "";
-  position: absolute;
-  inset: -12% -6%;
-  background: radial-gradient(
-    60% 55% at 50% 50%,
-    rgba(120, 190, 255, 0.28) 0%,
-    rgba(120, 190, 255, 0.08) 45%,
-    rgba(120, 190, 255, 0) 75%
-  );
-  filter: blur(28px);
-  pointer-events: none;
-  z-index: 0;
-}
-
-/* Vignette + grain sit *over* the frame, so they must never eat a drag. */
+/* The room around the frame is plain white now, like the rest of the site —
+   the near-black stage and the light spilling off it went with it, since both
+   only read as "lit" against a dark ground. What survives is what plays over
+   the scene itself: a vignette pulling the eye to the middle, and a fine
+   grain so the flat panel reads as projected film rather than a div.
+   Both sit *over* the frame, so they must never eat a drag. */
 .cinema-vignette {
   background: radial-gradient(
     75% 75% at 50% 50%,

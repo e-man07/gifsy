@@ -2,15 +2,23 @@
 // public `scene.json` (config + public asset URLs) so a viewer on any site can
 // then fetch the assets directly. CORS-open + long immutable cache so embeds on
 // third-party pages load fast.
+//
+// Asset URLs are rewritten to our own `/api/asset/[id]/[field]` proxy rather
+// than handed out as raw Blob storage URLs — see that route's comment for why
+// (a page loading many scenes at once was bursting Blob's CDN and tripping
+// its firewall). Third-party consumers still get absolute, fetch-ready URLs;
+// they just resolve to our domain instead of Blob's.
 
 import { head, BlobNotFoundError } from "@vercel/blob";
+import type { SceneAssetRef } from "@/lib/publish/types";
 
 export const runtime = "nodejs";
 
 const ID_RE = /^[a-z0-9]{6,32}$/i;
+const ASSET_FIELDS = ["image", "depth", "mask", "background", "thumb"] as const;
 
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ): Promise<Response> {
   const { id } = await params;
@@ -25,6 +33,11 @@ export async function GET(
       return Response.json({ error: "Manifest unavailable." }, { status: 502 });
     }
     const manifest = await res.json();
+    const origin = new URL(request.url).origin;
+    for (const field of ASSET_FIELDS) {
+      const ref = manifest.assets?.[field] as SceneAssetRef | null | undefined;
+      if (ref) ref.url = `${origin}/api/asset/${id}/${field}`;
+    }
     return Response.json(manifest, {
       status: 200,
       headers: {

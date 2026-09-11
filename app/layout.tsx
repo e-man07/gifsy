@@ -1,17 +1,20 @@
 import type { Metadata } from "next";
-import { Pixelify_Sans, Nunito } from "next/font/google";
+import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
 import { siteOrigin, siteUrl } from "@/lib/site-url";
 
-// Display: a legible pixel face for the wordmark, headline, and labels.
-const pixel = Pixelify_Sans({
-  variable: "--font-pixel",
+// Editorial display face, for page headlines only — a high-contrast serif
+// standing in for PP Editorial New, which is commercial. Variable weight, so
+// headlines can sit at 500/600 and keep some stem behind the thin strokes.
+const editorial = Playfair_Display({
+  variable: "--font-editorial",
   subsets: ["latin"],
 });
 
-// Body/UI: rounded, friendly, and highly readable for controls and copy.
-const nunito = Nunito({
+// Everything else: body copy, nav, buttons, labels. A neutral grotesque
+// carries small UI text far better than the serif would.
+const inter = Inter({
   variable: "--font-body",
   subsets: ["latin"],
 });
@@ -47,8 +50,21 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
-      className={`${pixel.variable} ${nunito.variable} h-full antialiased`}
+      className={`${editorial.variable} ${inter.variable} h-full antialiased`}
     >
+      <head>
+        {/* Scroll reveals hide their element in CSS and are un-hidden by an
+            observer. With scripting off that observer never runs, so the
+            content would stay hidden permanently — this puts it back. */}
+        <noscript>
+          <style
+            dangerouslySetInnerHTML={{
+              __html:
+                "[data-reveal]{opacity:1!important;transform:none!important}",
+            }}
+          />
+        </noscript>
+      </head>
       <body className="min-h-full flex flex-col">
       {children}
       <Analytics />

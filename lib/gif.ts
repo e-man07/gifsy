@@ -3,8 +3,13 @@
 // single-image paths so frames don't flicker between near-identical colors.
 import { blurAlpha, drawCover, getCtx, makeCanvas, refineCutout, type Ctx2D } from "./image";
 
+// "depth" was removed: it was the one GIF effect that called the server's
+// metered depth-head route (same one 3D uses), silently requiring an account
+// and sharing 3D's free-generation quota — directly contradicting "GIFs &
+// stickers always free". `makeDepthGif`/`estimateDepth` are left in place
+// below in case a real depth-based GIF renderer comes back later, but nothing
+// calls them now.
 export type GifEffect =
-  | "depth"
   | "zoom"
   | "bounce"
   | "shake"
@@ -17,7 +22,6 @@ export const GIF_EFFECTS: {
   label: string;
   ai?: boolean;
 }[] = [
-  { id: "depth", label: "Depth", ai: true },
   { id: "zoom", label: "Zoom" },
   { id: "bounce", label: "Bounce" },
   { id: "shake", label: "Shake" },
@@ -105,7 +109,7 @@ function drawEffectFrame(
       break;
     }
     default:
-      // "depth" is rendered by makeDepthGif; fall back to a gentle zoom here.
+      // Unreachable for any current GifEffect — kept as a safe fallback.
       drawCover(ctx, img, size, 1.08 + 0.22 * osc);
   }
 }

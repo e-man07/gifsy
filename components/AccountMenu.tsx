@@ -43,17 +43,22 @@ export interface NavLink {
   label: string;
 }
 
-// The nav sits over the hero video, so `hero-text` carries the ink outline +
-// halo that keeps these readable on bright frames. Harmless on the flat ink
-// band the other pages use.
-const linkCls = "hero-text font-pixel text-sm text-cloud hover:text-sun";
+/** Nav-link colour. The landing header is fixed and travels from the hero
+ *  photo onto white panels, so it flips to "dark"; every other header, which
+ *  sits on a solid ink band, stays "light". */
+export type NavTone = "light" | "dark";
+
+const linkClsFor = (tone: NavTone) =>
+  tone === "dark"
+    ? "font-display text-sm text-ink transition-colors hover:text-sky-deep"
+    : "font-display text-sm text-cloud transition-colors hover:text-sun";
 
 /** One row in either dropdown. */
 const itemCls =
-  "block w-full px-3 py-2.5 text-left font-pixel text-sm text-foreground hover:bg-sky hover:text-cloud";
+  "block w-full px-3 py-2.5 text-left font-display text-sm text-foreground hover:bg-sky hover:text-cloud";
 
 const panelCls =
-  "hud absolute right-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-xl bg-panel py-1";
+  "card absolute right-0 top-full z-30 mt-2 w-56 overflow-hidden rounded-xl bg-panel py-1";
 
 interface Account {
   email: string | null;
@@ -61,7 +66,14 @@ interface Account {
   avatarUrl: string | null;
 }
 
-export function AccountMenu({ links = [] }: { links?: NavLink[] }) {
+export function AccountMenu({
+  links = [],
+  tone = "light",
+}: {
+  links?: NavLink[];
+  tone?: NavTone;
+}) {
+  const linkCls = linkClsFor(tone);
   // undefined = still loading; null = signed out.
   const [account, setAccount] = useState<Account | null | undefined>(undefined);
   const [open, setOpen] = useState(false);
@@ -153,13 +165,13 @@ export function AccountMenu({ links = [] }: { links?: NavLink[] }) {
             aria-haspopup="menu"
             aria-expanded={open}
             aria-label={`Account menu for ${label}`}
-            className="btn-pixel flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-sky"
+            className="btn flex h-9 w-9 items-center justify-center overflow-hidden rounded-full bg-sky"
           >
             {account.avatarUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={account.avatarUrl} alt="" className="h-full w-full object-cover" />
             ) : (
-              <span className="font-pixel text-sm leading-none text-cloud">
+              <span className="font-display text-sm leading-none text-cloud">
                 {label?.trim().charAt(0).toUpperCase()}
               </span>
             )}
@@ -170,7 +182,7 @@ export function AccountMenu({ links = [] }: { links?: NavLink[] }) {
               {/* Who you are — the reason the avatar needs no text label. */}
               <div className="border-b border-foreground/10 px-3 pb-2 pt-1.5">
                 {account.name && (
-                  <p className="truncate font-pixel text-sm text-foreground">{account.name}</p>
+                  <p className="truncate font-display text-sm text-foreground">{account.name}</p>
                 )}
                 <p className="truncate text-xs text-muted">{account.email}</p>
               </div>
@@ -205,7 +217,7 @@ export function AccountMenu({ links = [] }: { links?: NavLink[] }) {
           aria-haspopup="menu"
           aria-expanded={open}
           aria-label={open ? "Close menu" : "Open menu"}
-          className="btn-pixel flex h-9 w-9 items-center justify-center rounded-full bg-panel"
+          className="btn flex h-9 w-9 items-center justify-center rounded-full bg-panel"
         >
           {open ? (
             <X className="h-4 w-4 text-foreground" strokeWidth={3} aria-hidden />
@@ -219,7 +231,7 @@ export function AccountMenu({ links = [] }: { links?: NavLink[] }) {
             {account && (
               <div className="border-b border-foreground/10 px-3 pb-2 pt-1.5">
                 {account.name && (
-                  <p className="truncate font-pixel text-sm text-foreground">{account.name}</p>
+                  <p className="truncate font-display text-sm text-foreground">{account.name}</p>
                 )}
                 <p className="truncate text-xs text-muted">{account.email}</p>
               </div>

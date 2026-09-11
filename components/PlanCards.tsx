@@ -14,18 +14,20 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight, Check, Flame } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { startCheckout } from "@/lib/billing/checkout";
 import { PLAN_DISPLAY, PLAN_ORDER, type PaidPlanId } from "@/lib/billing/plans";
+import { OFFER_ENDS_AT, OFFER_PRICE } from "@/lib/billing/offer";
+import { useCountdown } from "@/lib/use-countdown";
 
 const TIERS = PLAN_ORDER.map((id) => PLAN_DISPLAY[id]);
 
 export function PlanCards({
   /** Where to send a signed-out visitor after they sign in. */
   next = "/pricing",
-  /** The Free card's CTA target — an in-page anchor on the landing page. */
-  freeHref = "/#make",
+  /** The Free card's CTA target — the landing page, where every mode starts. */
+  freeHref = "/",
   /** Hide the USD/merchant-of-record line when the surrounding page already
    *  carries it. */
   showFinePrint = true,
@@ -37,6 +39,7 @@ export function PlanCards({
   const [signedIn, setSignedIn] = useState<boolean | null>(null);
   const [busy, setBusy] = useState<PaidPlanId | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const offer = useCountdown(OFFER_ENDS_AT);
 
   useEffect(() => {
     const supabase = createClient();
@@ -60,7 +63,7 @@ export function PlanCards({
   return (
     <>
       {err && (
-        <div className="hud-sm mx-auto mb-6 max-w-xl rounded-lg bg-petal px-4 py-3 text-center text-sm font-semibold text-cloud">
+        <div className="card-sm mx-auto mb-6 max-w-xl rounded-lg bg-petal px-4 py-3 text-center text-sm font-semibold text-cloud">
           {err}
         </div>
       )}
@@ -69,24 +72,45 @@ export function PlanCards({
         {TIERS.map((tier) => (
           <div
             key={tier.id}
-            className={`hud relative flex flex-col rounded-2xl bg-panel p-6 sm:p-7 ${
+            className={`card relative flex flex-col rounded-2xl bg-panel p-6 sm:p-7 ${
               tier.featured ? "md:-translate-y-2" : ""
             }`}
           >
-            {tier.featured && (
-              <span className="hud-sm absolute -top-3 left-6 rounded-full bg-sky px-3 py-1 font-pixel text-[10px] uppercase tracking-wide text-cloud">
-                Most popular
+            {tier.id === "pro" && offer.active ? (
+              <span className="card-sm absolute -top-3 left-6 flex items-center gap-1 rounded-full bg-sun px-3 py-1 font-display text-[10px] uppercase tracking-wide text-ink">
+                <Flame className="h-3 w-3" strokeWidth={3} aria-hidden />
+                Launch offer
               </span>
+            ) : (
+              tier.featured && (
+                <span className="card-sm absolute -top-3 left-6 rounded-full bg-sky px-3 py-1 font-display text-[10px] uppercase tracking-wide text-cloud">
+                  Most popular
+                </span>
+              )
             )}
 
-            <h3 className="font-pixel text-xl uppercase tracking-wide text-foreground">
+            <h3 className="font-display text-xl uppercase tracking-wide text-foreground">
               {tier.name}
             </h3>
-            <div className="mt-3 flex items-end gap-1">
-              {/* .num, not font-pixel: the pixel face renders "$29" as "$89". */}
-              <span className="num text-4xl text-foreground">{tier.price}</span>
-              <span className="pb-1 text-sm font-semibold text-muted">{tier.cadence}</span>
-            </div>
+            {tier.id === "pro" && offer.active ? (
+              <>
+                <div className="mt-3 flex items-end gap-2">
+                  {/* .num, not font-display: tabular, bold figures for the price. */}
+                  <span className="num text-4xl text-foreground">{OFFER_PRICE}</span>
+                  <span className="num pb-1 text-lg text-muted line-through">{tier.price}</span>
+                  <span className="pb-1 text-sm font-semibold text-muted">{tier.cadence}</span>
+                </div>
+                <p className="num mt-1.5 text-xs font-semibold uppercase tracking-wide text-petal">
+                  Ends in {offer.label}
+                </p>
+              </>
+            ) : (
+              <div className="mt-3 flex items-end gap-1">
+                {/* .num, not font-display: tabular, bold figures for the price. */}
+                <span className="num text-4xl text-foreground">{tier.price}</span>
+                <span className="pb-1 text-sm font-semibold text-muted">{tier.cadence}</span>
+              </div>
+            )}
             <p className="mt-3 text-sm text-muted">{tier.tagline}</p>
 
             <ul className="mt-5 flex flex-1 flex-col gap-2.5">
@@ -106,14 +130,14 @@ export function PlanCards({
               {tier.id === "free" ? (
                 <Link
                   href={freeHref}
-                  className="btn-pixel flex w-full items-center justify-center gap-2 rounded-xl bg-grass py-3 font-pixel text-sm uppercase tracking-wide text-ink"
+                  className="btn flex w-full items-center justify-center gap-2 rounded-xl bg-grass py-3 font-display text-sm uppercase tracking-wide text-ink"
                 >
                   Start free
                 </Link>
               ) : signedIn === false ? (
                 <Link
                   href={`/login?next=${encodeURIComponent(next)}`}
-                  className={`btn-pixel flex w-full items-center justify-center gap-2 rounded-xl ${tier.accent} py-3 font-pixel text-sm uppercase tracking-wide text-ink`}
+                  className={`btn flex w-full items-center justify-center gap-2 rounded-xl ${tier.accent} py-3 font-display text-sm uppercase tracking-wide text-ink`}
                 >
                   Sign in to upgrade
                 </Link>
@@ -122,7 +146,7 @@ export function PlanCards({
                   type="button"
                   disabled={signedIn === null || busy !== null}
                   onClick={() => upgrade(tier.id as PaidPlanId)}
-                  className={`btn-pixel flex w-full items-center justify-center gap-2 rounded-xl ${tier.accent} py-3 font-pixel text-sm uppercase tracking-wide text-ink disabled:opacity-50`}
+                  className={`btn flex w-full items-center justify-center gap-2 rounded-xl ${tier.accent} py-3 font-display text-sm uppercase tracking-wide text-ink disabled:opacity-50`}
                 >
                   {busy === tier.id ? "Starting…" : "Get lifetime access"}
                   {busy !== tier.id && (

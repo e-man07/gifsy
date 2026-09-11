@@ -658,7 +658,7 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
     >
       <div ref={mountRef} className="h-[360px] w-full sm:h-[420px]" />
       {fps !== null && (
-        <span className="pointer-events-none absolute bottom-2 right-2 rounded bg-ink/70 px-1.5 py-0.5 font-pixel text-[10px] text-cloud">{fps} fps</span>
+        <span className="pointer-events-none absolute bottom-2 right-2 rounded bg-ink/70 px-1.5 py-0.5 font-display text-[10px] text-cloud">{fps} fps</span>
       )}
     </div>
   );
