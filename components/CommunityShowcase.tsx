@@ -29,6 +29,8 @@ const CLIP_IDS = [
 
 const ROW_LENGTH = 8;
 
+const CLIP_PLAYBACK_RATE = 2;
+
 function fillRow(offset: number) {
   return Array.from(
     { length: ROW_LENGTH },
@@ -47,6 +49,12 @@ function Clip({ id }: { id: string }) {
     // the clip's bottom edge happens to be.
     <div className="relative w-[240px] shrink-0 overflow-hidden rounded-xl bg-black shadow-[0_20px_45px_rgba(14,36,56,0.25)] ring-1 ring-inset ring-white/10 sm:w-[300px]">
       <video
+        // The recorded orbit is a slow, deliberate sweep; at 1x in a small
+        // card it barely reads as moving. The rate survives load, so setting
+        // it once on mount is enough.
+        ref={(v) => {
+          if (v) v.playbackRate = CLIP_PLAYBACK_RATE;
+        }}
         src={`/showcase/${id}.mp4`}
         poster={`/showcase/${id}.jpg`}
         autoPlay
@@ -127,8 +135,8 @@ function Row({
 export function CommunityShowcase() {
   return (
     <div className="space-y-5">
-      <Row ids={fillRow(0)} reverse duration="200s" />
-      <Row ids={fillRow(2)} duration="180s" />
+      <Row ids={fillRow(0)} reverse duration="90s" />
+      <Row ids={fillRow(2)} duration="80s" />
     </div>
   );
 }
