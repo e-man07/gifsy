@@ -2,9 +2,9 @@
 
 // Recordings of scenes people actually published, streaming past in two
 // rows moving opposite directions — proof the product works on more than our
-// own curated shots. Each row holds the same five clips repeated (there
-// aren't more yet) at a different offset so the two rows don't mirror each
-// other, then doubled so the CSS -50% translate loops seamlessly.
+// own curated shots. Sixteen distinct scenes, eight per row with no scene
+// appearing in both, so nothing repeats within a screen's width; each row is
+// then doubled so the CSS -50% translate loops seamlessly.
 //
 // These are pre-rendered clips, not live <iframe> embeds of gifsy.fun. The
 // live version mounted ~32 WebGL viewers on page load, each fetching its
@@ -12,31 +12,42 @@
 // so it served a challenge page instead of the image and roughly half the
 // cards came up as a broken-image icon (staggering the mounts only lowered
 // the odds). A local clip can't fail that way, costs no WebGL, and the
-// browser downloads each of the five files once for all of its copies.
+// browser downloads each file once for both of its copies in the loop.
 //
 // Each clip under /public/showcase/<id>.mp4 is the embed's own auto-orbit
 // self-demo, captured off the canvas at 600×760 (2× the card) and played
 // forward then backward so the loop point is invisible. <id>.jpg is its
 // first frame, painted immediately so the card never shows a blank box.
 // Re-record with scripts/capture-showcase.mjs when the set changes.
-const CLIP_IDS = [
-  "ae14f65c7f",
-  "0f0fbe28ea",
-  "326d47ec42",
-  "22ea7b1548",
-  "0fce93464c",
+//
+// Ordered so neighbours contrast — a character next to an object next to a
+// photo — rather than grouping the three Jokers or the two decanters. Scenes
+// already shown live in the persona grid and the cinema section are left out
+// so the page doesn't show the same subject twice.
+const ROWS: string[][] = [
+  [
+    "ae14f65c7f", // crystal decanter
+    "0f0fbe28ea", // Hulk, profile
+    "7a6a545d65", // portrait, red jacket
+    "326d47ec42", // Joker, purple suit
+    "cb1d36d61a", // whiskey bottle
+    "b9a21a313f", // Spider-Man in snow
+    "9a53c5e98e", // dog on yellow
+    "22ea7b1548", // chrome face
+  ],
+  [
+    "fb048319d4", // Joker, Ledger
+    "4845689544", // sneakers mid-air
+    "849cd89cdf", // Iron Man
+    "0fce93464c", // wolf decanter
+    "7fdde4ec7c", // Hulk, front
+    "ced7d028ef", // penguin cartoon
+    "b7f30ebb79", // Joker, watercolour
+    "57acfb32d7", // portrait at a desk
+  ],
 ];
 
-const ROW_LENGTH = 8;
-
 const CLIP_PLAYBACK_RATE = 2;
-
-function fillRow(offset: number) {
-  return Array.from(
-    { length: ROW_LENGTH },
-    (_, i) => CLIP_IDS[(i + offset) % CLIP_IDS.length],
-  );
-}
 
 function Clip({ id }: { id: string }) {
   return (
@@ -135,8 +146,8 @@ function Row({
 export function CommunityShowcase() {
   return (
     <div className="space-y-5">
-      <Row ids={fillRow(0)} reverse duration="90s" />
-      <Row ids={fillRow(2)} duration="80s" />
+      <Row ids={ROWS[0]} reverse duration="90s" />
+      <Row ids={ROWS[1]} duration="80s" />
     </div>
   );
 }
