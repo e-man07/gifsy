@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { GALLERY_COUNT } from "@/lib/gallery";
 import { SiteNav } from "@/components/SiteNav";
+import { ScrollReveal } from "@/components/ScrollReveal";
 
 export const metadata: Metadata = {
   title: "3D Gallery",
@@ -22,6 +23,7 @@ export const metadata: Metadata = {
 export default function GalleryPage() {
   return (
     <main className="flex flex-1 flex-col">
+      <ScrollReveal />
       {/* ─────────────────────────── HERO ─────────────────────────── */}
       <section className="relative isolate overflow-hidden border-b border-foreground/10 bg-panel">
         <div
@@ -46,7 +48,7 @@ export default function GalleryPage() {
             seconds, without uploading your photo. Here&apos;s how it looks.
           </p>
           <Link
-            href="/#make"
+            href="/"
             className="btn mt-6 inline-flex items-center gap-2 rounded-full bg-sun px-6 py-3 font-display text-base text-ink"
           >
             Make yours
@@ -72,7 +74,7 @@ export default function GalleryPage() {
             free account; GIFs and stickers don&apos;t.
           </p>
           <Link
-            href="/#make"
+            href="/"
             className="btn mt-6 inline-flex items-center gap-2 rounded-full bg-sun px-6 py-3 font-display text-base text-ink"
           >
             Make yours

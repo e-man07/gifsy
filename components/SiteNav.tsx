@@ -31,7 +31,7 @@ export function SiteNav({ links = [] }: { links?: NavLink[] }) {
           </Link>
         ))}
         <Link
-          href="/#make"
+          href="/"
           className="btn order-1 flex shrink-0 items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-display text-sm text-cloud"
         >
           Make one
