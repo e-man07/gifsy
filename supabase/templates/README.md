@@ -40,7 +40,7 @@ Resend, on its own free tier (3,000/month, 100/day, SMTP relay included).
 **Sign up at resend.com directly, not through the Vercel marketplace.** The
 marketplace lists a free plan for Resend but rejects it on install
 ("Billing plan is disabled: free"), leaving Pro at $20/month as the cheapest
-option -- $240/year for auth email on a product that charges $29 once.
+option -- $240/year for auth email on a product that charges $9 once.
 
 Supabase SMTP settings:
 

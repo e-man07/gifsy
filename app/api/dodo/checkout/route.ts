@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
   // Lifetime means there is nothing to buy a second time. Without this, a
   // signed-in Pro user hitting the pricing page's CTA again would be walked
-  // through a full $29 checkout for something they already own.
+  // through a full $9 checkout for something they already own.
   const { data: profile } = await supabase
     .from("profiles")
     .select("plan")

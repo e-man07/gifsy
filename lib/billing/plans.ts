@@ -28,7 +28,7 @@ export const FREE_GENERATION_LIMIT = 3;
 export interface PlanDisplay {
   id: PlanId;
   name: string;
-  /** Human display price, e.g. "$0", "$29". */
+  /** Human display price, e.g. "$0", "$9". */
   price: string;
   /** Billing cadence label, e.g. "forever", "one-time". */
   cadence: string;
@@ -62,7 +62,7 @@ export const PLAN_DISPLAY: Record<PlanId, PlanDisplay> = {
   pro: {
     id: "pro",
     name: "Pro",
-    price: "$29",
+    price: "$9",
     cadence: "one-time",
     oneTime: true,
     tagline: "Pay once. Yours forever, no subscription.",

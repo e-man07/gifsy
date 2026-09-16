@@ -84,7 +84,7 @@ Rendering lives in `lib/rendering/` and is shared by the creator preview (`compo
 └──────┬──────────────┬──────────────────┬─────────────────┘
        ▼              ▼                  ▼
   Supabase        Vercel Blob        Dodo Payments
-  (auth, profiles, (scene assets,    (one-time $29 Pro)
+  (auth, profiles, (scene assets,    (one-time $9 Pro)
    scenes index)    depth encoder)
 ```
 
@@ -159,7 +159,7 @@ gifsy-3d-handoff.md, gifsy-interactive-3d-embed-handoff.md   product/engineering
 
 ## Plans, metering and the split depth model
 
-| | Free | Pro ($29, one-time, never renews) |
+| | Free | Pro ($9, one-time, never renews) |
 | --- | --- | --- |
 | GIFs & stickers | Unlimited, no account | Unlimited |
 | 3D generations | `FREE_GENERATION_LIMIT` = 3 lifetime | Unlimited |

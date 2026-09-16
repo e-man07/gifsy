@@ -3,7 +3,7 @@
 // signature, and syncs plan state into Supabase using the service-role admin
 // client (RLS bypass).
 //
-// Pro is a ONE-TIME $29 purchase, so the events that matter are
+// Pro is a ONE-TIME $9 purchase, so the events that matter are
 // `payment.succeeded` (grant Pro for good) and `refund.succeeded` (revoke it).
 // The subscription.* handling below is kept for any legacy monthly subscription
 // still running — those accounts must keep working until they lapse — but no
