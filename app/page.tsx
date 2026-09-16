@@ -211,6 +211,26 @@ export default function Home() {
             offer.active ? "pt-40 sm:pt-44" : "pt-36 sm:pt-40"
           }`}
         >
+          {/* Product Hunt featured badge. Plain <img>: the badge is a remote
+              SVG that Product Hunt regenerates (the `t` param is a cache
+              buster), so next/image would only add a hop and a remotePatterns
+              entry. PH renders it at 250×54; that's a lot of badge for an
+              eyebrow slot, so it's drawn at 180×39 (same ratio) — width/height
+              attrs still reserve the box before it loads. */}
+          <a
+            href="https://www.producthunt.com/products/gifsy?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-gifsy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mb-5 inline-block drop-shadow-[0_4px_16px_rgba(4,16,29,0.45)] transition hover:-translate-y-0.5"
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              alt="Gifsy - Turn any photo into an interactive 3D scene you can embed. | Product Hunt"
+              width={180}
+              height={39}
+              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1251694&theme=light&t=1789548480433"
+            />
+          </a>
           <p className="font-display text-xs uppercase tracking-[0.22em] text-white/70 drop-shadow-[0_1px_8px_rgba(4,16,29,0.5)]">
             For portfolios, product pages & hero sections
           </p>
