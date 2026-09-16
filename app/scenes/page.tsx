@@ -72,9 +72,12 @@ export default async function MyScenesPage() {
             >
               <div className="aspect-square w-full overflow-hidden bg-surface">
                 {s.thumb_url ?? s.image_url ? (
+                  // Always go through the asset proxy, whatever the row holds:
+                  // rows from the Blob era store raw storage URLs that no
+                  // longer resolve, newer rows already store this path.
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
-                    src={s.thumb_url ?? s.image_url!}
+                    src={`/api/asset/${s.id}/${s.thumb_url ? "thumb" : "image"}`}
                     alt=""
                     loading="lazy"
                     className="h-full w-full object-cover transition group-hover:scale-105"

@@ -1,21 +1,25 @@
-// POST /api/scenes — persist a published scene to Vercel Blob so it resolves on
-// any device or third-party site (the IndexedDB store only sees the creating
-// browser). Writes the three assets plus a public `scene.json` manifest under a
-// deterministic `scenes/<id>/` prefix.
+// POST /api/scenes — persist a published scene to Cloudflare R2 so it resolves
+// on any device or third-party site (the IndexedDB store only sees the creating
+// browser). Writes the assets plus a `scene.json` manifest under a deterministic
+// `scenes/<id>/` prefix. The bucket is private; everything is read back through
+// /api/scenes/[id] and /api/asset/[id]/[field].
+//
+// Asset refs in the manifest are `r2:<key>`, not URLs — there is no public URL
+// to hand out, and the asset proxy knows how to read a key. Legacy manifests
+// (Vercel Blob era) carry absolute URLs; the proxy handles both.
 //
 // No AI here: the creator's device already produced image/depth/mask; this route
 // only moves those finished files into shared storage.
 
-import { put } from "@vercel/blob";
 import type { SceneConfig } from "@/lib/rendering/types";
 import type { SceneManifest } from "@/lib/publish/types";
+import { putObject } from "@/lib/storage/r2";
 import { createClient } from "@/lib/supabase/server";
 
-// @vercel/blob needs Node APIs — never the edge runtime (also Vercel's default).
+// The S3 client needs Node APIs — never the edge runtime (also Vercel's default).
 export const runtime = "nodejs";
 
 const ID_RE = /^[a-z0-9]{6,32}$/i;
-const ONE_YEAR_SECONDS = 365 * 24 * 60 * 60;
 const MAX_ASSET_BYTES = 24 * 1024 * 1024; // per-asset guard (image/depth/mask)
 
 function bad(message: string, status = 400): Response {
@@ -97,27 +101,29 @@ export async function POST(request: Request): Promise<Response> {
   if (tooBig) return bad("Asset exceeds size limit.", 413);
 
   const base = `scenes/${id}`;
-  const putOpts = {
-    access: "public" as const,
-    addRandomSuffix: false, // deterministic pathnames: scenes/<id>/<file>
-    allowOverwrite: true, // re-publishing the same id replaces cleanly
-    cacheControlMaxAge: ONE_YEAR_SECONDS,
+  // Store one asset and return its manifest ref, or null when absent.
+  const store = async (
+    field: string,
+    file: FormDataEntryValue | null,
+    ext: string,
+    mime: string,
+  ): Promise<{ url: string; mime: string } | null> => {
+    if (!(file instanceof Blob)) return null;
+    const key = `${base}/${field}.${ext}`;
+    await putObject(key, file, mime);
+    return { url: `r2:${key}`, mime };
   };
 
   try {
-    const [imageRes, depthRes, maskRes, backgroundRes, thumbRes] = await Promise.all([
-      put(`${base}/image.webp`, image, { ...putOpts, contentType: "image/webp" }),
-      put(`${base}/depth.png`, depth, { ...putOpts, contentType: "image/png" }),
-      mask instanceof Blob
-        ? put(`${base}/mask.png`, mask, { ...putOpts, contentType: "image/png" })
-        : Promise.resolve(null),
-      background instanceof Blob
-        ? put(`${base}/background.webp`, background, { ...putOpts, contentType: "image/webp" })
-        : Promise.resolve(null),
-      thumb instanceof Blob
-        ? put(`${base}/thumb.webp`, thumb, { ...putOpts, contentType: "image/webp" })
-        : Promise.resolve(null),
+    const [imageRef, depthRef, maskRef, backgroundRef, thumbRef] = await Promise.all([
+      store("image", image, "webp", "image/webp"),
+      store("depth", depth, "png", "image/png"),
+      store("mask", mask, "png", "image/png"),
+      store("background", background, "webp", "image/webp"),
+      store("thumb", thumb, "webp", "image/webp"),
     ]);
+    // image/depth were validated as Blobs above, so these are never null.
+    if (!imageRef || !depthRef) return bad("Missing image or depth asset.");
 
     const manifest: SceneManifest = {
       id,
@@ -126,18 +132,19 @@ export async function POST(request: Request): Promise<Response> {
       createdAt,
       watermark,
       assets: {
-        image: { url: imageRes.url, mime: "image/webp" },
-        depth: { url: depthRes.url, mime: "image/png" },
-        mask: maskRes ? { url: maskRes.url, mime: "image/png" } : null,
-        background: backgroundRes ? { url: backgroundRes.url, mime: "image/webp" } : null,
-        thumb: thumbRes ? { url: thumbRes.url, mime: "image/webp" } : null,
+        image: imageRef,
+        depth: depthRef,
+        mask: maskRef,
+        background: backgroundRef,
+        thumb: thumbRef,
       },
     };
 
-    await put(`${base}/scene.json`, JSON.stringify(manifest), {
-      ...putOpts,
-      contentType: "application/json",
-    });
+    await putObject(`${base}/scene.json`, JSON.stringify(manifest), "application/json");
+
+    // The DB keeps proxy paths, not storage locations: they're what the
+    // /scenes grid renders, and they stay valid if the store moves again.
+    const proxy = (field: string) => `/api/asset/${id}/${field}`;
 
     // Record ownership + metadata (RLS enforces owner_id = auth.uid()).
     const { error: dbErr } = await supabase.from("scenes").upsert(
@@ -145,11 +152,11 @@ export async function POST(request: Request): Promise<Response> {
         id,
         owner_id: user.id,
         config,
-        image_url: imageRes.url,
-        depth_url: depthRes.url,
-        mask_url: maskRes ? maskRes.url : null,
-        background_url: backgroundRes ? backgroundRes.url : null,
-        thumb_url: thumbRes ? thumbRes.url : null,
+        image_url: proxy("image"),
+        depth_url: proxy("depth"),
+        mask_url: maskRef ? proxy("mask") : null,
+        background_url: backgroundRef ? proxy("background") : null,
+        thumb_url: thumbRef ? proxy("thumb") : null,
         watermark,
       },
       { onConflict: "id" },
@@ -158,8 +165,8 @@ export async function POST(request: Request): Promise<Response> {
 
     return Response.json({ id, watermark }, { status: 201 });
   } catch (err) {
-    // Most likely a missing/invalid BLOB_READ_WRITE_TOKEN (store not provisioned
-    // yet). 503 lets the client fall back to its local IndexedDB copy.
+    // Most likely missing/invalid R2_* env (store not provisioned yet). 503
+    // lets the client fall back to its local IndexedDB copy.
     const message = err instanceof Error ? err.message : "Upload failed.";
     return Response.json({ error: message }, { status: 503 });
   }
