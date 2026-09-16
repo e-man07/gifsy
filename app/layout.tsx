@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Playfair_Display, Inter } from "next/font/google";
 import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
+import Script from "next/script";
 import { siteOrigin, siteUrl } from "@/lib/site-url";
 
 // Editorial display face, for page headlines only — a high-contrast serif
@@ -72,6 +73,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
       {children}
       <Analytics />
+      {/* DataFast analytics. afterInteractive = loads once the page is
+          hydrated, on every route since this is the root layout. */}
+      <Script
+        src="https://datafa.st/js/script.js"
+        data-website-id="dfid_VTK9dxkszf139VvLdMQxT"
+        data-domain="gifsy.fun"
+        strategy="afterInteractive"
+      />
       </body>
     </html>
   );
