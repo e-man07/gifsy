@@ -8,8 +8,13 @@ import { useEffect, useState } from "react";
 // four cards is few enough to keep interactive, and a visitor should be able
 // to grab one and spin it before reading a pitch about what it's for.
 //
+// Scene ids are re-publishes of the public/demo assets (product, dog,
+// character, portrait) onto R2 — the original persona scenes lived in the
+// old Blob store and became unreadable when it was blocked. Swap in better
+// shots freely; any published id works here.
+//
 // Staggered mount: even 4 cards loading at once fire ~20 near-simultaneous
-// requests at Blob storage (4 scenes x ~5 assets each), which was enough in
+// requests at storage (4 scenes x ~5 assets each), which was enough in
 // practice to trip Vercel's firewall challenge and show broken/white cards.
 // `loading="lazy"` alone wasn't enough here since all 4 enter the viewport
 // together. Now that the ~32-card marquee above no longer embeds live, these
@@ -17,22 +22,22 @@ import { useEffect, useState } from "react";
 // the burst well under that threshold.
 const PERSONAS = [
   {
-    id: "edb9be6b58",
+    id: "4c25e4c9ee",
     eyebrow: "Web agencies & Webflow/Framer builders",
     pitch: "A scroll-stopping hero without hiring a WebGL developer.",
   },
   {
-    id: "d6d28b0238",
+    id: "4a3f8caa99",
     eyebrow: "Portfolio creators",
     pitch: "Give your best piece the presentation it deserves.",
   },
   {
-    id: "24d12531b7",
+    id: "4ee8488906",
     eyebrow: "Solo brands & products",
     pitch: "One flagship shot with real depth — not a flat product photo.",
   },
   {
-    id: "97d7eff307",
+    id: "04dc1f898c",
     eyebrow: "Personal brands & creators",
     pitch: "A bio page that feels alive, not static.",
   },
