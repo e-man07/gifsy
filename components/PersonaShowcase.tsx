@@ -8,10 +8,11 @@ import { useEffect, useState } from "react";
 // four cards is few enough to keep interactive, and a visitor should be able
 // to grab one and spin it before reading a pitch about what it's for.
 //
-// Scene ids are re-publishes of the public/demo assets (product, dog,
-// character, portrait) onto R2 — the original persona scenes lived in the
-// old Blob store and became unreadable when it was blocked. Swap in better
-// shots freely; any published id works here.
+// One subject per niche, cut out on transparency (subjectOnly) so the card
+// reads as an object you can grab: 3D shapes for the agency hero, a glass
+// prism for portfolios, a floating sneaker for products, a portrait for
+// creators. Sources are Unsplash-licensed photos, baked with the same models
+// the app runs (scripts/make-demo-assets.py) and published to R2.
 //
 // Staggered mount: even 4 cards loading at once fire ~20 near-simultaneous
 // requests at storage (4 scenes x ~5 assets each), which was enough in
@@ -22,22 +23,22 @@ import { useEffect, useState } from "react";
 // the burst well under that threshold.
 const PERSONAS = [
   {
-    id: "4c25e4c9ee",
+    id: "e62678871c",
     eyebrow: "Web agencies & Webflow/Framer builders",
     pitch: "A scroll-stopping hero without hiring a WebGL developer.",
   },
   {
-    id: "4a3f8caa99",
+    id: "0e45c95856",
     eyebrow: "Portfolio creators",
     pitch: "Give your best piece the presentation it deserves.",
   },
   {
-    id: "4ee8488906",
+    id: "8a68552608",
     eyebrow: "Solo brands & products",
     pitch: "One flagship shot with real depth — not a flat product photo.",
   },
   {
-    id: "04dc1f898c",
+    id: "f4c3e9bef8",
     eyebrow: "Personal brands & creators",
     pitch: "A bio page that feels alive, not static.",
   },
