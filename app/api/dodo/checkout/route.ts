@@ -13,6 +13,7 @@
 // payment.succeeded event) and email seeds/links the Dodo customer.
 
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { getDodoClient, PLANS, isPaidPlan } from "@/lib/billing/dodo";
 
@@ -78,6 +79,12 @@ export async function POST(req: Request) {
     new URL(req.url).origin;
   const returnUrl = `${origin}/pricing?checkout=success`;
 
+  // DataFast revenue attribution: its script sets a first-party visitor
+  // cookie; echoing it into checkout metadata lets DataFast's Dodo webhook
+  // tie the payment back to the visit (and the channel that sent it).
+  // Optional — a visitor who blocked the script simply goes unattributed.
+  const datafastVisitorId = (await cookies()).get("datafast_visitor_id")?.value;
+
   // 4. Create the checkout session.
   let dodo;
   try {
@@ -104,6 +111,7 @@ export async function POST(req: Request) {
       metadata: {
         supabase_user_id: user.id,
         plan,
+        ...(datafastVisitorId ? { datafast_visitor_id: datafastVisitorId } : {}),
       },
       return_url: returnUrl,
     });
