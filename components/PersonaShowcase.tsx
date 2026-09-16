@@ -9,8 +9,8 @@ import { useEffect, useState } from "react";
 // to grab one and spin it before reading a pitch about what it's for.
 //
 // One subject per niche, cut out on transparency (subjectOnly) so the card
-// reads as an object you can grab: 3D shapes for the agency hero, a glass
-// prism for portfolios, a floating sneaker for products, a portrait for
+// reads as an object you can grab: 3D shapes for the agency hero, a mosaic
+// sculpture for portfolios, a floating sneaker for products, a portrait for
 // creators. Sources are Unsplash-licensed photos, baked with the same models
 // the app runs (scripts/make-demo-assets.py) and published to R2.
 //
@@ -28,7 +28,7 @@ const PERSONAS = [
     pitch: "A scroll-stopping hero without hiring a WebGL developer.",
   },
   {
-    id: "0e45c95856",
+    id: "1edb4523e4",
     eyebrow: "Portfolio creators",
     pitch: "Give your best piece the presentation it deserves.",
   },
