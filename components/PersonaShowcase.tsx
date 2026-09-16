@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 // to grab one and spin it before reading a pitch about what it's for.
 //
 // One subject per niche, cut out on transparency (subjectOnly) so the card
-// reads as an object you can grab: 3D shapes for the agency hero, a mosaic
+// reads as an object you can grab: a red director's chair for the agency hero, a mosaic
 // sculpture for portfolios, a floating sneaker for products, a portrait for
 // creators. Sources are Unsplash-licensed photos, baked with the same models
 // the app runs (scripts/make-demo-assets.py) and published to R2.
@@ -23,7 +23,7 @@ import { useEffect, useState } from "react";
 // the burst well under that threshold.
 const PERSONAS = [
   {
-    id: "e62678871c",
+    id: "d556cd5c57",
     eyebrow: "Web agencies & Webflow/Framer builders",
     pitch: "A scroll-stopping hero without hiring a WebGL developer.",
   },
