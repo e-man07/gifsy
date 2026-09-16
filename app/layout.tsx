@@ -44,6 +44,10 @@ export const metadata: Metadata = {
     description:
       "Upload one photo. Gifsy gives it real, interactive depth in your browser and hands you an embed for any site.",
   },
+  // Site-ownership verification for the Orynth listing.
+  other: {
+    "ory-verify": "orynth-bfe949565da64784b4a7ceb8c2c448c0",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
