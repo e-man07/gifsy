@@ -397,7 +397,7 @@ export default function Home() {
                   frame is already narrow enough to fill, so it stays 1:1 —
                   zooming there pushes him off both edges. */}
               <iframe
-                src="https://www.gifsy.fun/embed/d41ee2f645"
+                src="https://www.gifsy.fun/embed/03ed4c7605"
                 title="A 3D scene made with Gifsy"
                 loading="lazy"
                 className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 border-0 sm:h-[210%] sm:w-[210%]"
