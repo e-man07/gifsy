@@ -88,8 +88,10 @@ export default function FramerGuide() {
       <p className="lede">
         Framer&apos;s Embed component takes raw HTML, so an interactive 3D photo in Framer is one
         iframe away: a photo goes into Gifsy, a scene with real depth comes out, and the visitor
-        can drag it on your published site. This is the Framer version of the{" "}
-        <Link href="/guides/embed-3d-photo-on-website">full iframe embed guide</Link>; the
+        can drag it on your published site. This is the Framer chapter of the{" "}
+        <Link href="/guides/interactive-3d-photos-for-websites">complete guide to interactive 3D photos for websites</Link>;
+        the platform-agnostic version is the{" "}
+        <Link href="/guides/embed-3d-photo-on-website">full iframe embed guide</Link>, and the
         Webflow one is <Link href="/guides/3d-photo-webflow">here</Link>.
       </p>
 

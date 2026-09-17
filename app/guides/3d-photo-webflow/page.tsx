@@ -114,7 +114,9 @@ export default function WebflowGuide() {
         no code beyond one iframe — and it is a photo, not a 3D model, so nothing needs
         modelling. One thing to know before you start: Code Embed is a paid-plan element; on a
         free site the route is a looping video instead (covered below).
-        For the wider picture, see the{" "}
+        This is the Webflow chapter of the{" "}
+        <Link href="/guides/interactive-3d-photos-for-websites">guide to interactive 3D photos for websites</Link>;
+        the platform-agnostic version is the{" "}
         <Link href="/guides/embed-3d-photo-on-website">full iframe embed guide</Link>.
       </p>
 

@@ -115,7 +115,9 @@ export default function EmbedGuide() {
         To embed a 3D photo on a website you need one photo, a published Gifsy scene, and an{" "}
         <code>&lt;iframe&gt;</code>. The scene runs live in the frame — the visitor can drag it —
         and the snippet below works on any page that accepts HTML, from a hand-written site to
-        Webflow, Framer, Squarespace, WordPress, Wix, Carrd, Notion and Shopify.
+        Webflow, Framer, Squarespace, WordPress, Wix, Carrd, Notion and Shopify. This is the
+        reference chapter of the{" "}
+        <Link href="/guides/interactive-3d-photos-for-websites">guide to interactive 3D photos for websites</Link>.
       </p>
 
       <H2 id="quick">Quick answer: the universal embed snippet</H2>
@@ -241,7 +243,8 @@ export default function EmbedGuide() {
       <p>
         Block editor → <strong>Custom HTML</strong> block → paste. In Elementor, the HTML widget.
         Gotcha: authors and contributors without the <code>unfiltered_html</code> capability get
-        the iframe stripped on save — paste as an administrator or editor.
+        the iframe stripped on save — paste as an administrator or editor. Full walkthrough:{" "}
+        <Link href="/guides/3d-photo-wordpress">WordPress without a plugin</Link>.
       </p>
       <h3>Wix</h3>
       <p>

@@ -180,6 +180,10 @@ export function StickerToolCopy() {
           <a href={TELEGRAM_SPEC} className={inlineLink} rel="noopener" target="_blank">
             sticker documentation
           </a>
+          ; the long version is{" "}
+          <a href="/guides/telegram-sticker-size" className={inlineLink}>
+            Telegram sticker size: 512×512, WebP vs PNG
+          </a>
           .
         </p>
       </Section>
@@ -239,6 +243,7 @@ export function StickerToolCopy() {
       <Section title="Next">
         <NextLinks
           links={[
+            { href: "/guides/telegram-sticker-pack-from-browser", label: "Make Telegram stickers without an app", note: "The whole @Stickers flow, step by step, with the traps." },
             { href: "/tools/gif", label: "Animate a photo into a GIF", note: "Same no-upload approach, for motion." },
             { href: "/create", label: "Make an interactive 3D photo", note: "Real depth from one photo, with an embed for any site." },
           ]}

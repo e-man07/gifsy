@@ -53,6 +53,9 @@ export function SiteFooter({
             </Link>
           </Column>
           <Column heading="Learn">
+            <Link href="/guides/interactive-3d-photos-for-websites" className={linkCls}>
+              3D photos for websites: the guide
+            </Link>
             <Link href="/guides/how-3d-photos-work" className={linkCls}>
               How 3D photos work
             </Link>

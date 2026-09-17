@@ -457,7 +457,8 @@ export default function ImmersityAlternativesPage() {
         through Webflow&apos;s Embed element, Framer&apos;s Embed component, or a code block anywhere
         else. An Immersity, Media.io or Animagen export goes in as a <code>&lt;video&gt;</code> file
         instead: it plays, but the visitor can&apos;t move it. Both are fine choices; they are
-        different things.
+        different things. The platform-by-platform steps are in the{" "}
+        <Link href="/guides/interactive-3d-photos-for-websites">guide to interactive 3D photos for websites</Link>.
       </p>
 
       <H2 id="faq">FAQ</H2>

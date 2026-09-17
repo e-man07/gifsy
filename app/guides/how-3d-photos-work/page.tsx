@@ -85,8 +85,10 @@ export default function HowItWorksGuide() {
         the phone features Facebook and Apple ship, and the depth-parallax scene this article is
         about — which is what Facebook 3D Photos, iOS Spatial Scenes and Gifsy all do underneath.
         Everything below is the exact pipeline Gifsy runs, with the models named and the numbers
-        as they are in the code. If you want to put one on a page, start with the{" "}
-        <Link href="/guides/embed-3d-photo-on-website">embed guide</Link>.
+        as they are in the code. For{" "}
+        <Link href="/guides/interactive-3d-photos-for-websites">using interactive 3D photos on a website</Link>{" "}
+        — which platform, which photos, what it costs — start with the complete guide; to put one
+        on a page right now, the <Link href="/guides/embed-3d-photo-on-website">embed guide</Link>.
       </p>
 
       <div className="not-prose my-8 overflow-hidden rounded-xl bg-black" style={{ aspectRatio: "16 / 10" }}>
