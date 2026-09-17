@@ -79,9 +79,23 @@ paste brief prose into `.legal`. Word counts after: `/` 1,985, `/tools/gif`
 1,141, `/tools/sticker` 1,216, `/create` 993 — all still with H2/H3
 structure and FAQPage/HowTo schema.
 
-**Next:** phase 4 = `/alternatives/immersity-ai` (brief 10), then guides in
-run 06 order, then swap the held-back links in. Both need an article layout
-designed first (byline, updated date, TOC, comparison table, verdict card).
+**Phase 4 done (2026-09-17)** — article system + first alternatives page.
+Layout per the user's reference (metamemory.tech/blog): `lib/articles.ts`
+registry, `components/article/ArticleIndex.tsx` (mono date · read time, bold
+title, description, mono tag pills, hairline dividers) and
+`components/article/ArticleLayout.tsx` (mono breadcrumb + tags, bold H1, dek,
+byline with both founders, sticky "On this page" rail; Article + Breadcrumb
+JSON-LD). `/alternatives` index, `/alternatives/immersity-ai` (2,580 words,
+10 H2, FAQPage, wide scrollable head-to-head table), `/alternatives/leiapix`
+308 → it; both in the sitemap. Honesty: page states it compared published
+pricing/output/data-handling on 17 Sep 2026 and that the hands-on same-photo
+test (criterion 6) is not yet run; CapCut + Motionleap rows flagged as
+unverified by tooling.
+
+**Next:** guides in run 06 order (`/guides` index + `/guides/3d-photo-webflow`,
+`/guides/embed-3d-photo-on-website`, `/guides/how-3d-photos-work`,
+`/guides/3d-photo-framer`), then swap the held-back links into `/` and the
+tool pages, then the hub.
 
 ## Runs
 
@@ -296,9 +310,10 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
       @Stickers bot; attribute it to the bot and screenshot the rejection.
       Citation for "white stroke + black shadow":
       https://core.telegram.org/stickers#static-stickers-and-emoji (brief 15)
-- [ ] new `/alternatives/immersity-ai` — listicle + comparison table (run 02);
-      needs: same-photo test assets for 8 tools, dated Immersity pricing
-      screenshots, quarterly pricing re-check as the freshness edge
+- [x] new `/alternatives/immersity-ai` — listicle + comparison table (run 02);
+      `/alternatives/leiapix` 308s to it. STILL NEEDED: same-photo test assets
+      for 8 tools (criterion 6 marked "not yet scored" on the page), dated
+      Immersity pricing screenshots, quarterly re-check (next Dec 2026)
 - [ ] later spokes: `/alternatives/media-io-3d-image-maker`, `/alternatives/depthy` (run 02)
 - [ ] explainer assets from eng (brief 13): a raw-depth dump + refined-depth
       crop, a backdrop-bearing demo scene for the push-pull-vs-LaMa screenshot,
