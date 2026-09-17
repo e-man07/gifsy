@@ -394,7 +394,7 @@ export function CreateWorkshop() {
     "captureStream" in HTMLCanvasElement.prototype;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-8 sm:py-14">
+    <div className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-8 sm:py-14">
       <UpgradeDialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
 
       <div className="card rounded-2xl bg-panel p-5 sm:p-7">
@@ -629,6 +629,6 @@ export function CreateWorkshop() {
           </p>
         </div>
       )}
-    </main>
+    </div>
   );
 }

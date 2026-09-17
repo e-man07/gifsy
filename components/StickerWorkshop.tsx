@@ -126,7 +126,7 @@ export function StickerWorkshop() {
   const canGenerate = !busy && sources.length >= 1;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-8 sm:py-14">
+    <div className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-8 sm:py-14">
       <div className="card rounded-2xl bg-panel p-5 sm:p-7">
         <h1 className="font-editorial text-3xl text-foreground">Make your sticker</h1>
 
@@ -248,6 +248,6 @@ export function StickerWorkshop() {
           <ImportGuide png={result.sticker.png} webp={result.sticker.webp} />
         </div>
       )}
-    </main>
+    </div>
   );
 }

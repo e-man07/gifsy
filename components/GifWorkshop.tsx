@@ -169,7 +169,7 @@ export function GifWorkshop({ initialGifMode }: { initialGifMode: GifMode }) {
   const canGenerate = !busy && sources.length >= (multiple ? 2 : 1);
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-8 sm:py-14">
+    <div className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-8 sm:py-14">
       <div className="card rounded-2xl bg-panel p-5 sm:p-7">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <h1 className="font-editorial text-3xl text-foreground">Make your GIF</h1>
@@ -321,6 +321,6 @@ export function GifWorkshop({ initialGifMode }: { initialGifMode: GifMode }) {
           </div>
         </div>
       )}
-    </main>
+    </div>
   );
 }

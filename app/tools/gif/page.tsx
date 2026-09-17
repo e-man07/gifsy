@@ -1,13 +1,16 @@
-import type { Metadata } from "next";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { GifWorkshop } from "@/components/GifWorkshop";
+import { pageMetadata } from "@/lib/seo/metadata";
 
-export const metadata: Metadata = {
-  title: "Make a GIF",
+// `?mode=combine` pre-selects the multi-photo mode but is the same page, so it
+// canonicalises here rather than existing as a duplicate URL for crawlers.
+export const metadata = pageMetadata({
+  path: "/tools/gif",
+  title: "Animate a Photo Into a GIF — Free, No Upload",
   description:
-    "Turn one photo — or a handful — into an animated GIF, right in your browser. Always free, no account needed.",
-  robots: { index: true, follow: true },
-};
+    "Turn one photo into an animated GIF with zoom, bounce, shake, pulse, spin or glitch — or stitch several into a loop. Runs in your browser, no upload, no watermark, no account.",
+});
 
 export default async function GifToolPage({
   searchParams,
@@ -19,6 +22,7 @@ export default async function GifToolPage({
     <main className="flex flex-1 flex-col bg-background">
       <SiteNav links={[{ href: "/gallery", label: "Gallery" }]} />
       <GifWorkshop initialGifMode={mode === "combine" ? "combine" : "animate"} />
+      <SiteFooter />
     </main>
   );
 }
