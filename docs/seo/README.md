@@ -57,8 +57,20 @@ the briefs: first-party example GIFs / sticker screenshots (need the founders'
 own photos), measured WebP sizes, the competitor-table rows the brief marked
 "verify" (Kapwing omitted; ezgif/Imgflip/Canva kept to widely-documented facts).
 
-**Next:** phase 3 = homepage rewrite (brief 09), then `/alternatives/
-immersity-ai` (brief 10), then guides in run 06 order.
+**Phase 3 done (2026-09-17)** — homepage rewrite per brief 09. `app/page.tsx`
+is now a server component (static-prerendered); the nav pill and hero drop
+card are client components in `components/home/`. 2,291 crawlable words,
+13 H2 / 19 H3, HowTo + FAQPage (10 Qs) schema, new H1 "The interactive 3D photo
+maker you can embed on any site.", definition/snippet paragraph, 3-step how-it-
+works naming the models + split-model data flow, literal embed snippet, video-
+vs-embed table, persona H3s, honest-limits block, data-flow section, plans
+prose with refund + MoR, founder paragraph linking both X profiles + /about,
+FAQ. Marquee "3D · Made with Gifsy" moved to CSS (was 32× DOM text). Not
+done: depth-map + matte screenshots (need a founder-owned photo); links to
+/guides/* and /alternatives/* are held back until those routes exist.
+
+**Next:** phase 4 = `/alternatives/immersity-ai` (brief 10), then guides in
+run 06 order, then swap the held-back links in.
 
 ## Runs
 
@@ -225,11 +237,11 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
       (/privacy) vs "last 10% of the model" (README); remove the expired $5
       launch-offer code so the page can never show a price Dodo doesn't
       charge. (run 07)
-- [ ] State the data flow on `/` in the same words as `/privacy`: photo stays
+- [x] State the data flow on `/` in the same words as `/privacy`: photo stays
       in the browser; Free sends depth-model activations (not the photo) for
       one step; Pro fully local; publishing uploads the finished scene and it
       is public. Name the legal operator in `/terms`. (run 07)
-- [~] Founder paragraph on `/` in first person with a real number (44 MB
+- [x] Founder paragraph on `/` in first person with a real number (44 MB
       encoder, the Blob-firewall marquee incident) + GitHub link; minimal
       `/about` naming the founder, linked from every footer; a Contact link
       outside the legal pages; a gifsy.fun-domain email. (run 07)
@@ -247,7 +259,7 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
       (`GifWorkshop.tsx`) (run 05)
 - [x] Tool-page pattern: one-paragraph explainer ABOVE the uploader (first
       paint) + server-rendered body below each workshop in `page.tsx` (run 05)
-- [ ] `/` — rewrite to ~2,200 words around "3D photo maker"; add 3-step how-to,
+- [x] `/` — rewrite to ~2,200 words around "3D photo maker"; add 3-step how-to,
       use cases, 8–10 Q FAQ, "video vs interactive embed" table, "how it works",
       "what photos work best" (honest limits)
 - [x] `/create` — real copy + FAQ around "AI 3D photo animation"
