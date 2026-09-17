@@ -36,6 +36,61 @@ export const SECTION_LABEL: Record<ArticleSection, { eyebrow: string; title: str
 
 export const ARTICLES: Article[] = [
   {
+    slug: "interactive-3d-photos-for-websites",
+    section: "guides",
+    title: "Interactive 3D photos for websites: the complete guide (2026)",
+    shortTitle: "Interactive 3D Photos for Websites: The Complete Guide",
+    description:
+      "Turn one photo into a 3D scene visitors can drag, then embed it in Webflow, Framer, Squarespace or WordPress. What it is, why interactive beats a video, how it works, what to shoot, what it costs — with a live scene to try.",
+    date: "2026-09-18",
+    tags: ["hub", "3d-photo", "embed", "websites"],
+    words: 3100,
+  },
+  {
+    slug: "3d-photo-squarespace",
+    section: "guides",
+    title: "How to add an interactive 3D photo to Squarespace (Code block, not Embed block)",
+    shortTitle: "Add an Interactive 3D Photo to Squarespace",
+    description:
+      "Squarespace's Embed block wants an oEmbed URL; a Gifsy scene is an iframe, so it goes in a Code block. Where the block is, why 'Display source' must be off, the plan requirement, and how to size it on phones.",
+    date: "2026-09-18",
+    tags: ["squarespace", "embed", "how-to"],
+    words: 1400,
+  },
+  {
+    slug: "3d-photo-wordpress",
+    section: "guides",
+    title: "How to add a 3D photo to WordPress without a plugin",
+    shortTitle: "Add a 3D Photo to WordPress Without a Plugin",
+    description:
+      "One Custom HTML block — no slider plugin, no Photoshop layers. The block editor, Elementor and the classic editor, the wp_kses gotcha that silently strips iframes for non-admins, and how to make it responsive in a theme you don't control.",
+    date: "2026-09-18",
+    tags: ["wordpress", "embed", "how-to"],
+    words: 1600,
+  },
+  {
+    slug: "telegram-sticker-pack-from-browser",
+    section: "guides",
+    title: "How to make Telegram stickers from a photo without an app",
+    shortTitle: "Make Telegram Stickers From a Photo Without an App",
+    description:
+      "The whole flow from a browser: cut the subject out, get a 512×512 WebP, and build the pack with the @Stickers bot — including the /newpack vs /newemojipack trap and why you must send the file as a file.",
+    date: "2026-09-18",
+    tags: ["telegram", "stickers", "how-to"],
+    words: 1500,
+  },
+  {
+    slug: "telegram-sticker-size",
+    section: "guides",
+    title: "Telegram sticker size: 512×512, WebP vs PNG, and the 512 KB limit",
+    shortTitle: "Telegram Sticker Size and Format",
+    description:
+      "The exact rules for a static Telegram sticker — one side exactly 512 px, PNG or WebP with transparency, under 512 KB — with a WebP-vs-PNG table, the 100×100 emoji confusion, and what the @Stickers bot actually rejects.",
+    date: "2026-09-18",
+    tags: ["telegram", "stickers", "reference"],
+    words: 900,
+  },
+  {
     slug: "3d-photo-webflow",
     section: "guides",
     title: "How to add an interactive 3D photo to Webflow (one photo, no layers)",
