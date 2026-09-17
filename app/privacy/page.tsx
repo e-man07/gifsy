@@ -1,14 +1,14 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
+import { pageMetadata } from "@/lib/seo/metadata";
 import { CONTACT_EMAIL, COMPANY_NAME } from "@/lib/legal";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/privacy",
   title: "Privacy",
   description:
     "What Gifsy does and doesn't collect: GIFs and stickers stay on your device, 3D depth involves our server on the free plan, publishing uploads the finished scene.",
-  robots: { index: true, follow: true },
-};
+});
 
 export default function PrivacyPage() {
   return (
@@ -124,17 +124,27 @@ export default function PrivacyPage() {
 
       <h2>Analytics</h2>
       <p>
-        We use Vercel Analytics to count page views and a small number of
-        product events — for example that a scene was published, or that a
-        visitor interacted with a demo. It is aggregate and is not used to build
-        a profile of you or to track you across other websites.
+        We use two aggregate analytics services: Vercel Analytics, which counts
+        page views and a small number of product events (for example that a
+        scene was published, or that a visitor interacted with a demo), and
+        DataFast, which attributes visits and Pro purchases to the page or
+        campaign they came from. Neither is used to build a profile of you or
+        to track you across other websites, and neither receives your images.
       </p>
 
       <h2>Services we rely on</h2>
       <ul>
         <li>
-          <strong>Vercel</strong> — hosting, file storage for published scenes,
-          and analytics.
+          <strong>Vercel</strong> — hosting, analytics, and storage of the
+          depth model&apos;s first half that your browser downloads.
+        </li>
+        <li>
+          <strong>Cloudflare R2</strong> — file storage for published scenes.
+          The bucket is private; scene files are served through our own
+          domain.
+        </li>
+        <li>
+          <strong>DataFast</strong> — analytics (see above).
         </li>
         <li>
           <strong>Supabase</strong> — accounts and our database.
