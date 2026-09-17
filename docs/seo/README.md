@@ -48,8 +48,16 @@ briefs (09–15).
 Partial: the founder paragraph on `/` and the data-flow statement on `/` are
 deferred to the homepage rewrite (phase 2); `/about` carries both for now.
 
-**Next:** phase 2 = server-rendered copy on the three tool pages (briefs 14/15
-+ `/create`), then the homepage rewrite (brief 09), then `/alternatives/
+**Phase 2 done (2026-09-17)** — server-rendered copy on the three tool pages
+(`components/copy/{Gif,Sticker,Create}ToolCopy.tsx`): `/tools/gif` 50→1,362
+words, `/tools/sticker` 25→1,360, `/create` 27→1,139; keyword H1s + first-paint
+explainers in the workshops; FAQPage (+HowTo on sticker/create) + Breadcrumb
+JSON-LD; post-download bridge to `/create` from GIF and sticker. Not done from
+the briefs: first-party example GIFs / sticker screenshots (need the founders'
+own photos), measured WebP sizes, the competitor-table rows the brief marked
+"verify" (Kapwing omitted; ezgif/Imgflip/Canva kept to widely-documented facts).
+
+**Next:** phase 3 = homepage rewrite (brief 09), then `/alternatives/
 immersity-ai` (brief 10), then guides in run 06 order.
 
 ## Runs
@@ -231,20 +239,19 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
 
 **Pages**
 
-- [x] Inbound links to the tool pages: hero line + `SiteFooter` on every page
-      (done); post-download cross-link from GIF/sticker → `/create` still TODO
-      (phase 2, with the tool-page copy) (run 05)
-- [ ] Surface the hidden E-E-A-T copy as static text: the depth-model/
+- [x] Inbound links to the tool pages: hero line + `SiteFooter` on every page;
+      post-download cross-link from GIF/sticker → `/create` (run 05)
+- [x] Surface the hidden E-E-A-T copy as static text: the depth-model/
       segmentation/60fps paragraph + ≥640px note (`CreateWorkshop.tsx`), the
       Telegram 100×100 emoji-pack trap (`ImportGuide.tsx`), the chat-app note
       (`GifWorkshop.tsx`) (run 05)
-- [ ] Tool-page pattern: one-paragraph explainer ABOVE the uploader (first
+- [x] Tool-page pattern: one-paragraph explainer ABOVE the uploader (first
       paint) + server-rendered body below each workshop in `page.tsx` (run 05)
 - [ ] `/` — rewrite to ~2,200 words around "3D photo maker"; add 3-step how-to,
       use cases, 8–10 Q FAQ, "video vs interactive embed" table, "how it works",
       "what photos work best" (honest limits)
-- [ ] `/create` — real copy + FAQ around "AI 3D photo animation"
-- [ ] `/tools/gif` — ~1,400 words server-rendered under the tool: both modes,
+- [x] `/create` — real copy + FAQ around "AI 3D photo animation"
+- [x] `/tools/gif` — ~1,400 words server-rendered under the tool: both modes,
       3-step how-to, six presets with first-party example GIFs, verifiable
       privacy section, comparison table vs ezgif/Imgflip/Canva/Kapwing, which
       photos animate well, FAQ ×8, "make it move in real 3D" bridge to `/`.
@@ -253,7 +260,7 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
       component, preset pre-selected), a dedicated combine-mode route ("photo
       slideshow GIF maker"); guides "how to animate a photo into a GIF" and
       "GIF size limits for Slack/Discord/GitHub/email" (run 03)
-- [ ] `/tools/sticker` — ~1,800–2,200 words **server-rendered** below the tool:
+- [x] `/tools/sticker` — ~1,800–2,200 words **server-rendered** below the tool:
       3-step how-to, @Stickers bot flow (incl. the "exactly 100×100" emoji-pack
       trap), Telegram spec section (512 px, PNG vs WebP, ≤512 KB, send-as-file;
       cite core.telegram.org's "white stroke + black shadow"), no-upload/privacy,
