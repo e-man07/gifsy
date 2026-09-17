@@ -5,6 +5,7 @@ import { Analytics } from "@vercel/analytics/next"
 import Script from "next/script";
 import { siteOrigin, siteUrl } from "@/lib/site-url";
 import { JsonLd, organizationNodes, softwareApplicationNode } from "@/lib/seo/json-ld";
+import { FREE_GENERATION_LIMIT, PLAN_DISPLAY } from "@/lib/billing/plans";
 
 // Editorial display face, for page headlines only — a high-contrast serif
 // standing in for PP Editorial New, which is commercial. Variable weight, so
@@ -32,8 +33,7 @@ export const metadata: Metadata = {
     default: "3D Photo Maker — Interactive Depth, Embed Anywhere · Gifsy",
     template: "%s · Gifsy",
   },
-  description:
-    "Upload one photo. Gifsy adds real depth in your browser and hands you an iframe embed for Webflow, Framer or any site. Free to try, pay once — no subscription.",
+  description: `Make an interactive 3D photo from one image, in your browser. Drag it, then paste the iframe into Webflow, Framer or any site. ${FREE_GENERATION_LIMIT} free, then ${PLAN_DISPLAY.pro.price} once.`,
   alternates: { canonical: siteOrigin() },
   openGraph: {
     type: "website",
