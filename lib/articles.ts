@@ -36,6 +36,50 @@ export const SECTION_LABEL: Record<ArticleSection, { eyebrow: string; title: str
 
 export const ARTICLES: Article[] = [
   {
+    slug: "3d-photo-webflow",
+    section: "guides",
+    title: "How to add an interactive 3D photo to Webflow (one photo, no layers)",
+    shortTitle: "Add an Interactive 3D Photo to Webflow",
+    description:
+      "Every \"interactive image Webflow\" tutorial wants Photoshop-cut layers and an Interactions rig. This one starts from a single photo and uses Webflow's Embed element — about ten minutes, no code beyond one iframe.",
+    date: "2026-09-17",
+    tags: ["webflow", "embed", "how-to"],
+    words: 1660,
+  },
+  {
+    slug: "embed-3d-photo-on-website",
+    section: "guides",
+    title: "How to embed a 3D photo on any website (iframe guide)",
+    shortTitle: "Embed a 3D Photo on Any Website",
+    description:
+      "The universal iframe snippet, every attribute explained, what the frame actually loads, and the exact menu path for Webflow, Framer, Squarespace, WordPress, Wix, Carrd, Notion and Shopify — plus the troubleshooting table.",
+    date: "2026-09-17",
+    tags: ["embed", "iframe", "reference"],
+    words: 1750,
+  },
+  {
+    slug: "how-3d-photos-work",
+    section: "guides",
+    title: "How do 3D photos work? Depth maps, mattes and two planes, explained",
+    shortTitle: "How 3D Photos Work",
+    description:
+      "One photo becomes a scene with depth in five steps: a depth map, a subject matte, an inpainted backdrop, two displaced planes, and a camera orbit that stops at 23° for a reason. The models, the numbers, and what a 3D photo can't do.",
+    date: "2026-09-17",
+    tags: ["explainer", "depth-map", "3d-photo"],
+    words: 2400,
+  },
+  {
+    slug: "3d-photo-framer",
+    section: "guides",
+    title: "How to add a 3D photo to Framer with the Embed component",
+    shortTitle: "Add a 3D Photo to Framer",
+    description:
+      "Framer's Embed component takes raw HTML, so an interactive 3D photo is one iframe away. Where the component lives, how to size it per breakpoint, how to use it as a hero, and what to check before publishing.",
+    date: "2026-09-17",
+    tags: ["framer", "embed", "how-to"],
+    words: 870,
+  },
+  {
     slug: "immersity-ai",
     section: "alternatives",
     title: "Immersity AI (LeiaPix) alternatives in 2026: 8 tools compared",
