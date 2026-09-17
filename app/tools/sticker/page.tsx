@@ -1,6 +1,7 @@
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { StickerWorkshop } from "@/components/StickerWorkshop";
+import { StickerToolCopy } from "@/components/copy/StickerToolCopy";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
@@ -15,6 +16,7 @@ export default function StickerToolPage() {
     <main className="flex flex-1 flex-col bg-background">
       <SiteNav links={[{ href: "/gallery", label: "Gallery" }]} />
       <StickerWorkshop />
+      <StickerToolCopy />
       <SiteFooter />
     </main>
   );
