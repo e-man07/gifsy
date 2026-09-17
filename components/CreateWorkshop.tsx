@@ -398,7 +398,19 @@ export function CreateWorkshop() {
       <UpgradeDialog open={upgradeOpen} onClose={() => setUpgradeOpen(false)} />
 
       <div className="card rounded-2xl bg-panel p-5 sm:p-7">
-        <h1 className="font-editorial text-3xl text-foreground">Make your 3D photo</h1>
+        <h1 className="font-editorial text-3xl text-foreground">
+          AI 3D photo animation, made in your browser
+        </h1>
+        {/* First-paint explainer. Honest data flow: the photo stays here; on
+            Free the depth head runs server-side on activations; publishing
+            uploads the finished scene. */}
+        <p className="mt-2 text-sm text-muted">
+          Drop in one photo. A depth model turns it into a 3D scene and a second model lifts the
+          subject off the background. Drag to look around — the AI runs once, then it&apos;s pure
+          graphics at 60 fps. Export a GIF, PNG or WebM, or publish it and paste the iframe into
+          your site. 3D needs a free account; the photo stays in your browser while the scene is
+          made, and only the finished scene is uploaded when you publish.
+        </p>
 
         <div className="mt-5">
           <Uploader
@@ -421,7 +433,7 @@ export function CreateWorkshop() {
             <p className="flex items-start gap-2 rounded-xl bg-sky/10 px-3.5 py-2.5 text-xs font-semibold text-sky-deep">
               <Box className="mt-0.5 h-4 w-4 shrink-0" strokeWidth={2.5} aria-hidden />
               <span>
-                A depth model turns your photo into a 3D scene, and a second model lifts the subject off the background. Move your mouse to look around — the AI runs once, then it&apos;s pure graphics at 60 fps. 3D needs a free account; your photo itself isn&apos;t uploaded, and Pro runs the whole model locally.
+                Choose a look, then generate. On the free plan one step of the depth model runs on our server, fed with intermediate numbers rather than the photo; Pro runs the whole model on your device. Nothing is uploaded until you publish.
               </span>
             </p>
 

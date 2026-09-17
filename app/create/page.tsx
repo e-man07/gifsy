@@ -1,6 +1,7 @@
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { CreateWorkshop } from "@/components/CreateWorkshop";
+import { CreateToolCopy } from "@/components/copy/CreateToolCopy";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 export const metadata = pageMetadata({
@@ -15,6 +16,7 @@ export default function CreatePage() {
     <main className="flex flex-1 flex-col bg-background">
       <SiteNav links={[{ href: "/gallery", label: "Gallery" }]} />
       <CreateWorkshop />
+      <CreateToolCopy />
       <SiteFooter />
     </main>
   );
