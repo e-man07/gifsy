@@ -3,16 +3,17 @@
 // surfaces cannot advertise different things. What is left here is the page
 // chrome around them, which is why this is a plain server component now.
 
-import type { Metadata } from "next";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
+import { pageMetadata } from "@/lib/seo/metadata";
 import { PlanCards } from "@/components/PlanCards";
 import { PLAN_DISPLAY } from "@/lib/billing/plans";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/pricing",
   title: "Pricing",
   description: `GIFs and stickers are free forever and need no account. Pro is a one-time ${PLAN_DISPLAY.pro.price} payment for unlimited 3D generations, no badge, and commercial use.`,
-  robots: { index: true, follow: true },
-};
+});
 
 export default function PricingPage() {
   return (
@@ -39,6 +40,7 @@ export default function PricingPage() {
       <section className="mx-auto w-full max-w-6xl flex-1 px-5 py-10 sm:px-8 sm:py-14">
         <PlanCards next="/pricing" />
       </section>
+      <SiteFooter />
     </main>
   );
 }

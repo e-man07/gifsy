@@ -4,20 +4,18 @@ import { useCallback, useEffect, useState, type CSSProperties } from "react";
 import Image from "next/image";
 import { Uploader } from "@/components/Uploader";
 import { ScrollReveal } from "@/components/ScrollReveal";
+import { SiteFooter } from "@/components/SiteFooter";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { AccountMenu } from "@/components/AccountMenu";
 import { Wordmark } from "@/components/Wordmark";
 import { GalleryStrip } from "@/components/GalleryGrid";
 import { CommunityShowcase } from "@/components/CommunityShowcase";
-import { OfferBanner } from "@/components/OfferBanner";
 import { PersonaShowcase } from "@/components/PersonaShowcase";
 import { PlanCards } from "@/components/PlanCards";
 import { GALLERY_COUNT } from "@/lib/gallery";
 // Quoted in the hero badges so the landing page can't drift from /pricing.
 import { FREE_GENERATION_LIMIT, PLAN_DISPLAY } from "@/lib/billing/plans";
-import { OFFER_ENDS_AT, OFFER_PRICE } from "@/lib/billing/offer";
-import { useCountdown } from "@/lib/use-countdown";
 
 // Lightning geometry for the cinema section, in a 1000x500 viewBox scaled
 // with "slice" so nothing is stretched — the centre of the box stays the
@@ -60,10 +58,6 @@ export default function Home() {
   // the loudest positioning signal on the page. GIF/sticker stay one click away.
   const [mode, setMode] = useState<Mode>("3d");
   const [gifMode, setGifMode] = useState<GifMode>("animate");
-  // Drives the "Keep going for $X" heading below — kept in sync with the
-  // OfferBanner and PlanCards' Pro card so this page never shows two
-  // different prices for the same offer at once.
-  const offer = useCountdown(OFFER_ENDS_AT);
 
   // The nav is fixed, so it crosses from the hero photo onto the white panels
   // below. The glass treatment stays put the whole way; only the type flips
@@ -112,14 +106,8 @@ export default function Home() {
     <main className="flex flex-1 flex-col">
       <ScrollReveal />
 
-      {/* Fixed header stack: the offer banner (when live) sits above the nav
-          pill, both pinned to the real viewport top. Stacking them inside one
-          `fixed` wrapper means the pill always sits right under the banner's
-          actual rendered height — including when the banner wraps to two
-          lines on a phone — with no manual offset to keep in sync. */}
+      {/* Fixed header: the nav pill pinned to the real viewport top. */}
       <div className="fixed inset-x-0 top-0 z-50 flex flex-col">
-        <OfferBanner />
-
         {/* Nav: a frosted pill pinned to the viewport, so it stays reachable
             the whole way down the page. It lives outside the hero
             deliberately — sitting inside a section with `overflow-hidden`
@@ -201,16 +189,8 @@ export default function Home() {
 
         {/* Hero content: centered, single column, matching the reference —
             one message in the middle of the frame instead of text pinned
-            against an empty second column.
-            Extra top clearance while the offer banner is live: it adds a row
-            to the fixed header sitting above this section, and without the
-            bump the badge text right below crowds into the nav pill. Reverts
-            to the original spacing on its own once the offer expires. */}
-        <div
-          className={`relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-5 pb-20 text-center sm:px-8 ${
-            offer.active ? "pt-40 sm:pt-44" : "pt-36 sm:pt-40"
-          }`}
-        >
+            against an empty second column. */}
+        <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-5 pb-20 pt-36 text-center sm:px-8 sm:pt-40">
           {/* Product Hunt featured badge. Plain <img>: the badge is a remote
               SVG that Product Hunt regenerates (the `t` param is a cache
               buster), so next/image would only add a hop and a remotePatterns
@@ -331,6 +311,25 @@ export default function Home() {
               </span>
             ))}
           </div>
+
+          {/* Real <a> links to the three tool pages. The mode toggle above is
+              buttons + router.push, which is invisible to a crawler — before
+              this line nothing on the site linked to /create, /tools/gif or
+              /tools/sticker at all. */}
+          <p className="mt-4 text-xs text-white/85 [text-shadow:0_1px_3px_rgba(4,16,29,0.9)]">
+            Or open a tool directly:{" "}
+            <Link href="/create" className="underline underline-offset-2 hover:text-white">
+              3D photo maker
+            </Link>
+            {" · "}
+            <Link href="/tools/gif" className="underline underline-offset-2 hover:text-white">
+              animate a photo into a GIF
+            </Link>
+            {" · "}
+            <Link href="/tools/sticker" className="underline underline-offset-2 hover:text-white">
+              Telegram sticker maker
+            </Link>
+          </p>
         </div>
 
         {/* Scroll cue */}
@@ -652,16 +651,7 @@ export default function Home() {
               Plans
             </p>
             <h2 className="mt-2 font-editorial text-3xl text-foreground sm:text-4xl">
-              {offer.active ? (
-                <>
-                  Keep going for {OFFER_PRICE}, once.{" "}
-                  <span className="num text-2xl text-muted line-through sm:text-3xl">
-                    {PLAN_DISPLAY.pro.price}
-                  </span>
-                </>
-              ) : (
-                <>Keep going for {PLAN_DISPLAY.pro.price}, once.</>
-              )}
+              Keep going for {PLAN_DISPLAY.pro.price}, once.
             </h2>
             <p className="mt-2 text-sm text-muted sm:text-base">
               GIFs and stickers stay free and unlimited, no account needed. Pro
@@ -675,26 +665,7 @@ export default function Home() {
         </div>
       </section>
 
-      <footer className="mt-auto border-t border-foreground/10 bg-panel py-5 text-center font-display text-xs uppercase tracking-wide text-muted">
-        <p>Made in your browser · your photo is only uploaded when you publish</p>
-        <nav className="mt-2 flex flex-wrap items-center justify-center gap-4">
-          <Link href="/pricing" className="hover:text-foreground">
-            Pricing
-          </Link>
-          <Link href="/gallery" className="hover:text-foreground">
-            Gallery
-          </Link>
-          <Link href="/privacy" className="hover:text-foreground">
-            Privacy
-          </Link>
-          <Link href="/terms" className="hover:text-foreground">
-            Terms
-          </Link>
-          <Link href="/refund" className="hover:text-foreground">
-            Refunds
-          </Link>
-        </nav>
-      </footer>
+      <SiteFooter note="Made in your browser · your photo is only uploaded when you publish" />
     </main>
   );
 }

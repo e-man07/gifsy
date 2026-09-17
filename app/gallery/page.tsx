@@ -1,24 +1,19 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { GalleryGrid } from "@/components/GalleryGrid";
 import { GALLERY_COUNT } from "@/lib/gallery";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
+import { pageMetadata } from "@/lib/seo/metadata";
 import { ScrollReveal } from "@/components/ScrollReveal";
 
-export const metadata: Metadata = {
-  title: "3D Gallery",
+export const metadata = pageMetadata({
+  path: "/gallery",
+  title: "3D Photo Gallery — Interactive Depth From One Photo",
+  ogTitle: "Gifsy 3D Gallery",
   description:
-    "See what Gifsy's 3D mode does to a single photo — real depth, in motion, rendered in your browser. No modeling, and your photo itself is never uploaded to make one.",
-  openGraph: {
-    // Standalone: the "%s · Gifsy" template applies to `title`, not to og:title.
-    title: "Gifsy 3D Gallery",
-    description:
-      "Every scene started as one still photo. Gifsy gives it real depth — in your browser.",
-    type: "website",
-  },
-  robots: { index: true, follow: true },
-};
+    "See what Gifsy's 3D mode does to a single photo — real depth, in motion, rendered in your browser. Every scene started as one still image.",
+});
 
 export default function GalleryPage() {
   return (
@@ -83,9 +78,7 @@ export default function GalleryPage() {
         </div>
       </section>
 
-      <footer className="mt-auto border-t border-foreground/10 bg-panel py-5 text-center font-display text-xs uppercase tracking-wide text-muted">
-        Made in your browser · your photo is only uploaded when you publish
-      </footer>
+      <SiteFooter />
     </main>
   );
 }
