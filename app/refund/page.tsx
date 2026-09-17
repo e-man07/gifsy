@@ -1,6 +1,6 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
+import { pageMetadata } from "@/lib/seo/metadata";
 import {
   CONTACT_EMAIL,
   COMPANY_NAME,
@@ -9,11 +9,12 @@ import {
 } from "@/lib/legal";
 import { PLAN_DISPLAY } from "@/lib/billing/plans";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/refund",
   title: "Refunds",
-  description: `Gifsy Pro is a one-time ${PLAN_DISPLAY.pro.price} payment with nothing to cancel, and a no-questions refund within ${REFUND_WINDOW_DAYS} days.`,
-  robots: { index: true, follow: true },
-};
+  description:
+    `Gifsy Pro is a one-time ${PLAN_DISPLAY.pro.price} payment with nothing to cancel, and a no-questions refund within ${REFUND_WINDOW_DAYS} days.`,
+});
 
 export default function RefundPage() {
   return (
