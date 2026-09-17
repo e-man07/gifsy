@@ -21,7 +21,7 @@ export const HOME_FAQ: Faq[] = [
   },
   {
     q: "Can I put it on Webflow, Framer, Squarespace or WordPress?",
-    a: "Any site that accepts an iframe or an HTML embed: paste the snippet into Webflow's Embed element, Framer's Embed component, a Squarespace code block, a WordPress custom-HTML block, Carrd, Notion and the rest. Some builders only allow custom code on certain plans, so check yours.",
+    a: "Any site that accepts an iframe or an HTML embed: paste the snippet into Webflow's Code Embed (a paid-plan element), Framer's Embed component, a Squarespace code block, a WordPress custom-HTML block, Carrd, Notion and the rest. Some builders only allow custom code on certain plans, so check yours.",
   },
   {
     q: "Can I remove the \"Made with Gifsy\" badge?",

@@ -65,7 +65,7 @@ const TOC = [
 const FAQ: Faq[] = [
   {
     q: "Can I embed a 3D photo on my website without any code?",
-    a: "Yes. Paste the iframe into your builder's embed element — Webflow's Embed, Framer's Embed, a Squarespace Code block, WordPress's Custom HTML block, Wix's Embed HTML, Carrd's Embed — or paste the plain URL into Notion. The only thing you type is a height.",
+    a: "Yes. Paste the iframe into your builder's embed element — Webflow's Code Embed (paid plans only), Framer's Embed, a Squarespace Code block, WordPress's Custom HTML block, Wix's Embed HTML, Carrd's Embed — or paste the plain URL into Notion. The only thing you type is a height.",
   },
   {
     q: "Does the iframe slow my site down?",
@@ -217,9 +217,11 @@ export default function EmbedGuide() {
       <p>Each one opens with the exact menu path, then the one thing that trips people up.</p>
       <h3>Webflow</h3>
       <p>
-        Add panel → Components → <strong>Embed</strong> → paste → Save &amp; Close. Set the
-        wrapper&apos;s aspect ratio at each breakpoint. Gotcha: custom code publishes to a custom
-        domain only on a paid Site plan. Full walkthrough:{" "}
+        Add panel → search &ldquo;embed&rdquo; → <strong>Code Embed</strong> → paste → Save &amp;
+        Close. Set the wrapper&apos;s aspect ratio at each breakpoint. Gotcha: Code Embed is
+        locked on a free Starter site (it won&apos;t even drag onto the canvas) — it needs a paid
+        Site plan or a paid Workspace. On the free plan, show the scene as a WebM in a Background
+        Video element instead. Full walkthrough, tested on a free account:{" "}
         <Link href="/guides/3d-photo-webflow">add a 3D photo to Webflow</Link>.
       </p>
       <h3>Framer</h3>

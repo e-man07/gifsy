@@ -325,7 +325,7 @@ export default function Home() {
               </pre>
               <ul className="mt-4 grid gap-3 sm:grid-cols-3">
                 {[
-                  { name: "Webflow", how: "Embed element", href: "/guides/3d-photo-webflow" },
+                  { name: "Webflow", how: "Code Embed (paid plan) or Background Video", href: "/guides/3d-photo-webflow" },
                   { name: "Framer", how: "Embed component, HTML", href: "/guides/3d-photo-framer" },
                   { name: "Squarespace, WordPress, Carrd, Notion", how: "Code or custom-HTML block", href: "/guides/embed-3d-photo-on-website" },
                 ].map((p) => (
