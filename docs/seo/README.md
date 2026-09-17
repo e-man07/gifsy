@@ -92,10 +92,23 @@ pricing/output/data-handling on 17 Sep 2026 and that the hands-on same-photo
 test (criterion 6) is not yet run; CapCut + Motionleap rows flagged as
 unverified by tooling.
 
-**Next:** guides in run 06 order (`/guides` index + `/guides/3d-photo-webflow`,
-`/guides/embed-3d-photo-on-website`, `/guides/how-3d-photos-work`,
-`/guides/3d-photo-framer`), then swap the held-back links into `/` and the
-tool pages, then the hub.
+**Phase 5 done (2026-09-17)** — `/guides` index + four guides on the article
+layout: `/guides/3d-photo-webflow` (1,660w, HowTo+FAQ), `/guides/embed-3d-
+photo-on-website` (1,750w, HowTo+FAQ, platform-by-platform + troubleshooting
+table), `/guides/how-3d-photos-work` (2,400w, FAQ, live embed on the page,
+disambiguation table, approved data-flow statement, citations),
+`/guides/3d-photo-framer` (870w, HowTo+FAQ). Held-back links swapped in: the
+homepage embed tiles now link the three guides, how-it-works links the
+explainer, video-vs-embed links the comparison; footer gained a "Learn"
+column; `/create` next-links; sitemap has 17 URLs. Not done: the screenshots
+each guide brief specifies (need a founder-owned photo); Webflow/Framer/
+Squarespace/Carrd plan tiers are worded as "check your plan" because the
+tooling could not verify them.
+
+**Next:** the editorial hub `/guides/interactive-3d-photos-for-websites`
+(run 06), then Squarespace + WordPress guides, best-photos guide, and the
+Telegram sticker guides (brief 15). Then Search Console: request indexing
+for every URL in the sitemap.
 
 ## Runs
 
@@ -318,8 +331,8 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
 - [ ] explainer assets from eng (brief 13): a raw-depth dump + refined-depth
       crop, a backdrop-bearing demo scene for the push-pull-vs-LaMa screenshot,
       an orbit-extreme capture, an exploded-plane SVG
-- [ ] `/guides` index + hub `/guides/interactive-3d-photos-for-websites` (run 06)
-- [ ] spokes per run 06 order: `/guides/3d-photo-webflow`,
+- [~] `/guides` index + hub `/guides/interactive-3d-photos-for-websites` (run 06)
+- [~] spokes per run 06 order: `/guides/3d-photo-webflow`,
       `/guides/embed-3d-photo-on-website`, `/guides/how-3d-photos-work`,
       `/guides/3d-photo-framer`, then Squarespace/WordPress/best-photos/
       video-vs-interactive, use-case pages, `/compare/3d-photo-makers`
