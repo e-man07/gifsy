@@ -87,7 +87,15 @@ export function SiteFooter({
         </div>
         <p className="mt-8 text-xs">
           © {new Date().getFullYear()} Gifsy · made by{" "}
-          {FOUNDERS.map((f) => f.name).join(" & ")} ❤️
+          {FOUNDERS.map((f, i) => (
+            <span key={f.x}>
+              {i > 0 && " & "}
+              <a href={f.x} className={linkCls} rel="me noopener" target="_blank">
+                {f.name}
+              </a>
+            </span>
+          ))}{" "}
+          ❤️
         </p>
       </div>
     </footer>
