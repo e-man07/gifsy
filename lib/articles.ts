@@ -40,11 +40,12 @@ export const ARTICLES: Article[] = [
     section: "guides",
     title: "How to add an interactive 3D photo to Webflow (one photo, no layers)",
     shortTitle: "Add an Interactive 3D Photo to Webflow",
+    updated: "2026-09-17",
     description:
-      "Every \"interactive image Webflow\" tutorial wants Photoshop-cut layers and an Interactions rig. This one starts from a single photo and uses Webflow's Embed element — about ten minutes, no code beyond one iframe.",
+      "Every \"interactive image Webflow\" tutorial wants Photoshop-cut layers and an Interactions rig. This one starts from a single photo and uses Webflow's Code Embed — about ten minutes, no code beyond one iframe. Tested on a free account: what's locked, what it costs, and the free-plan video route.",
     date: "2026-09-17",
-    tags: ["webflow", "embed", "how-to"],
-    words: 1660,
+    tags: ["webflow", "embed", "how-to", "tested"],
+    words: 2150,
   },
   {
     slug: "embed-3d-photo-on-website",

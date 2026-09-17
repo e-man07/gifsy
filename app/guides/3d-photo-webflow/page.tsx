@@ -1,7 +1,13 @@
 // /guides/3d-photo-webflow — spoke 2 of the guides cluster (docs/seo/runs/11).
-// The Webflow plan gate could not be verified by our tooling on 2026-09-17
-// (help.webflow.com and webflow.com/pricing both refused the fetch), so the
-// plan callout is worded as "check your plan" rather than quoting tiers.
+//
+// Hands-on verified 2026-09-17 in a free Starter workspace + Starter site
+// (test site: gifsy-embed-test.webflow.io): the element is "Code Embed", it
+// is LOCKED on a free site (tooltip: "This element requires a paid site or
+// account plan"), the star badge opens the site's Plans page, and the
+// free-plan route is the Background Video element with Gifsy's WebM export —
+// which Webflow transcodes to MP4 and which renders behind a section
+// background unless the element gets its own z-index. Plan names/prices are
+// from the Plans page shown to that account on that day.
 
 import Link from "next/link";
 import { ArticleLayout, H2 } from "@/components/article/ArticleLayout";
@@ -22,7 +28,7 @@ export const metadata = pageMetadata({
 const STEPS = [
   { name: "Make the 3D photo", text: "Upload one photo at gifsy.fun/create, generate, and click Publish." },
   { name: "Copy the embed snippet", text: "One iframe, copied from the publish panel." },
-  { name: "Add an Embed element in Webflow", text: "Add panel → Components → Embed → paste → Save & Close." },
+  { name: "Add a Code Embed in Webflow", text: "Add panel → Elements → search \"embed\" → Code Embed → paste → Save & Close. Needs a paid site or workspace plan." },
   { name: "Make it responsive", text: "Width 100% and an aspect ratio on a wrapper, instead of the fixed 500 px height." },
   { name: "Publish and check on a phone", text: "Drag sideways to orbit; swipe to scroll." },
 ];
@@ -40,7 +46,8 @@ const TOC = [
   { id: "quick", title: "Quick answer: the 5 steps" },
   { id: "need", title: "What you need" },
   { id: "step1", title: "Step 1 — Make the photo, copy the code" },
-  { id: "step2", title: "Step 2 — The Embed element" },
+  { id: "step2", title: "Step 2 — The Code Embed element" },
+  { id: "free", title: "On the free plan: Background Video" },
   { id: "step3", title: "Step 3 — Make it responsive" },
   { id: "hero", title: "Using it as a hero" },
   { id: "performance", title: "Performance" },
@@ -53,7 +60,7 @@ const TOC = [
 const FAQ: Faq[] = [
   {
     q: "Can I add an interactive image to Webflow on the free plan?",
-    a: "You can add the Embed element in the Designer and preview it on your webflow.io staging address on any plan. Publishing custom code to a custom domain needs a paid Site plan — check Webflow's current pricing page for the exact tier before you commit a client to it.",
+    a: "Not the live, draggable version: on a free Starter site the Code Embed element is greyed out in the Add panel and can't even be dragged onto the canvas — Webflow's tooltip says it requires a paid site or account plan. What you can do on the free plan is show the same scene as a looping clip: export a WebM from Gifsy and drop it into Webflow's Background Video element, which is free.",
   },
   {
     q: "Does Webflow support 3D images natively?",
@@ -73,7 +80,7 @@ const FAQ: Faq[] = [
   },
   {
     q: "Can I use it in a Webflow CMS Collection page?",
-    a: "Yes. Put the Embed element in the Collection page template and insert a CMS field for the scene id inside the iframe's src — Webflow lets you add fields inside an Embed. Store each item's Gifsy scene id in a plain-text field.",
+    a: "Yes. Put the Code Embed in the Collection page template, click Edit code, place the cursor inside the iframe's src where the scene id goes, click the purple dot on that line to open the connect menu, and pick a plain-text CMS field that holds each item's Gifsy scene id. Save & Close. The embed has to be inside a Collection list or on a Collection page for the field to appear.",
   },
   {
     q: "Can I remove the \"Made with Gifsy\" badge?",
@@ -93,7 +100,7 @@ export default function WebflowGuide() {
       extraGraph={[
         howToNode({
           name: "How to add an interactive 3D photo to Webflow",
-          description: "Publish a 3D photo on Gifsy and place it in Webflow with the Embed element, sized with an aspect ratio.",
+          description: "Publish a 3D photo on Gifsy and place it in Webflow with the Code Embed element, sized with an aspect ratio.",
           steps: STEPS,
         }),
         faqPageNode(FAQ),
@@ -103,8 +110,10 @@ export default function WebflowGuide() {
         Every &ldquo;interactive image Webflow&rdquo; tutorial starts the same way: cut your
         photo into Photoshop layers, then build an Interactions rig that tilts them with the
         cursor. This guide skips both. You start from one photo, Gifsy estimates the depth and
-        cuts the subject out, and Webflow gets a single Embed element. About ten minutes, no
-        code beyond one iframe — and it is a photo, not a 3D model, so nothing needs modelling.
+        cuts the subject out, and Webflow gets a single Code Embed element. About ten minutes,
+        no code beyond one iframe — and it is a photo, not a 3D model, so nothing needs
+        modelling. One thing to know before you start: Code Embed is a paid-plan element; on a
+        free site the route is a looping video instead (covered below).
         For the wider picture, see the{" "}
         <Link href="/guides/embed-3d-photo-on-website">full iframe embed guide</Link>.
       </p>
@@ -121,10 +130,17 @@ export default function WebflowGuide() {
       <H2 id="need">What you need</H2>
       <ul>
         <li>
-          <strong>A Webflow site where custom code publishes.</strong> The Embed element works in
-          the Designer and on your <code>.webflow.io</code> staging address on every plan; publishing
-          it to a custom domain needs a paid Site plan. We could not verify the exact tier names on
-          the day this was written — check webflow.com/pricing before promising a client.
+          <strong>A Webflow site on a paid plan — or a paid Workspace.</strong> Checked on a free
+          Starter workspace on 17 September 2026: the Code Embed element is greyed out in the
+          Add panel with the tooltip &ldquo;This element requires a paid site or account plan.
+          Click the star icon to upgrade your plan.&rdquo; It can&apos;t be dragged onto the
+          canvas at all. Clicking the star opens the site&apos;s Plans page, which listed
+          <strong> Basic at $15/month</strong> and <strong>Premium at $25/month</strong> (both
+          billed yearly) as the paid Site plans; the Workspace plans page listed{" "}
+          <strong>Core at $19/month</strong> and <strong>Growth at $49/month</strong> with
+          &ldquo;custom code on staged sites&rdquo;, so a paid Workspace also unlocks it on a{" "}
+          <code>.webflow.io</code> staging site without a Site plan. Prices change; the lock does
+          not.
         </li>
         <li>
           <strong>A photo with one clear subject</strong>, at least 640 px on the long edge, with
@@ -154,28 +170,34 @@ export default function WebflowGuide() {
         snippet doesn&apos;t include one yet.
       </p>
 
-      <H2 id="step2">Step 2 — Add an Embed element in the Webflow Designer</H2>
+      <H2 id="step2">Step 2 — Add a Code Embed in the Webflow Designer</H2>
       <ol>
         <li>Open the page. Open the Add panel (the <strong>+</strong> top-left, or ⌘/Ctrl + E).</li>
-        <li>Scroll to <strong>Components</strong> and drag <strong>Embed</strong> into the Section or Container where the scene should sit.</li>
-        <li>The <strong>Edit Code</strong> modal opens (it also opens from the element&apos;s settings gear). Paste the iframe. Click <strong>Save &amp; Close</strong>.</li>
+        <li>
+          Type &ldquo;embed&rdquo; in the search box, or scroll to <strong>Advanced</strong>. The
+          element is called <strong>Code Embed</strong> (icon: <code>&lt;/&gt;</code>). Click it to
+          insert it into the selected element, or drag it into the Section or Container where the
+          scene should sit.
+        </li>
+        <li>The <strong>Edit code</strong> modal opens (it also opens from the element&apos;s settings). Paste the iframe. Click <strong>Save &amp; Close</strong>.</li>
       </ol>
       <p>
-        The Designer may show a &ldquo;Custom code&rdquo; placeholder rather than the live scene;
-        publish, or open the staging address, to see it running.
+        Webflow&apos;s own note applies here: scripts inside a Code Embed don&apos;t fully render
+        until you publish, so preview on the staging address to see the scene running. The
+        element takes up to 50,000 characters; the snippet is about 120.
       </p>
-      <h3>Embed element vs Page or Site custom code</h3>
+      <h3>Code Embed vs Page or Site custom code</h3>
       <p>
         Use the <em>element</em>: it has a position in the page flow. Page settings → Custom code
         → &ldquo;Before &lt;/body&gt;&rdquo; is for scripts, and an iframe pasted there has no
         layout position. Never paste it into Site settings custom code. The 50,000-character
-        limit on Embed elements is irrelevant here — the snippet is about 120 characters.
+        limit on Code Embeds is irrelevant here — the snippet is about 120 characters.
       </p>
 
       <H2 id="step3">Step 3 — Make it responsive (aspect ratio, not fixed height)</H2>
       <p>
         A fixed 500 px looks fine on a laptop and crops badly on a phone. Wrap the iframe and
-        size the wrapper by aspect ratio instead. Paste this whole block into the Embed element:
+        size the wrapper by aspect ratio instead. Paste this whole block into the Code Embed:
       </p>
       <pre className="overflow-x-auto rounded-xl bg-ink p-4 text-xs leading-relaxed text-cloud sm:text-sm"><code>{RESPONSIVE}</code></pre>
       <p>
@@ -187,10 +209,44 @@ export default function WebflowGuide() {
         <code>height: 0; padding-top: 75%</code> (4/3) or <code>56.25%</code> (16/9).
       </p>
 
+      <H2 id="free">On the free plan: the same scene as a looping video</H2>
+      <p>
+        If you&apos;re on a Starter site and not ready to pay, you can still show the scene —
+        just not the draggable version. Export a <strong>WebM</strong> clip of the orbit from the
+        Gifsy workshop and use Webflow&apos;s <strong>Background Video</strong> element, which is
+        available on the free plan. We built a whole demo store this way on a Starter site:{" "}
+        <a href="https://gifsy-embed-test.webflow.io/" rel="noopener" target="_blank">
+          gifsy-embed-test.webflow.io
+        </a>
+        .
+      </p>
+      <ol>
+        <li>In Gifsy, open your scene and export <strong>WebM</strong> (GIF works too, via an Image element, but it&apos;s heavier).</li>
+        <li>Add panel → search &ldquo;video&rdquo; → <strong>Background Video</strong> (under Media). Click it to insert into the selected container.</li>
+        <li>In the Background Video settings, click <strong>Upload video</strong>. Accepted: <strong>webm, mp4, mov, ogg, under 30 MB</strong>. Leave <strong>Loop video</strong> and <strong>Autoplay video</strong> on; turn off &ldquo;Include play/pause button&rdquo; if you don&apos;t want the round icon.</li>
+        <li>Give the element a <strong>height</strong> in the Style panel (it has no intrinsic height — inside a grid it collapses to nothing). 320 px worked for a card; a hero wants a vh value.</li>
+      </ol>
+      <p>Two things we hit that no tutorial mentions:</p>
+      <ul>
+        <li>
+          <strong>Webflow transcodes the upload.</strong> A 561 KB WebM came back as an MP4
+          served from Webflow&apos;s CDN at 990 px wide. So WebM in, MP4 out — fine for playback,
+          but don&apos;t expect the exact file you uploaded.
+        </li>
+        <li>
+          <strong>The video can be invisible on a coloured section.</strong> Webflow&apos;s
+          Background Video puts the <code>&lt;video&gt;</code> at <code>z-index: -100</code>. If
+          the element itself has no z-index, the section&apos;s background colour paints over
+          the video and you get a blank box with a pause button — in the Designer and live. Fix:
+          select the Background Video, Style panel → Position → set <strong>z-index to 1</strong>.
+          The frame appears immediately.
+        </li>
+      </ul>
+
       <H2 id="hero">Using it as a hero image</H2>
       <ul>
         <li>Hero section <code>position: relative</code>, a min-height of around 80vh.</li>
-        <li>Embed element absolute, full-bleed, <code>z-index: 0</code>.</li>
+        <li>Code Embed absolute, full-bleed, <code>z-index: 0</code>.</li>
         <li>Headline and CTA in a wrapper at <code>z-index: 1</code> with <code>pointer-events: none</code>, and <code>pointer-events: auto</code> back on the button — otherwise the copy blocks the drag.</li>
         <li><strong>Drop <code>loading=&quot;lazy&quot;</code></strong> — lazy loading is for frames below the viewport.</li>
         <li>Keep the copy off the subject: left-aligned text over a subject that sits right of centre, or the reverse.</li>
@@ -230,17 +286,20 @@ export default function WebflowGuide() {
             <tr><td>Interactions &ldquo;mouse move&rdquo; + PNG layers</td><td>Cutting layers per photo in Photoshop or GIMP</td><td>Tilts with the cursor; no touch drag</td><td>You already have layered art and want zero third-party code</td></tr>
             <tr><td>Webflow 2.5D with 3D transforms</td><td>Separated layers</td><td>Static unless you add Interactions</td><td>Illustration and UI compositions</td></tr>
             <tr><td>Spline, model-viewer, Vectary</td><td>An actual 3D model; some are paid</td><td>Orbit a real mesh</td><td>Products and objects, not photos</td></tr>
-            <tr><td>Gifsy embed</td><td>One photo</td><td>Grab-to-orbit about ±23°, touch included</td><td>Portraits, hero photos, portfolio stills</td></tr>
+            <tr><td>Gifsy embed (Code Embed, paid plan)</td><td>One photo</td><td>Grab-to-orbit about ±23°, touch included</td><td>Portraits, hero photos, portfolio stills</td></tr>
+            <tr><td>Gifsy WebM in Background Video (free plan)</td><td>One photo</td><td>Loops; not interactive</td><td>The same scene on a Starter site</td></tr>
           </tbody>
         </table>
       </div>
       <p>To be fair to the first row: Interactions come with any paid plan and keep everything first-party.</p>
 
       <H2 id="troubleshooting">Troubleshooting</H2>
+      <h3>The Code Embed is greyed out and won&apos;t drag</h3>
+      <p>The plan gate. On a free site it can&apos;t be added at all; the star badge on the tile opens the Plans page. Use the Background Video route above, or upgrade the site or workspace.</p>
       <h3>The Embed shows a placeholder in the Designer</h3>
       <p>Normal. Publish, or open the staging address.</p>
-      <h3>Nothing renders on my custom domain</h3>
-      <p>The plan gate. Custom code needs a paid Site plan to publish to a custom domain.</p>
+      <h3>A Background Video is a blank box with a pause button</h3>
+      <p>Give the element a z-index (Style → Position → z-index 1) and a height. See the free-plan section.</p>
       <h3>It is a fixed 500 px and crops on mobile</h3>
       <p>Step 3 — size by aspect ratio and change it at the phone breakpoint.</p>
       <h3>I can&apos;t drag it — the hero text is in the way</h3>
