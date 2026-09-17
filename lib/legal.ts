@@ -10,11 +10,12 @@ export const CONTACT_EMAIL = "aman@metamemory.tech";
  *  "the courts at <city>"), add the city here and adjust the Terms sentence. */
 export const GOVERNING_LAW = "India";
 
-/** Trading name shown in the policies. */
+/** Trading name shown in the policies. There is no registered company: the
+ *  service is operated by the individuals in lib/founders.ts, trading as this. */
 export const COMPANY_NAME = "Gifsy";
 
 /** Shown at the top of each policy. Bump when you change the text. */
-export const POLICY_LAST_UPDATED = "9 September 2026";
+export const POLICY_LAST_UPDATED = "17 September 2026";
 
 /** Days after the Pro payment during which a refund is granted on request.
  *  Pro is a single payment, so there is exactly one payment this can apply to. */

@@ -1,6 +1,7 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { LegalPage } from "@/components/LegalPage";
+import { pageMetadata } from "@/lib/seo/metadata";
+import { OPERATOR_NAMES } from "@/lib/founders";
 import {
   CONTACT_EMAIL,
   COMPANY_NAME,
@@ -10,12 +11,12 @@ import {
 } from "@/lib/legal";
 import { FREE_GENERATION_LIMIT, PLAN_DISPLAY } from "@/lib/billing/plans";
 
-export const metadata: Metadata = {
+export const metadata = pageMetadata({
+  path: "/terms",
   title: "Terms",
   description:
     "The terms for using Gifsy: your content stays yours, what Free and one-time Pro each allow, and the limits of the service.",
-  robots: { index: true, follow: true },
-};
+});
 
 export default function TermsPage() {
   return (
@@ -32,6 +33,14 @@ export default function TermsPage() {
         <Link href="/privacy">privacy policy</Link>). Published 3D
         scenes are hosted by us and given a shareable link and an embed code. By
         using {COMPANY_NAME}, you agree to these terms.
+      </p>
+      <p>
+        <strong>Who you are dealing with.</strong> {COMPANY_NAME} is not a
+        registered company. It is operated by {OPERATOR_NAMES}, as individuals,
+        trading as {COMPANY_NAME}; &ldquo;we&rdquo; and &ldquo;us&rdquo; in
+        these terms means them. Purchases of Pro are sold by Dodo Payments as
+        merchant of record (see <Link href="/refund">Refund Policy</Link>), so
+        Dodo, not us, is the seller named on your receipt.
       </p>
 
       <h2>Your account</h2>
