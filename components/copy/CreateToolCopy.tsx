@@ -1,27 +1,30 @@
-// Server-rendered copy for /create. The workshop's own explanation only
-// appeared after a photo was added, so a crawler saw the H1 and a button.
-// Written from the /create section of docs/seo/runs/05-page-audits.md with
-// the honesty constraints in docs/seo/runs/_brief-context.md: the photo stays
-// in the browser; on Free the second half of the depth model runs on our
-// server fed with activations (not the image); Pro runs fully locally;
-// publishing uploads the finished scene and it becomes public.
+// Server-rendered copy for /create on the shared blocks. Honesty constraints
+// (docs/seo/runs/_brief-context.md): the photo stays in the browser; on Free
+// the second half of the depth model runs on our server fed with activations
+// (not the image); Pro runs fully locally; publishing uploads the finished
+// scene and it becomes public.
 
 import Link from "next/link";
+import { Code, ImagePlus, Layers } from "lucide-react";
 import { FREE_GENERATION_LIMIT, PLAN_DISPLAY } from "@/lib/billing/plans";
 import { JsonLd, faqPageNode, breadcrumbNode, howToNode, type Faq } from "@/lib/seo/json-ld";
+import { CopyPage, Facts, FaqList, NextLinks, ProsCons, Section, Steps, inlineLink } from "./blocks";
 
 const STEPS = [
   {
+    Icon: ImagePlus,
     name: "Add a photo",
-    text: "Drop a JPG, PNG or WebP with one clear subject. Around 640 px or more on the long edge gives the depth model enough detail.",
+    text: "JPG, PNG or WebP with one clear subject. 640 px or more on the long edge gives the depth model enough detail.",
   },
   {
+    Icon: Layers,
     name: "Generate",
-    text: "A depth model estimates how far every pixel is from the camera and a second model lifts the subject off the background. Choose whether to keep the backdrop or float the cut-out on a transparent one.",
+    text: "A depth model estimates how far every pixel is; a second model lifts the subject. Keep the backdrop, or float the cut-out on transparency.",
   },
   {
+    Icon: Code,
     name: "Drag, export or embed",
-    text: "Spin the scene with the mouse, export a GIF, PNG or WebM, or publish it to get a share link and an iframe you can paste into any website.",
+    text: "Spin it with the mouse, export a GIF, PNG or WebM, or publish for a share link and an iframe for any website.",
   },
 ];
 
@@ -62,7 +65,7 @@ export const CREATE_FAQ: Faq[] = [
 
 export function CreateToolCopy() {
   return (
-    <section className="mx-auto w-full max-w-2xl px-5 pb-16 sm:px-8">
+    <CopyPage>
       <JsonLd
         graph={[
           breadcrumbNode([
@@ -73,120 +76,107 @@ export function CreateToolCopy() {
             name: "How to turn a photo into an interactive 3D photo",
             description:
               "Upload one photo, let two AI models add depth and lift the subject, then export or publish an embeddable scene.",
-            steps: STEPS,
+            steps: STEPS.map(({ name, text }) => ({ name, text })),
           }),
           faqPageNode(CREATE_FAQ),
         ]}
       />
-      <div className="legal">
-        <h2>What a 3D photo animation is — and how this one is different</h2>
-        <p>
-          A 3D photo animation takes a flat picture and adds parallax: near things move more than
-          far things as the viewpoint shifts, which the eye reads as depth. Most tools render that
-          motion once and hand you a video. Gifsy renders it live, so the person looking at it
-          can drag the scene themselves — on this page, on the share link, and inside the
-          iframe you paste into your own site.
+
+      <Section
+        title="What a 3D photo animation is — and how this one differs"
+        intro={
+          <p>
+            A 3D photo animation adds parallax to a flat picture: near things move more than far
+            things as the viewpoint shifts, which the eye reads as depth. Most tools render that
+            once and hand you a video. Gifsy renders it live, so the person looking at it can drag
+            the scene — here, on the share link, and inside the iframe on your own site.
+          </p>
+        }
+      >
+        <Steps steps={STEPS} />
+      </Section>
+
+      <Section title="Two looks, four outputs">
+        <Facts
+          items={[
+            { label: "Look", value: "With background", note: "Subject lifts over its own backdrop; a clean fill is painted behind it." },
+            { label: "Look", value: "Cut-out", note: "Subject alone on transparency — clean at every angle of the orbit." },
+            { label: "Files", value: "GIF · WebM · PNG", note: "A looping clip, a short video, or a still at the current angle." },
+            { label: "Embed", value: "One iframe", note: "100% wide, 500 px tall by default, loading=\"lazy\". No AI for visitors." },
+          ]}
+        />
+      </Section>
+
+      <Section title="Which photos work best">
+        <ProsCons
+          good={[
+            "One clear subject, fully inside the frame",
+            "Plain or blurred background",
+            "640 px or more on the long edge",
+          ]}
+          bad={[
+            "Frame-filling subjects — nothing behind them to parallax",
+            "Busy, low-contrast backgrounds — falls back to a depth-only view that reads as a warping sheet",
+            "Small sources — come out soft",
+          ]}
+        />
+        <p className="mt-3 text-xs text-muted">
+          The orbit is deliberately shallow — about ±23° — because one photo only contains one side
+          of anything. That&apos;s the honest limit of a single-image 3D photo.
         </p>
+      </Section>
 
-        <h2>How to make one in three steps</h2>
-        <ol>
-          {STEPS.map((s) => (
-            <li key={s.name}>
-              <strong>{s.name}.</strong> {s.text}
-            </li>
-          ))}
-        </ol>
-
-        <h2>Two looks</h2>
-        <h3>With background</h3>
-        <p>
-          Keeps the whole photo. The subject lifts with depth over its own backdrop, and a clean
-          fill is painted behind it so that moving the camera never reveals a hole.
+      <Section
+        title="Where your photo goes"
+        intro={
+          <p>
+            While the scene is made, your photo stays in your browser. The depth model is split in
+            two: your device always runs the first, larger half.
+          </p>
+        }
+      >
+        <Facts
+          items={[
+            { label: "Free", value: "One step on our server", note: "The second half of the depth model receives activations, not the image. That step is what counts as a generation." },
+            { label: "Pro", value: "Everything on your device", note: "Both halves run locally." },
+            { label: "Publishing", value: "Uploads the finished scene", note: "Image, depth map, subject mask, backdrop. Published scenes are public." },
+            { label: "Full account", value: "Privacy policy", note: "Every case, spelled out." },
+          ]}
+        />
+        <p className="mt-3 text-xs text-muted">
+          <Link href="/privacy" className={inlineLink}>
+            Read the privacy policy
+          </Link>
         </p>
-        <h3>Cut-out</h3>
-        <p>
-          Floats the subject alone on a transparent background, so it composites onto whatever
-          your page looks like. This is the look that stays clean at every angle of the orbit.
-        </p>
+      </Section>
 
-        <h2>Exports and the embed</h2>
-        <ul>
-          <li>
-            <strong>GIF</strong> — a looping clip of the orbit, for chats and READMEs.
-          </li>
-          <li>
-            <strong>WebM</strong> — a short video clip, where the browser supports recording.
-          </li>
-          <li>
-            <strong>PNG</strong> — a still frame at the current angle.
-          </li>
-          <li>
-            <strong>Embed</strong> — after publishing, an{" "}
-            <code>&lt;iframe&gt;</code> at 100% width and 500 px height with{" "}
-            <code>loading=&quot;lazy&quot;</code>. Paste it into Webflow, Framer, Squarespace,
-            WordPress or plain HTML. Visitors download the image, a depth map, the subject mask
-            and a small renderer; no AI runs on their side.
-          </li>
-        </ul>
+      <Section
+        title="Free and Pro"
+        intro={
+          <p>
+            Free: {FREE_GENERATION_LIMIT} 3D generations, unlimited publishing, a small Gifsy badge
+            on embeds. Pro: {PLAN_DISPLAY.pro.price} once, never renews — unlimited generations, no
+            badge, commercial use, and the whole depth model on your own device.{" "}
+            <Link href="/pricing" className={inlineLink}>
+              See pricing
+            </Link>
+          </p>
+        }
+      />
 
-        <h2>Which photos work best</h2>
-        <ul>
-          <li>One clear subject, fully inside the frame, on a plain or blurred background.</li>
-          <li>Around 640 px or more on the long edge; small sources come out soft.</li>
-          <li>
-            Frame-filling subjects and busy, low-contrast backgrounds are the weak cases: the
-            subject can&apos;t be separated cleanly, so the scene falls back to a depth-only
-            view that reads as a gently warping sheet.
-          </li>
-          <li>
-            The orbit is deliberately shallow — about ±23° — because one photo only contains one
-            side of anything. That is the honest limit of a single-image 3D photo.
-          </li>
-        </ul>
+      <Section title="Questions">
+        <FaqList faqs={CREATE_FAQ} />
+      </Section>
 
-        <h2>Where your photo goes</h2>
-        <p>
-          While the scene is made, your photo stays in your browser. The depth model is split in
-          two: your device always runs the first, larger half. On the free plan the second half
-          runs on our server and receives the intermediate activations from the first half — not
-          the image — and sends back a depth map; that is also where a free generation is
-          counted. On Pro both halves run on your device. Publishing is the one step that uploads
-          the finished scene (image, depth map, subject mask and backdrop), and published scenes
-          are public. The full account is in the <Link href="/privacy">privacy policy</Link>.
-        </p>
-
-        <h2>Free and Pro</h2>
-        <p>
-          Free: {FREE_GENERATION_LIMIT} 3D generations, unlimited publishing, a small Gifsy badge
-          on embeds. Pro: {PLAN_DISPLAY.pro.price} once, never renews — unlimited generations, no
-          badge, commercial use, and the whole depth model on your own device.{" "}
-          <Link href="/pricing">See pricing</Link>.
-        </p>
-
-        <h2>Frequently asked questions</h2>
-        {CREATE_FAQ.map((f) => (
-          <div key={f.q}>
-            <h3>{f.q}</h3>
-            <p>{f.a}</p>
-          </div>
-        ))}
-
-        <h2>Not what you need?</h2>
-        <ul>
-          <li>
-            <Link href="/tools/gif">Animate a photo into a GIF</Link> — flat motion effects,
-            entirely in your browser, no account.
-          </li>
-          <li>
-            <Link href="/tools/sticker">Telegram sticker maker</Link> — AI cut-out with an
-            outline, exported at 512×512.
-          </li>
-          <li>
-            <Link href="/gallery">3D gallery</Link> — what the effect looks like on different
-            kinds of photos.
-          </li>
-        </ul>
-      </div>
-    </section>
+      <Section title="Not what you need?">
+        <NextLinks
+          links={[
+            { href: "/tools/gif", label: "Animate a photo into a GIF", note: "Flat motion effects, in your browser, no account." },
+            { href: "/tools/sticker", label: "Telegram sticker maker", note: "AI cut-out with an outline, exported at 512×512." },
+            { href: "/gallery", label: "3D gallery", note: "What the effect looks like on different kinds of photos." },
+          ]}
+        />
+      </Section>
+    </CopyPage>
   );
 }
