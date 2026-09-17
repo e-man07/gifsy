@@ -216,7 +216,9 @@ export default function WebflowGuide() {
         If you&apos;re on a Starter site and not ready to pay, you can still show the scene —
         just not the draggable version. Export a <strong>WebM</strong> clip of the orbit from the
         Gifsy workshop and use Webflow&apos;s <strong>Background Video</strong> element, which is
-        available on the free plan. We built a whole demo store this way on a Starter site:{" "}
+        available on the free plan. We built a whole studio-portfolio demo this way on a Starter
+        site — a full-bleed hero, a six-scene work grid, and before/after pairs, all Gifsy
+        renders:{" "}
         <a href="https://gifsy-embed-test.webflow.io/" rel="noopener" target="_blank">
           gifsy-embed-test.webflow.io
         </a>
@@ -226,8 +228,14 @@ export default function WebflowGuide() {
         <li>In Gifsy, open your scene and export <strong>WebM</strong> (GIF works too, via an Image element, but it&apos;s heavier).</li>
         <li>Add panel → search &ldquo;video&rdquo; → <strong>Background Video</strong> (under Media). Click it to insert into the selected container.</li>
         <li>In the Background Video settings, click <strong>Upload video</strong>. Accepted: <strong>webm, mp4, mov, ogg, under 30 MB</strong>. Leave <strong>Loop video</strong> and <strong>Autoplay video</strong> on; turn off &ldquo;Include play/pause button&rdquo; if you don&apos;t want the round icon.</li>
-        <li>Give the element a <strong>height</strong> in the Style panel (it has no intrinsic height — inside a grid it collapses to nothing). 320 px worked for a card; a hero wants a vh value.</li>
+        <li>Give the element a <strong>height</strong> in the Style panel (it has no intrinsic height — inside a grid it collapses to nothing). 320 px worked for a card; a hero wants a vh value (ours is 85vh).</li>
       </ol>
+      <p>
+        Webflow re-encodes the upload to an MP4 of about 990 px wide, so export at least that
+        wide and keep the WebM under 2 MB where you can — ours came out at 205–823 KB for
+        4-second orbit loops. Background Videos below the fold don&apos;t play until they scroll
+        into view, which is Webflow&apos;s doing, not the file&apos;s.
+      </p>
       <p>Two things we hit that no tutorial mentions:</p>
       <ul>
         <li>

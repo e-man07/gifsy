@@ -138,6 +138,7 @@ Search Console: request indexing for every URL in the sitemap.
 | 05 | 2026-09-17 | page-audit | `/`, `/create`, `/tools/gif`, `/tools/sticker` | [runs/05-page-audits.md](runs/05-page-audits.md) |
 | 07 | 2026-09-17 | eeat-audit | homepage + /pricing /privacy /terms /refund | [runs/07-eeat-audit-homepage.md](runs/07-eeat-audit-homepage.md) |
 | 16 | 2026-09-17 | hands-on (Chrome) | Gifsy on Webflow, free Starter account | [runs/16-handson-webflow.md](runs/16-handson-webflow.md) |
+| 17 | 2026-09-18 | hands-on (Chrome) | Webflow showcase rebuild + sourced assets | [runs/17-webflow-showcase-rebuild.md](runs/17-webflow-showcase-rebuild.md) |
 | 08 | 2026-09-17 | linkbuilding | phase classification + plan | [runs/08-linkbuilding-phase-plan.md](runs/08-linkbuilding-phase-plan.md) |
 | 06 | 2026-09-17 | topic-cluster-planning | "interactive 3D photos for websites" | [runs/06-topic-cluster-3d-photos-for-websites.md](runs/06-topic-cluster-3d-photos-for-websites.md) |
 
