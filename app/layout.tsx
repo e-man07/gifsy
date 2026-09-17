@@ -4,6 +4,7 @@ import "./globals.css";
 import { Analytics } from "@vercel/analytics/next"
 import Script from "next/script";
 import { siteOrigin, siteUrl } from "@/lib/site-url";
+import { JsonLd, organizationNodes, softwareApplicationNode } from "@/lib/seo/json-ld";
 
 // Editorial display face, for page headlines only — a high-contrast serif
 // standing in for PP Editorial New, which is commercial. Variable weight, so
@@ -24,24 +25,28 @@ const inter = Inter({
 // silently drop relative ones, so without it the generated card never appears.
 export const metadata: Metadata = {
   metadataBase: siteUrl(),
+  // The default title is the homepage's and is used verbatim (the template
+  // only applies to child pages), so it carries the brand itself. Page titles
+  // must NOT include "Gifsy" — the template adds it.
   title: {
-    default: "Gifsy — turn any photo into a live 3D photo",
+    default: "3D Photo Maker — Interactive Depth, Embed Anywhere · Gifsy",
     template: "%s · Gifsy",
   },
   description:
-    "Upload one photo and Gifsy gives it real depth in your browser — then hands you an embed you can paste into any site. Also makes GIFs and cut-out stickers.",
+    "Upload one photo. Gifsy adds real depth in your browser and hands you an iframe embed for Webflow, Framer or any site. Free to try, pay once — no subscription.",
+  alternates: { canonical: siteOrigin() },
   openGraph: {
     type: "website",
     siteName: "Gifsy",
     url: siteOrigin(),
-    title: "Gifsy — turn any photo into a live 3D photo",
+    title: "Gifsy — the interactive 3D photo maker you can embed anywhere",
     description:
       "Upload one photo. Gifsy gives it real, interactive depth in your browser and hands you an embed for any site.",
   },
   twitter: {
     // Without this the card renders as a small thumbnail, not the large image.
     card: "summary_large_image",
-    title: "Gifsy — turn any photo into a live 3D photo",
+    title: "Gifsy — the interactive 3D photo maker you can embed anywhere",
     description:
       "Upload one photo. Gifsy gives it real, interactive depth in your browser and hands you an embed for any site.",
   },
@@ -71,6 +76,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </noscript>
       </head>
       <body className="min-h-full flex flex-col">
+      {/* Site-wide entity graph: who publishes this, who the founders are, and
+          what the product is. Pages add their own nodes (FAQPage, HowTo,
+          BreadcrumbList) that reference these by @id. */}
+      <JsonLd graph={[...organizationNodes(), softwareApplicationNode()]} />
       {children}
       <Analytics />
       {/* DataFast analytics. afterInteractive = loads once the page is
