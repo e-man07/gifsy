@@ -69,8 +69,19 @@ FAQ. Marquee "3D · Made with Gifsy" moved to CSS (was 32× DOM text). Not
 done: depth-map + matte screenshots (need a founder-owned photo); links to
 /guides/* and /alternatives/* are held back until those routes exist.
 
+**Design pass (2026-09-17)** — user feedback: the first cut read like docs.
+Every new section on `/` and under the three tools was rebuilt as a UI element
+(step tiles, ✓/✗ cards, comparison grid, fact tiles, native `<details>` FAQ,
+founder card) with the copy fitted to the element. Shared blocks live in
+`components/copy/blocks.tsx`; the tool pages use only those. Rule going
+forward: **design the section first, then write copy to fit it** — never
+paste brief prose into `.legal`. Word counts after: `/` 1,985, `/tools/gif`
+1,141, `/tools/sticker` 1,216, `/create` 993 — all still with H2/H3
+structure and FAQPage/HowTo schema.
+
 **Next:** phase 4 = `/alternatives/immersity-ai` (brief 10), then guides in
-run 06 order, then swap the held-back links in.
+run 06 order, then swap the held-back links in. Both need an article layout
+designed first (byline, updated date, TOC, comparison table, verdict card).
 
 ## Runs
 
