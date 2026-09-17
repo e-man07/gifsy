@@ -120,6 +120,7 @@ for every URL in the sitemap.
 | 04 | 2026-09-17 | keyword-deep-dive | "sticker maker" family | [runs/04-keyword-sticker-maker.md](runs/04-keyword-sticker-maker.md) |
 | 05 | 2026-09-17 | page-audit | `/`, `/create`, `/tools/gif`, `/tools/sticker` | [runs/05-page-audits.md](runs/05-page-audits.md) |
 | 07 | 2026-09-17 | eeat-audit | homepage + /pricing /privacy /terms /refund | [runs/07-eeat-audit-homepage.md](runs/07-eeat-audit-homepage.md) |
+| 16 | 2026-09-17 | hands-on (Chrome) | Gifsy on Webflow, free Starter account | [runs/16-handson-webflow.md](runs/16-handson-webflow.md) |
 | 08 | 2026-09-17 | linkbuilding | phase classification + plan | [runs/08-linkbuilding-phase-plan.md](runs/08-linkbuilding-phase-plan.md) |
 | 06 | 2026-09-17 | topic-cluster-planning | "interactive 3D photos for websites" | [runs/06-topic-cluster-3d-photos-for-websites.md](runs/06-topic-cluster-3d-photos-for-websites.md) |
 
@@ -414,8 +415,9 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
   embeds; verify Carrd Embed tier and Squarespace's current plan list
   (Core/Plus/Advanced/Business/Commerce, not "Business+"); confirm which
   analytics scripts fire inside `/embed/[id]` and disclose them.
-- Brief 11: Webflow plan gate for the Embed element — help.webflow.com and
-  webflow.com/pricing both 403'd; needs a dated citation before publish.
+- ~~Brief 11: Webflow plan gate~~ — RESOLVED hands-on (run 16): Code Embed is
+  locked on free; Basic $15/mo, Premium $25/mo site plans; Core $19/mo, Growth
+  $49/mo workspace plans; free route = Background Video + WebM (z-index gotcha).
 - Brief 10 contradictions to resolve in a browser before writing: CapCut
   (capcut.com returns HTTP 451 to fetches; the 3D Zoom template may watermark)
   and Motionleap (a 2026 review says "sunset" but Google Play shows v1.9.38 on
