@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 // The GIF creation flow, extracted out of the homepage into its own page —
 // same reasoning as CreateWorkshop for 3D: picking a photo should navigate
 // somewhere, not auto-scroll the same page down to a "workshop" section.
@@ -171,8 +172,18 @@ export function GifWorkshop({ initialGifMode }: { initialGifMode: GifMode }) {
   return (
     <div className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-8 sm:py-14">
       <div className="card rounded-2xl bg-panel p-5 sm:p-7">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <h1 className="font-editorial text-3xl text-foreground">Make your GIF</h1>
+        <h1 className="font-editorial text-3xl text-foreground">
+          Animate a photo into a GIF
+        </h1>
+        {/* First-paint explainer: the one paragraph a crawler and a reader
+            both get before the tool has loaded. Numbers mirror lib/gif.ts. */}
+        <p className="mt-2 text-sm text-muted">
+          Zoom, bounce, shake, pulse, spin or glitch one photo — or combine several into a
+          loop. Pick an effect, set the speed (8–30 fps), keep the boomerang loop on, and
+          download a 480 × 480 GIF. Free, no account, no watermark, and nothing is uploaded:
+          the encoder runs in this tab.
+        </p>
+        <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
           <div className="inline-flex gap-0.5 rounded-full bg-ink/[0.06] p-0.5">
             {(
               [
@@ -307,6 +318,12 @@ export function GifWorkshop({ initialGifMode }: { initialGifMode: GifMode }) {
             <img src={result.preview} alt="Your GIF" className="max-h-72 w-auto rounded-lg" />
           </div>
           <p className="text-center text-sm font-semibold text-muted">{result.note}</p>
+          <p className="text-center text-xs text-muted">
+            Want the photo to move in real 3D, not a flat zoom?{" "}
+            <Link href="/create" className="font-semibold text-sky-deep underline underline-offset-2">
+              Try the 3D photo maker
+            </Link>
+          </p>
           <div className="flex flex-wrap justify-center gap-3">
             {result.files.map((f) => (
               <button

@@ -1,6 +1,7 @@
 import { SiteNav } from "@/components/SiteNav";
 import { SiteFooter } from "@/components/SiteFooter";
 import { GifWorkshop } from "@/components/GifWorkshop";
+import { GifToolCopy } from "@/components/copy/GifToolCopy";
 import { pageMetadata } from "@/lib/seo/metadata";
 
 // `?mode=combine` pre-selects the multi-photo mode but is the same page, so it
@@ -22,6 +23,7 @@ export default async function GifToolPage({
     <main className="flex flex-1 flex-col bg-background">
       <SiteNav links={[{ href: "/gallery", label: "Gallery" }]} />
       <GifWorkshop initialGifMode={mode === "combine" ? "combine" : "animate"} />
+      <GifToolCopy />
       <SiteFooter />
     </main>
   );
