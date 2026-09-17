@@ -297,6 +297,10 @@ export default function Home() {
           </ol>
           <p className="mt-6 text-sm text-muted" data-reveal>
             Each model runs once, on your device. The viewer never runs AI.{" "}
+            <Link href="/guides/how-3d-photos-work" className={inlineLink}>
+              How it works, in detail
+            </Link>
+            {" · "}
             <Link href="/create" className={inlineLink}>
               Make your 3D photo
             </Link>
@@ -321,13 +325,15 @@ export default function Home() {
               </pre>
               <ul className="mt-4 grid gap-3 sm:grid-cols-3">
                 {[
-                  { name: "Webflow", how: "Embed element" },
-                  { name: "Framer", how: "Embed component, HTML" },
-                  { name: "Squarespace, WordPress, Carrd, Notion", how: "Code or custom-HTML block" },
+                  { name: "Webflow", how: "Embed element", href: "/guides/3d-photo-webflow" },
+                  { name: "Framer", how: "Embed component, HTML", href: "/guides/3d-photo-framer" },
+                  { name: "Squarespace, WordPress, Carrd, Notion", how: "Code or custom-HTML block", href: "/guides/embed-3d-photo-on-website" },
                 ].map((p) => (
-                  <li key={p.name} className="rounded-xl border border-foreground/10 px-4 py-3">
-                    <p className="font-display text-sm text-foreground">{p.name}</p>
-                    <p className="mt-0.5 text-xs text-muted">{p.how}</p>
+                  <li key={p.name}>
+                    <Link href={p.href} className="block rounded-xl border border-foreground/10 px-4 py-3 transition hover:border-sky/50">
+                      <span className="block font-display text-sm text-foreground">{p.name}</span>
+                      <span className="mt-0.5 block text-xs text-muted">{p.how} — guide</span>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -342,7 +348,11 @@ export default function Home() {
           <Heading title="A video export, or an embed that stays live?">
             <p>
               Immersity for Web, png3D, Upsampler and Media.io hand you a video. Gifsy gives you
-              the embed, plus a GIF, WebM or PNG capture when you want a file too.
+              the embed, plus a GIF, WebM or PNG capture when you want a file too.{" "}
+              <Link href="/alternatives/immersity-ai" className={inlineLink}>
+                See how the tools compare
+              </Link>
+              .
             </p>
           </Heading>
           <div className="card mt-8 overflow-hidden rounded-2xl bg-background" data-reveal>

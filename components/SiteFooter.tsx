@@ -37,7 +37,7 @@ export function SiteFooter({
             {note}
           </p>
         )}
-        <div className="grid grid-cols-2 gap-8 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:grid-cols-5">
           <Column heading="Make">
             <Link href="/create" className={linkCls}>
               3D photo maker
@@ -50,6 +50,20 @@ export function SiteFooter({
             </Link>
             <Link href="/gallery" className={linkCls}>
               3D gallery
+            </Link>
+          </Column>
+          <Column heading="Learn">
+            <Link href="/guides/how-3d-photos-work" className={linkCls}>
+              How 3D photos work
+            </Link>
+            <Link href="/guides/embed-3d-photo-on-website" className={linkCls}>
+              Embed a 3D photo
+            </Link>
+            <Link href="/guides" className={linkCls}>
+              All guides
+            </Link>
+            <Link href="/alternatives/immersity-ai" className={linkCls}>
+              Immersity AI alternatives
             </Link>
           </Column>
           <Column heading="Gifsy">
