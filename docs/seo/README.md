@@ -105,10 +105,27 @@ each guide brief specifies (need a founder-owned photo); Webflow/Framer/
 Squarespace/Carrd plan tiers are worded as "check your plan" because the
 tooling could not verify them.
 
-**Next:** the editorial hub `/guides/interactive-3d-photos-for-websites`
-(run 06), then Squarespace + WordPress guides, best-photos guide, and the
-Telegram sticker guides (brief 15). Then Search Console: request indexing
-for every URL in the sitemap.
+**Phase 6 done (2026-09-18)** — five more articles. Hub
+`/guides/interactive-3d-photos-for-websites` (run 06; ~3,100w, FAQ ×9, live
+embed, chapters what/why/how/photos/platforms/uses/perf/costs, links every
+spoke); `/guides/3d-photo-squarespace` (~1,400w, HowTo+FAQ; Code block vs
+Embed block, plan requirement hedged); `/guides/3d-photo-wordpress` (~1,600w,
+HowTo+FAQ; Custom HTML block, Elementor/Divi/Bricks/classic Text tab,
+`wp_kses`/`unfiltered_html` trap, aspect-ratio wrapper);
+`/guides/telegram-sticker-pack-from-browser` (~1,500w, HowTo+FAQ; @Stickers
+flow, /newpack vs /newemojipack 100×100 trap, send-as-file, 512 KB cap,
+management commands); `/guides/telegram-sticker-size` (~900w, FAQ; rules
+table, PNG vs WebP, rejection reasons, cites core.telegram.org). Links: every
+existing spoke's lede names the hub; embed guide links the Squarespace and
+WordPress spokes; `/tools/sticker` links both sticker guides; home embed
+section + footer "Learn" link the hub. Sitemap now 22 URLs. Not done: the
+screenshots (@Stickers rejection, sticker before/after) — need a real chat
+capture.
+
+**Next:** best-photos guide, use-case pages, `/compare/3d-photo-makers`;
+update `/guides/3d-photo-framer` after the hands-on Framer run (blocked on
+sign-in); `prefers-reduced-motion` + embed `title` in the product. Then
+Search Console: request indexing for every URL in the sitemap.
 
 ## Runs
 
@@ -317,9 +334,9 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
       cite core.telegram.org's "white stroke + black shadow"), no-upload/privacy,
       honest limits, 8–10 Q FAQ, explicit "no WhatsApp"; H1 "Telegram sticker
       maker — turn a photo into a sticker in your browser" (run 04)
-- [ ] new guides `/guides/telegram-sticker-pack-from-browser` (~1,500w, HowTo)
+- [x] new guides `/guides/telegram-sticker-pack-from-browser` (~1,500w, HowTo)
       and `/guides/telegram-sticker-size` (~900w, table snippet) (run 04, brief 15)
-- [ ] sticker copy nuance: the 512 KB cap is no longer on core.telegram.org's
+- [~] sticker copy nuance (text done; rejection screenshot still missing): the 512 KB cap is no longer on core.telegram.org's
       public spec (only TGS 64 KB / WEBM 256 KB) — it's enforced by the
       @Stickers bot; attribute it to the bot and screenshot the rejection.
       Citation for "white stroke + black shadow":
@@ -333,12 +350,13 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
       crop, a backdrop-bearing demo scene for the push-pull-vs-LaMa screenshot,
       an orbit-extreme capture, an exploded-plane SVG
 - [~] `/guides` index + hub `/guides/interactive-3d-photos-for-websites` (run 06)
-- [~] spokes per run 06 order: `/guides/3d-photo-webflow`,
+- [~] spokes per run 06 order: done — hub, `/guides/3d-photo-webflow`,
       `/guides/embed-3d-photo-on-website`, `/guides/how-3d-photos-work`,
-      `/guides/3d-photo-framer`, then Squarespace/WordPress/best-photos/
+      `/guides/3d-photo-framer`, Squarespace, WordPress. Left: best-photos/
       video-vs-interactive, use-case pages, `/compare/3d-photo-makers`
-- [ ] verify Webflow/Squarespace paid-plan requirements for custom code/embeds
-      before publishing platform spokes (run 06)
+- [~] verify Webflow/Squarespace paid-plan requirements for custom code/embeds
+      before publishing platform spokes (run 06) — Webflow verified hands-on
+      (run 16); Squarespace/Framer still worded "check your plan"
 
 **Link building (run 08 — in order)**
 - [x] Entity stacking: footer links to GitHub / Product Hunt / X; GitHub repo
@@ -396,10 +414,11 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
 - [x] fix nested `<main>` on tool pages — workshop roots → `<div>` (run 05)
 - [x] `OfferBanner` countdown: state a real end date or remove (reads as
       fabricated urgency; offer expired 09-12) (run 05, run 07)
-- [ ] add new routes to `app/sitemap.ts` (all guides/alternatives/compare URLs)
-- [ ] static App Router routes + `generateMetadata` for guides; a shared
+- [x] add new routes to `app/sitemap.ts` (all guides/alternatives/compare URLs)
+      — automatic via `ARTICLES` in `lib/articles.ts`
+- [x] static App Router routes + `generateMetadata` for guides; a shared
       article layout with byline, updated date, breadcrumbs (run 06)
-- [ ] internal links: tool pages → guides → comparison → pricing; nothing
+- [x] internal links: tool pages → guides → comparison → pricing; nothing
       currently links to `/tools/sticker` at all (run 04)
 - [ ] real screenshots: before/after sticker, @Stickers chat (run 04)
 - [ ] request indexing in Google Search Console after each rewrite — site is
