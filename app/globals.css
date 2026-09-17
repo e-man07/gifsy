@@ -234,6 +234,11 @@ body {
   color: var(--sky);
 }
 
+/* Community marquee slate text, kept out of the DOM (see CommunityShowcase). */
+.marquee-slate::after {
+  content: "3D · Made with Gifsy";
+}
+
 /* ── Scroll reveals ─────────────────────────────────────────────────────── */
 /* Driven by <ScrollReveal />, which adds .is-visible as an element scrolls in.
    The easing is a soft overshoot-free ease-out, so sections settle rather
