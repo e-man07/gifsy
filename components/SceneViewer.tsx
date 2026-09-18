@@ -20,6 +20,7 @@ import {
   ORBIT_MAX_PHI,
   ORBIT_RELIEF_BIAS,
   ORBIT_RELIEF_BOOST,
+  subjectReliefPush,
   type ParallaxScene,
 } from "@/lib/rendering/scene";
 import type { SceneConfig } from "@/lib/rendering/types";
@@ -118,6 +119,7 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
         extent,
         // Read live: the card can be resized (and is, between breakpoints).
         viewportPx: { w: mount.clientWidth || w, h: mount.clientHeight || h },
+        reliefPush: subjectReliefPush(configRef.current),
       });
     const initZ = planFor(w / h).rest;
     camera.position.set(0, 0, initZ);
@@ -238,6 +240,17 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
     mount.addEventListener("mouseleave", onMouseLeave);
     mount.addEventListener("mouseenter", onMouseEnter);
 
+    // prefers-reduced-motion: no self-driven motion (auto-turntable, the
+    // mouse-mode self-demo, "auto" drift, the breathing zoom). Motion the
+    // visitor causes — drag, pointer-follow, scroll — is still honoured, as
+    // the media query is about unrequested animation.
+    const reduceMq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    let reduceMotion = reduceMq.matches;
+    const onReduceChange = (e: MediaQueryListEvent) => {
+      reduceMotion = e.matches;
+    };
+    reduceMq.addEventListener("change", onReduceChange);
+
     let tick = 0;
     let curZ = initZ;
     const animate = () => {
@@ -258,7 +271,7 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
         // then it holds wherever they leave it. Relief is pushed all-forward so the
         // subject never sinks behind the backdrop as the camera swings around.
         // Mirror of ThreeDPreview so the embed matches the creator preview exactly.
-        if (!interacted.current) {
+        if (!interacted.current && !reduceMotion) {
           const rate = 0.25 + speed * 0.4;
           orbitTarget.current.theta = Math.sin(tick * rate) * ORBIT_MAX_THETA * 0.85;
           orbitTarget.current.phi = Math.sin(tick * rate * 0.5) * ORBIT_MAX_PHI * 0.55;
@@ -278,7 +291,7 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
         // 3D on load instead of a still photo; then we follow the pointer.
         let tpx = 0;
         let tpy = 0;
-        if (mm === "auto" || (mm === "mouse" && !interacted.current)) {
+        if ((mm === "auto" || (mm === "mouse" && !interacted.current)) && !reduceMotion) {
           const rate = 0.3 + speed * 0.5;
           tpx = Math.sin(tick * rate) * 0.7;
           tpy = Math.cos(tick * rate * 0.65) * 0.5;
@@ -304,7 +317,7 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
         // Framing per the plan: cover-fit for a window scene (fill, crop
         // overflow → no black border), contained for subject-only and pop-out.
         const plan = planFor(camera.aspect);
-        const breathe = mm === "auto" ? Math.sin(tick * 0.5) * 0.02 * plan.rest : 0;
+        const breathe = mm === "auto" && !reduceMotion ? Math.sin(tick * 0.5) * 0.02 * plan.rest : 0;
         const targetZ = (hovering ? plan.hover : plan.rest) + breathe;
         curZ += (targetZ - curZ) * 0.08;
         camera.position.z = curZ;
@@ -334,6 +347,7 @@ export function SceneViewer({ image, depth, mask, background, config, showBrand 
 
     return () => {
       cancelAnimationFrame(rafRef.current);
+      reduceMq.removeEventListener("change", onReduceChange);
       mount.removeEventListener("mousemove", onMouseMove);
       mount.removeEventListener("mousedown", onMouseDown);
       window.removeEventListener("mouseup", onMouseUp);
