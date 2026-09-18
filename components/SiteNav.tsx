@@ -15,6 +15,8 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Wordmark } from "@/components/Wordmark";
 import { AccountMenu, type NavLink } from "@/components/AccountMenu";
+import { ToolsMenu } from "@/components/ToolsMenu";
+import { TOOL_LINKS } from "@/lib/nav";
 
 /** Shared styling for a plain text link sitting in this nav. */
 export const navLinkCls =
@@ -30,6 +32,7 @@ export function SiteNav({ links = [] }: { links?: NavLink[] }) {
       <nav className="flex w-full max-w-5xl items-center justify-between gap-3 rounded-full bg-white/70 px-5 py-3 shadow-[0_8px_32px_rgba(4,16,29,0.18)] ring-1 ring-ink/10 backdrop-blur-xl sm:px-7">
         <Wordmark className="text-foreground" />
         <div className="flex items-center gap-3 sm:gap-5">
+          <ToolsMenu tone="dark" />
           {links.map((l) => (
             <Link key={l.href} href={l.href} className={`hidden sm:block ${navLinkCls}`}>
               {l.label}
@@ -42,7 +45,7 @@ export function SiteNav({ links = [] }: { links?: NavLink[] }) {
             Make one
             <ArrowRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
           </Link>
-          <AccountMenu links={links} tone="dark" />
+          <AccountMenu links={[...TOOL_LINKS, ...links]} tone="dark" />
         </div>
       </nav>
     </div>

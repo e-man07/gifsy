@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { AccountMenu } from "@/components/AccountMenu";
 import { Wordmark } from "@/components/Wordmark";
+import { ToolsMenu } from "@/components/ToolsMenu";
+import { TOOL_LINKS } from "@/lib/nav";
 
 // The landing page's fixed nav pill. Split out of app/page.tsx so the page
 // itself can be a server component (all the SEO prose must be in the HTML,
@@ -37,21 +39,15 @@ export function HomeNav() {
           <Wordmark href="#top" className={scrolled ? "text-ink" : "text-cloud"} />
           <div className="flex items-center gap-3 sm:gap-5">
             {/* Hidden on phones — the bar fits the wordmark, sign-in and the
-                CTA and no more. Both routes stay reachable from the sections
-                below and the footer; the hamburger gets the same two links. */}
+                CTA and no more; the hamburger lists the tools and Gallery. */}
+            <ToolsMenu tone={scrolled ? "dark" : "light"} />
             <Link href="/gallery" className={linkCls}>
               Gallery
             </Link>
-            <a href="#how" className={linkCls}>
-              How it works
-            </a>
             <AccountMenu
               tone={scrolled ? "dark" : "light"}
               signIn="button"
-              links={[
-                { href: "/gallery", label: "Gallery" },
-                { href: "#how", label: "How it works" },
-              ]}
+              links={[...TOOL_LINKS, { href: "/gallery", label: "Gallery" }]}
             />
           </div>
         </div>
