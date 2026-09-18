@@ -197,7 +197,9 @@ export default function HubGuide() {
       </ul>
       <p>
         When the matte can&apos;t separate a subject, Gifsy says so and falls back to a depth-only
-        view; it is better to pick another photo than to publish the sheet.
+        view; it is better to pick another photo than to publish the sheet. The full checklist,
+        with the reason behind each rule and the six photos that fail, is in{" "}
+        <Link href="/guides/best-photos-for-3d-effect">best photos for a 3D effect</Link>.
       </p>
 
       <H2 id="platforms">Adding one to your site, platform by platform</H2>
@@ -244,13 +246,16 @@ export default function HubGuide() {
         hero without hiring a WebGL developer. A founder portrait, a product on a surface, a mood
         shot behind the headline: one embed element, sized with an aspect ratio, copy kept clear of
         the subject, lazy-loading turned off because it is above the fold. Commercial use on client
-        sites comes with Pro.
+        sites comes with Pro. Six hero patterns and the load budget are in the{" "}
+        <Link href="/guides/3d-hero-image">3D hero image guide</Link>.
       </p>
       <h3>Portfolios for photographers, illustrators and 3D artists</h3>
       <p>
         One self-portrait or one key project shot that responds to the visitor — and stays
         interactive on a phone, where a finger drag does what the mouse does. The rest of the
-        portfolio stays still; that is what makes the one that moves land.
+        portfolio stays still; that is what makes the one that moves land. Which pieces, which
+        placement and which builders take the embed:{" "}
+        <Link href="/guides/3d-photo-portfolio">3D photos in a portfolio site</Link>.
       </p>
       <p>
         Product photography that needs a true 360° or AR is the wrong fit: that is the mesh
@@ -291,9 +296,9 @@ export default function HubGuide() {
         one-time price possible.
       </p>
       <p>
-        <Link href="/pricing">Compare Free and Pro</Link>, or see how the category&apos;s tools
-        line up on price, watermark and output in the{" "}
-        <Link href="/alternatives/immersity-ai">Immersity AI alternatives comparison</Link>.
+        <Link href="/pricing">Compare Free and Pro</Link>, or see how ten tools line up on
+        output, price, watermark and where your photo goes in{" "}
+        <Link href="/compare/3d-photo-makers">the 3D photo maker comparison</Link>.
       </p>
 
       <H2 id="faq">FAQ</H2>
@@ -308,7 +313,14 @@ export default function HubGuide() {
       <p><strong>Understand it</strong></p>
       <ul>
         <li><Link href="/guides/how-3d-photos-work">How 3D photos work: depth maps, mattes and two planes</Link></li>
+        <li><Link href="/guides/best-photos-for-3d-effect">Best photos for a 3D effect — and the ones that fail</Link></li>
+        <li><Link href="/compare/3d-photo-makers">Best 3D photo makers, compared by output and price</Link></li>
         <li><Link href="/alternatives/immersity-ai">Immersity AI (LeiaPix) alternatives, by output type</Link></li>
+      </ul>
+      <p><strong>Use it well</strong></p>
+      <ul>
+        <li><Link href="/guides/3d-hero-image">A 3D hero image: patterns and a performance budget</Link></li>
+        <li><Link href="/guides/3d-photo-portfolio">Interactive 3D photos in a portfolio site</Link></li>
       </ul>
       <p><strong>Put it on a site</strong></p>
       <ul>

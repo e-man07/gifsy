@@ -173,6 +173,7 @@ export function CreateToolCopy() {
           links={[
             { href: "/tools/gif", label: "Animate a photo into a GIF", note: "Flat motion effects, in your browser, no account." },
             { href: "/tools/sticker", label: "Telegram sticker maker", note: "AI cut-out with an outline, exported at 512×512." },
+            { href: "/guides/best-photos-for-3d-effect", label: "Which photos work best", note: "Eleven rules, the six that fail, and a five-second test before you upload." },
             { href: "/guides/embed-3d-photo-on-website", label: "Embed a 3D photo on any site", note: "The iframe, every attribute, and each platform's menu path." },
             { href: "/guides/how-3d-photos-work", label: "How 3D photos work", note: "Depth map, matte, backdrop, two planes — with the numbers." },
             { href: "/gallery", label: "3D gallery", note: "What the effect looks like on different kinds of photos." },
