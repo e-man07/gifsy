@@ -122,9 +122,28 @@ section + footer "Learn" link the hub. Sitemap now 22 URLs. Not done: the
 screenshots (@Stickers rejection, sticker before/after) — need a real chat
 capture.
 
-**Next:** best-photos guide, use-case pages, `/compare/3d-photo-makers`;
-`prefers-reduced-motion` + embed `title` in the product. Then
-Search Console: request indexing for every URL in the sitemap.
+**Phase 7 done (2026-09-19)** — product gaps + remaining spokes. Product:
+embed snippet now carries `title` via one shared `embedSnippet()`
+(lib/site-url.ts; workshop, share page, homepage); `SceneViewer` honours
+`prefers-reduced-motion` (no self-driven motion; drag still works);
+`frame-ancestors 'self'` + `X-Frame-Options` on every route except
+`/embed/*` (next.config.ts); two rendering bugs from run 18 fixed — subject-
+only framing now adds the relief push (`subjectReliefPush`) so cut-outs stop
+overflowing at the default depth, and planes went 150 → 300 segments so hard
+internal depth steps no longer tear. Guides updated to say the viewer honours
+reduced motion. Content: `/guides/best-photos-for-3d-effect` (~1,700w),
+`/guides/3d-hero-image` (~1,800w), `/guides/3d-photo-portfolio` (~1,700w),
+new `compare` section + `/compare/3d-photo-makers` (~2,300w, 10 tools; facts
+shared with the alternatives page, verified 2026-09-17). Hub, alternatives
+page, create page and footer link them. Sitemap 27 URLs. Sticker cutout now
+runs on WebGPU in a worker when available (~10 s → ~4 s, no page freeze).
+
+**Blocked on the founder:** Blob → R2 migration (legacy embeds 502 until
+the Vercel limit resets), Search Console indexing.
+
+**Next:** Immersity same-photo test (needs an account), sticker/@Stickers
+screenshots, later alternatives spokes (Media.io, Depthy), directories +
+outreach once indexed.
 
 ## Runs
 
@@ -351,10 +370,11 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
       crop, a backdrop-bearing demo scene for the push-pull-vs-LaMa screenshot,
       an orbit-extreme capture, an exploded-plane SVG
 - [~] `/guides` index + hub `/guides/interactive-3d-photos-for-websites` (run 06)
-- [~] spokes per run 06 order: done — hub, `/guides/3d-photo-webflow`,
-      `/guides/embed-3d-photo-on-website`, `/guides/how-3d-photos-work`,
-      `/guides/3d-photo-framer`, Squarespace, WordPress. Left: best-photos/
-      video-vs-interactive, use-case pages, `/compare/3d-photo-makers`
+- [~] spokes per run 06 order: done — hub, Webflow, embed, how-it-works,
+      Framer, Squarespace, WordPress, best-photos, hero-image, portfolio,
+      `/compare/3d-photo-makers`. Left: video-vs-interactive (covered in the
+      hub + compare page; standalone only if it earns a query), privacy,
+      Facebook-alternative
 - [~] verify Webflow/Squarespace paid-plan requirements for custom code/embeds
       before publishing platform spokes (run 06) — Webflow verified hands-on
       (run 16), Framer verified hands-on (run 18); Squarespace still "check your plan"
@@ -383,9 +403,9 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
 - [ ] Show HN once the explainer exists
 
 **Product gaps surfaced by the briefs (small code changes)**
-- [ ] embed snippet lacks a `title` attribute (a11y + how-to guides quote it) —
+- [x] embed snippet lacks a `title` attribute (a11y + how-to guides quote it) —
       `components/CreateWorkshop.tsx:605`, `app/s/[id]/scene-client.tsx:30` (brief 11)
-- [ ] `SceneViewer` has no `prefers-reduced-motion` handling — guides must say
+- [x] `SceneViewer` has no `prefers-reduced-motion` handling — guides must say
       so honestly until it's added; brief 12 recommends shipping it BEFORE the
       embed guide (brief 11, 12)
 - [ ] Combine mode has no boomerang — `/tools/gif/boomerang` must be
@@ -394,7 +414,7 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
       (same owned photo, 20 fps, boomerang on) + boomerang-off + combine (brief 14)
 - [x] title template: `app/layout.tsx` uses `%s · Gifsy` — page titles that
       already end in "| Gifsy" will double the brand; pick one (brief 14)
-- [ ] decide + document framing policy: today no X-Frame-Options /
+- [x] decide + document framing policy: today no X-Frame-Options /
       frame-ancestors anywhere, so any origin may frame `/embed/[id]` (that's
       the product) — but `/`, `/create`, `/account` etc. are also frameable;
       consider `frame-ancestors 'self'` everywhere except `/embed/*` (brief 12)
