@@ -21,24 +21,30 @@ export const navLinkCls =
   "font-display text-sm text-foreground transition-colors hover:text-sky-deep";
 
 export function SiteNav({ links = [] }: { links?: NavLink[] }) {
+  // Same pill as the landing page's HomeNav in its scrolled state — centred,
+  // frosted, ringed — so the site has one header, not two. It is sticky in
+  // flow (no fixed positioning, no spacer): pages keep their layout and the
+  // bar simply stays at the top as they scroll.
   return (
-    <nav className="flex items-center justify-between gap-2 px-5 py-4 sm:px-8">
-      <Wordmark className="text-foreground" />
-      <div className="flex items-center gap-2 sm:gap-3">
-        {links.map((l) => (
-          <Link key={l.href} href={l.href} className={`hidden sm:block ${navLinkCls}`}>
-            {l.label}
+    <div className="sticky top-0 z-50 flex justify-center px-5 pt-4 sm:px-8 sm:pt-6">
+      <nav className="flex w-full max-w-5xl items-center justify-between gap-3 rounded-full bg-white/70 px-5 py-3 shadow-[0_8px_32px_rgba(4,16,29,0.18)] ring-1 ring-ink/10 backdrop-blur-xl sm:px-7">
+        <Wordmark className="text-foreground" />
+        <div className="flex items-center gap-3 sm:gap-5">
+          {links.map((l) => (
+            <Link key={l.href} href={l.href} className={`hidden sm:block ${navLinkCls}`}>
+              {l.label}
+            </Link>
+          ))}
+          <Link
+            href="/"
+            className="btn order-1 flex shrink-0 items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-display text-sm text-cloud"
+          >
+            Make one
+            <ArrowRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
           </Link>
-        ))}
-        <Link
-          href="/"
-          className="btn order-1 flex shrink-0 items-center gap-1.5 rounded-full bg-sky px-4 py-2 font-display text-sm text-cloud"
-        >
-          Make one
-          <ArrowRight className="h-4 w-4" strokeWidth={2.5} aria-hidden />
-        </Link>
-        <AccountMenu links={links} tone="dark" />
-      </div>
-    </nav>
+          <AccountMenu links={links} tone="dark" />
+        </div>
+      </nav>
+    </div>
   );
 }
