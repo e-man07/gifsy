@@ -1,7 +1,7 @@
-// /guides/3d-photo-framer — spoke 5 (run 06). No dedicated brief; follows the
-// Webflow guide's shape with Framer's own Embed component. Framer's exact
-// plan rules for embeds were not verified by our tooling on 2026-09-17, so the
-// guide says "check your plan" rather than naming tiers.
+// /guides/3d-photo-framer — spoke 5 (run 06). Verified hands-on 2026-09-18
+// on a free Framer plan (docs/seo/runs/18): the Embed component publishes on
+// the free site, the Video component plays uploaded WebM (with alpha)
+// untouched, and the free *.framer.website subdomain is one click.
 
 import Link from "next/link";
 import { ArticleLayout, H2 } from "@/components/article/ArticleLayout";
@@ -39,8 +39,10 @@ const TOC = [
   { id: "embed", title: "The Embed component" },
   { id: "size", title: "Sizing per breakpoint" },
   { id: "hero", title: "Using it as a hero" },
+  { id: "video", title: "Transparent WebM in the Video component" },
   { id: "cms", title: "In a CMS collection" },
   { id: "check", title: "Before you publish" },
+  { id: "plans", title: "What the free plan does and doesn't allow" },
   { id: "faq", title: "FAQ" },
 ];
 
@@ -51,7 +53,11 @@ const FAQ: Faq[] = [
   },
   {
     q: "Does the Embed work on Framer's free plan?",
-    a: "The Embed component is available in the editor, but plan rules for what publishes change — check Framer's current pricing before relying on it for a client site.",
+    a: "Yes. We published a free-plan site (figandform.framer.website) with the Gifsy iframe in an Embed component and the scene renders and drags on the live page. The free plan gates custom domains, password protection and canonical URLs — not embeds.",
+  },
+  {
+    q: "Can I use a transparent WebM of the scene instead of the iframe?",
+    a: "Yes. Framer's Video component uploads .mp4 and .webm and serves the file unchanged, so a VP9 WebM with an alpha channel plays transparent over your page background in Chrome, Edge and Firefox. Safari needs an HEVC-alpha .mov, which the component doesn't accept — for Safari visitors, use the iframe or an opaque MP4.",
   },
   {
     q: "Why does Framer say some sites can't be embedded?",
@@ -119,6 +125,15 @@ export default function FramerGuide() {
         embedded — Gifsy&apos;s embed pages set no framing restriction, so it will render.
       </p>
 
+      <p>
+        We tested this on a free Framer plan by remixing a free marketplace template and
+        replacing every visual with a Gifsy scene; the result is live at{" "}
+        <a href="https://figandform.framer.website" rel="noopener" target="_blank">figandform.framer.website</a>
+        . The Embed published without an upgrade prompt. The one gotcha we hit: on the Phone and
+        Tablet breakpoints an absolutely positioned Embed or Video collapsed to zero width until
+        its left/right pins were set again per breakpoint.
+      </p>
+
       <H2 id="size">Sizing per breakpoint</H2>
       <p>
         Treat the Embed like an image layer. Give it a fixed height or a fixed aspect ratio in
@@ -135,6 +150,18 @@ export default function FramerGuide() {
         <li>Keep the copy clear of the subject, and make sure the text stack doesn&apos;t sit on top of the whole frame or it will block the drag. In Framer, a text layer only intercepts the pointer where it has content, so a left-aligned headline over a right-of-centre subject works.</li>
       </ul>
 
+      <H2 id="video">The other route: a transparent WebM in the Video component</H2>
+      <p>
+        If you don&apos;t need the visitor to drag the scene, export the orbit as a WebM with an
+        alpha channel and use Framer&apos;s own <strong>Video</strong> component (Insert → Media →
+        Video → Upload). It accepts <code>.mp4</code> and <code>.webm</code> only — no{" "}
+        <code>.mov</code>, no GIF (there is a separate GIF component) — and serves the file
+        byte-for-byte, so the transparency survives and the character sits straight on your page
+        background. Set Loop and Muted on, Controls off, Fit to Cover, and give it a poster PNG
+        with alpha for the first paint. CMS image fields don&apos;t take video, so in a collection
+        list use the poster and put the video on the detail page.
+      </p>
+
       <H2 id="cms">In a CMS collection</H2>
       <p>
         Add a plain-text field to the collection for the Gifsy scene id, then in the collection
@@ -149,6 +176,16 @@ export default function FramerGuide() {
         <li>If your page has a lot of copy, consider a subtler motion setting when you create the scene; the viewer does not yet honour the OS reduced-motion setting on its own.</li>
         <li>Free scenes show a small &ldquo;Made with Gifsy&rdquo; badge in the frame; <Link href="/pricing">Pro</Link> removes it and covers commercial use for client work.</li>
       </ul>
+
+      <H2 id="plans">What the free plan does and doesn&apos;t allow</H2>
+      <p>
+        Checked on 18 September 2026. Free: publish to a random <code>*.framer.app</code> URL and
+        claim a <code>name.framer.website</code> subdomain in Site Settings → Domains; CMS with one
+        collection; Layout Templates; the Embed component (HTML or URL); Video uploads; Forms.
+        Upgrade-gated: custom domains, password protection, canonical URL, branching and staging.
+        Paid tiers were Basic and Pro (regional pricing); they raise the CMS collection, page and
+        bandwidth limits rather than unlocking embeds.
+      </p>
 
       <H2 id="faq">FAQ</H2>
       {FAQ.map((f) => (

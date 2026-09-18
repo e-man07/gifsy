@@ -95,7 +95,7 @@ export const ARTICLES: Article[] = [
     section: "guides",
     title: "How to add an interactive 3D photo to Webflow (one photo, no layers)",
     shortTitle: "Add an Interactive 3D Photo to Webflow",
-    updated: "2026-09-17",
+    updated: "2026-09-18",
     description:
       "Every \"interactive image Webflow\" tutorial wants Photoshop-cut layers and an Interactions rig. This one starts from a single photo and uses Webflow's Code Embed — about ten minutes, no code beyond one iframe. Tested on a free account: what's locked, what it costs, and the free-plan video route.",
     date: "2026-09-17",
@@ -130,10 +130,11 @@ export const ARTICLES: Article[] = [
     title: "How to add a 3D photo to Framer with the Embed component",
     shortTitle: "Add a 3D Photo to Framer",
     description:
-      "Framer's Embed component takes raw HTML, so an interactive 3D photo is one iframe away. Where the component lives, how to size it per breakpoint, how to use it as a hero, and what to check before publishing.",
+      "Framer's Embed component takes raw HTML, so an interactive 3D photo is one iframe away — and it publishes on the free plan. Where the component lives, sizing per breakpoint, the transparent-WebM route via the Video component, and what the free plan gates.",
     date: "2026-09-17",
-    tags: ["framer", "embed", "how-to"],
-    words: 870,
+    updated: "2026-09-18",
+    tags: ["framer", "embed", "how-to", "tested"],
+    words: 1250,
   },
   {
     slug: "immersity-ai",
