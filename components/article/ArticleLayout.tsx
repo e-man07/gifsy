@@ -9,6 +9,7 @@ import Link from "next/link";
 import { SiteNav } from "@/components/SiteNav";
 import type { NavLink } from "@/components/AccountMenu";
 import { SiteFooter } from "@/components/SiteFooter";
+import { Toc } from "@/components/article/Toc";
 import { FOUNDERS } from "@/lib/founders";
 import { articlePath, formatDate, readTime, SECTION_LABEL, type Article } from "@/lib/articles";
 import { JsonLd, breadcrumbNode, ORG_ID } from "@/lib/seo/json-ld";
@@ -65,7 +66,10 @@ export function ArticleLayout({
     <main className="flex min-h-screen flex-1 flex-col bg-background">
       <JsonLd graph={graph} />
       <SiteNav links={CONTENT_NAV} />
-      <div className="mx-auto w-full max-w-[1180px] flex-1 px-5 pb-20 pt-6 sm:px-8 sm:pt-10 lg:grid lg:grid-cols-[minmax(0,780px)_1fr] lg:gap-14">
+      {/* Same max width as the nav pill, so the text column starts under the
+          wordmark and the rail ends under the CTA — the page reads as one
+          centred block instead of a wide grid drifting left of the header. */}
+      <div className="mx-auto w-full max-w-5xl flex-1 px-5 pb-20 pt-6 sm:px-8 sm:pt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-16">
         <article className="min-w-0">
           <nav aria-label="Breadcrumb" className="font-mono text-xs text-muted">
             <Link href="/" className="hover:text-foreground">Home</Link>
@@ -108,15 +112,7 @@ export function ArticleLayout({
         <aside className="hidden lg:block">
           <div className="sticky top-24">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">On this page</p>
-            <ol className="mt-4 space-y-3">
-              {toc.map((t) => (
-                <li key={t.id}>
-                  <a href={`#${t.id}`} className="block text-sm leading-snug text-muted hover:text-foreground">
-                    {t.title}
-                  </a>
-                </li>
-              ))}
-            </ol>
+            <Toc items={toc} />
           </div>
         </aside>
       </div>
