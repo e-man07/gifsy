@@ -66,11 +66,11 @@ export function ArticleLayout({
     <main className="flex min-h-screen flex-1 flex-col bg-background">
       <JsonLd graph={graph} />
       <SiteNav links={CONTENT_NAV} />
-      {/* Same max width as the nav pill, so the text column starts under the
-          wordmark and the rail ends under the CTA — the page reads as one
-          centred block instead of a wide grid drifting left of the header. */}
-      <div className="mx-auto w-full max-w-5xl flex-1 px-5 pb-20 pt-6 sm:px-8 sm:pt-10 lg:grid lg:grid-cols-[minmax(0,1fr)_240px] lg:gap-16">
-        <article className="min-w-0">
+      {/* The article column is centred on the page by itself; the rail lives
+          in the right-hand margin, not in the centred block. Symmetric outer
+          columns keep the text centred whatever the rail's width. */}
+      <div className="mx-auto w-full max-w-[1440px] flex-1 px-5 pb-20 pt-6 sm:px-8 sm:pt-10 lg:grid lg:grid-cols-[1fr_minmax(0,780px)_1fr] lg:gap-x-10">
+        <article className="min-w-0 lg:col-start-2">
           <nav aria-label="Breadcrumb" className="font-mono text-xs text-muted">
             <Link href="/" className="hover:text-foreground">Home</Link>
             <span className="mx-2">›</span>
@@ -109,8 +109,8 @@ export function ArticleLayout({
           <div className="article mt-12">{children}</div>
         </article>
 
-        <aside className="hidden lg:block">
-          <div className="sticky top-24">
+        <aside className="hidden lg:block lg:col-start-3">
+          <div className="sticky top-24 max-w-[240px]">
             <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">On this page</p>
             <Toc items={toc} />
           </div>
