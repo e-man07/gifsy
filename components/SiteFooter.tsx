@@ -65,6 +65,9 @@ export function SiteFooter({
             <Link href="/guides" className={linkCls}>
               All guides
             </Link>
+            <Link href="/compare/3d-photo-makers" className={linkCls}>
+              Best 3D photo makers
+            </Link>
             <Link href="/alternatives/immersity-ai" className={linkCls}>
               Immersity AI alternatives
             </Link>

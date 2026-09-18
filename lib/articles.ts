@@ -5,7 +5,7 @@
 // `date` is the first-publish date; `updated` moves when facts are re-checked
 // (the alternatives pages promise a quarterly price re-check).
 
-export type ArticleSection = "guides" | "alternatives";
+export type ArticleSection = "guides" | "alternatives" | "compare";
 
 export interface Article {
   slug: string;
@@ -32,9 +32,58 @@ export const SECTION_LABEL: Record<ArticleSection, { eyebrow: string; title: str
     title: "Alternatives",
     intro: "Honest comparisons of 3D photo tools, with Gifsy as one entry among the rest.",
   },
+  compare: {
+    eyebrow: "Compare",
+    title: "Compare",
+    intro: "Side-by-side decisions: which 3D photo tool, and which output, for the job in front of you.",
+  },
 };
 
 export const ARTICLES: Article[] = [
+  {
+    slug: "best-photos-for-3d-effect",
+    section: "guides",
+    title: "Best photos for a 3D effect — and the ones that fail",
+    shortTitle: "Best Photos for a 3D Effect (and the Ones That Fail)",
+    description:
+      "What makes a photo turn into a convincing 3D scene: a clear subject, a receding background, an edge the matte can find. Eleven rules with the reason behind each, the six kinds of photo that fail and why, and a five-second test before you upload.",
+    date: "2026-09-19",
+    tags: ["photos", "how-to", "limits"],
+    words: 1700,
+  },
+  {
+    slug: "3d-hero-image",
+    section: "guides",
+    title: "A 3D hero image for your website: patterns that work, and a performance budget",
+    shortTitle: "3D Hero Image for a Website: Patterns and a Performance Budget",
+    description:
+      "One interactive photo above the fold instead of a video or a static JPG. Six hero patterns, how to lay copy over a scene without blocking the drag, the load budget for an above-the-fold iframe, and the exact steps in Webflow, Framer, Squarespace and WordPress.",
+    date: "2026-09-19",
+    tags: ["hero", "use-case", "webflow", "framer"],
+    words: 1800,
+  },
+  {
+    slug: "3d-photo-portfolio",
+    section: "guides",
+    title: "Interactive 3D photos in a portfolio site: photographers, illustrators, 3D artists",
+    shortTitle: "Interactive 3D Photos in a Portfolio Site",
+    description:
+      "Where a draggable photo earns its place in a portfolio and where it doesn't. Portrait and editorial photography, layered illustration, still renders from 3D and motion artists — with the badge question, gallery-versus-hero placement, and which portfolio builders take an iframe.",
+    date: "2026-09-19",
+    tags: ["portfolio", "use-case", "photography"],
+    words: 1700,
+  },
+  {
+    slug: "3d-photo-makers",
+    section: "compare",
+    title: "Best 3D photo makers in 2026: 10 tools compared by output, price and where your photo goes",
+    shortTitle: "Best 3D Photo Makers (2026): 10 Tools Compared",
+    description:
+      "Every \"3D photo maker\" makes one of three things: an interactive scene, a video file, or a stylised still. The table sorts ten tools by which, then by free tier, watermark, price model and whether your photo is uploaded — with a straight answer on when a video tool is the right pick.",
+    date: "2026-09-19",
+    tags: ["comparison", "3d-photo", "pricing"],
+    words: 2300,
+  },
   {
     slug: "interactive-3d-photos-for-websites",
     section: "guides",
