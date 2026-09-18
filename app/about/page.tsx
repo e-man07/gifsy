@@ -4,6 +4,7 @@
 
 import Link from "next/link";
 import { SiteNav } from "@/components/SiteNav";
+import { CONTENT_NAV } from "@/components/article/ArticleLayout";
 import { SiteFooter } from "@/components/SiteFooter";
 import { pageMetadata } from "@/lib/seo/metadata";
 import { FOUNDERS, GITHUB_URL, PRODUCT_HUNT_URL } from "@/lib/founders";
@@ -22,7 +23,7 @@ export default function AboutPage() {
     <main className="flex min-h-screen flex-1 flex-col bg-background">
       <JsonLd graph={[breadcrumbNode([{ name: "Gifsy", path: "/" }, { name: "About", path: "/about" }])]} />
       <section className="border-b border-foreground/10 bg-panel">
-        <SiteNav />
+        <SiteNav links={CONTENT_NAV} />
         <div className="mx-auto w-full max-w-3xl px-5 pb-10 pt-6 sm:px-8 sm:pb-14 sm:pt-10">
           <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">About</p>
           <h1 className="mt-3 font-editorial text-4xl text-foreground sm:text-5xl">

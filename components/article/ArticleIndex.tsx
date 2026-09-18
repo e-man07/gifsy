@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import { SiteNav } from "@/components/SiteNav";
+import { CONTENT_NAV } from "@/components/article/ArticleLayout";
 import { SiteFooter } from "@/components/SiteFooter";
 import { articlePath, articlesIn, formatDate, readTime, SECTION_LABEL, type ArticleSection } from "@/lib/articles";
 
@@ -13,7 +14,7 @@ export function ArticleIndex({ section }: { section: ArticleSection }) {
   const items = articlesIn(section);
   return (
     <main className="flex min-h-screen flex-1 flex-col bg-background">
-      <SiteNav />
+      <SiteNav links={CONTENT_NAV} />
       <div className="mx-auto w-full max-w-[860px] flex-1 px-5 pb-20 pt-8 sm:px-8 sm:pt-12">
         <p className="font-mono text-xs uppercase tracking-[0.2em] text-muted">{meta.eyebrow}</p>
         <h1 className="mt-3 text-4xl font-bold tracking-tight text-foreground sm:text-5xl">{meta.title}</h1>

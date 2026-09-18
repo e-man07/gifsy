@@ -7,11 +7,20 @@
 
 import Link from "next/link";
 import { SiteNav } from "@/components/SiteNav";
+import type { NavLink } from "@/components/AccountMenu";
 import { SiteFooter } from "@/components/SiteFooter";
 import { FOUNDERS } from "@/lib/founders";
 import { articlePath, formatDate, readTime, SECTION_LABEL, type Article } from "@/lib/articles";
 import { JsonLd, breadcrumbNode, ORG_ID } from "@/lib/seo/json-ld";
 import { siteOrigin } from "@/lib/site-url";
+
+/** Nav links for every content page (articles and their indexes), so a
+ *  reader can move between the sections without going back to the homepage. */
+export const CONTENT_NAV: NavLink[] = [
+  { href: "/guides", label: "Guides" },
+  { href: "/compare", label: "Compare" },
+  { href: "/gallery", label: "Gallery" },
+];
 
 export interface TocItem {
   id: string;
@@ -55,7 +64,7 @@ export function ArticleLayout({
   return (
     <main className="flex min-h-screen flex-1 flex-col bg-background">
       <JsonLd graph={graph} />
-      <SiteNav />
+      <SiteNav links={CONTENT_NAV} />
       <div className="mx-auto w-full max-w-[1180px] flex-1 px-5 pb-20 pt-6 sm:px-8 sm:pt-10 lg:grid lg:grid-cols-[minmax(0,780px)_1fr] lg:gap-14">
         <article className="min-w-0">
           <nav aria-label="Breadcrumb" className="font-mono text-xs text-muted">
