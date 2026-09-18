@@ -64,6 +64,14 @@ observed in Chrome because the tab was hidden (headless check pending).
 - `/guides/3d-photo-webflow`: 720p MP4+WebM transcode, grey auto-poster, alpha
   lost, demo link → fig-form.webflow.io.
 
+## Screenshots (2026-09-19, public/guides/)
+`framer-insert-embed`, `framer-embed-component` (Embed selected, live scene,
+HTML field), `framer-video-webm` (Video component props with the alpha WebM),
+`webflow-code-embed-locked` (greyed tile + plan tooltip),
+`webflow-background-video-settings`. Wired into both guides via the new
+`components/article/Figure.tsx`. Founder decision: no further work on the
+demo sites themselves.
+
 ## Not done
 - Attribution names for the 14 Unsplash photos (slugs recorded; names to add).
 - The gifsy-embed-test.webflow.io site from run 17 still exists (disposable).
