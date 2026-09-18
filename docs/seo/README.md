@@ -123,8 +123,7 @@ screenshots (@Stickers rejection, sticker before/after) — need a real chat
 capture.
 
 **Next:** best-photos guide, use-case pages, `/compare/3d-photo-makers`;
-update `/guides/3d-photo-framer` after the hands-on Framer run (blocked on
-sign-in); `prefers-reduced-motion` + embed `title` in the product. Then
+`prefers-reduced-motion` + embed `title` in the product. Then
 Search Console: request indexing for every URL in the sitemap.
 
 ## Runs
@@ -138,7 +137,8 @@ Search Console: request indexing for every URL in the sitemap.
 | 05 | 2026-09-17 | page-audit | `/`, `/create`, `/tools/gif`, `/tools/sticker` | [runs/05-page-audits.md](runs/05-page-audits.md) |
 | 07 | 2026-09-17 | eeat-audit | homepage + /pricing /privacy /terms /refund | [runs/07-eeat-audit-homepage.md](runs/07-eeat-audit-homepage.md) |
 | 16 | 2026-09-17 | hands-on (Chrome) | Gifsy on Webflow, free Starter account | [runs/16-handson-webflow.md](runs/16-handson-webflow.md) |
-| 17 | 2026-09-18 | hands-on (Chrome) | Webflow showcase rebuild + sourced assets | [runs/17-webflow-showcase-rebuild.md](runs/17-webflow-showcase-rebuild.md) |
+| 17 | 2026-09-18 | hands-on (Chrome) | Webflow showcase rebuild + sourced assets (superseded by 18) | [runs/17-webflow-showcase-rebuild.md](runs/17-webflow-showcase-rebuild.md) |
+| 18 | 2026-09-18 | hands-on (Chrome ×2) | "Fig & Form" demo sites on free Webflow + Framer templates; Framer plan facts | [runs/18-template-sites-webflow-framer.md](runs/18-template-sites-webflow-framer.md) |
 | 08 | 2026-09-17 | linkbuilding | phase classification + plan | [runs/08-linkbuilding-phase-plan.md](runs/08-linkbuilding-phase-plan.md) |
 | 06 | 2026-09-17 | topic-cluster-planning | "interactive 3D photos for websites" | [runs/06-topic-cluster-3d-photos-for-websites.md](runs/06-topic-cluster-3d-photos-for-websites.md) |
 
@@ -357,7 +357,7 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
       video-vs-interactive, use-case pages, `/compare/3d-photo-makers`
 - [~] verify Webflow/Squarespace paid-plan requirements for custom code/embeds
       before publishing platform spokes (run 06) — Webflow verified hands-on
-      (run 16); Squarespace/Framer still worded "check your plan"
+      (run 16), Framer verified hands-on (run 18); Squarespace still "check your plan"
 
 **Link building (run 08 — in order)**
 - [x] Entity stacking: footer links to GitHub / Product Hunt / X; GitHub repo
