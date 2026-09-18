@@ -5,6 +5,7 @@
 
 import Link from "next/link";
 import { ArticleLayout, H2 } from "@/components/article/ArticleLayout";
+import { Figure } from "@/components/article/Figure";
 import { findArticle } from "@/lib/articles";
 import { PLAN_DISPLAY } from "@/lib/billing/plans";
 import { faqPageNode, howToNode, type Faq } from "@/lib/seo/json-ld";
@@ -118,6 +119,20 @@ export default function FramerGuide() {
         <li>Paste the snippet into the HTML field:</li>
       </ol>
       <pre className="overflow-x-auto rounded-xl bg-ink p-4 text-xs leading-relaxed text-cloud sm:text-sm"><code>{SNIPPET}</code></pre>
+      <Figure
+        src="/guides/framer-insert-embed.webp"
+        alt="Framer's Insert panel with 'embed' typed in the search field, showing the Embed component tile"
+        caption="Insert panel → search “embed”. The plain Embed tile is the one you want; Tagembed is a third-party plugin."
+        width={964}
+        height={530}
+      />
+      <Figure
+        src="/guides/framer-embed-component.webp"
+        alt="Framer editor with an Embed layer selected: the Gifsy 3D photo renders on the canvas and the properties panel shows Type: HTML with the iframe snippet"
+        caption="The Embed selected in Layers. Type is set to HTML, the iframe is pasted in the HTML field, and the scene renders live on the canvas — this is the free-plan project behind figandform.framer.website."
+        width={1418}
+        height={840}
+      />
       <p>
         Two differences from the copied snippet: the height is <code>100%</code> rather than a
         fixed 500 px, because in Framer the component itself is the box you size; and there is a{" "}
@@ -161,6 +176,13 @@ export default function FramerGuide() {
         with alpha for the first paint. CMS image fields don&apos;t take video, so in a collection
         list use the poster and put the video on the detail page.
       </p>
+      <Figure
+        src="/guides/framer-video-webm.webp"
+        alt="Framer's Video component properties: Source set to Upload with a .webm file, Loop and Muted on, Controls hidden, Fit Cover, Poster image set; the transparent character renders over the page's ticker text"
+        caption="Video component with a transparent VP9 WebM: Source → Upload, Loop and Muted on, Controls hidden, a poster PNG with alpha. The character sits straight on the page background."
+        width={960}
+        height={720}
+      />
 
       <H2 id="cms">In a CMS collection</H2>
       <p>

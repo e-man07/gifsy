@@ -11,6 +11,7 @@
 
 import Link from "next/link";
 import { ArticleLayout, H2 } from "@/components/article/ArticleLayout";
+import { Figure } from "@/components/article/Figure";
 import { findArticle } from "@/lib/articles";
 import { FREE_GENERATION_LIMIT, PLAN_DISPLAY } from "@/lib/billing/plans";
 import { faqPageNode, howToNode, type Faq } from "@/lib/seo/json-ld";
@@ -143,6 +144,13 @@ export default function WebflowGuide() {
           &ldquo;custom code on staged sites&rdquo;, so a paid Workspace also unlocks it on a{" "}
           <code>.webflow.io</code> staging site without a Site plan. Prices change; the lock does
           not.
+          <Figure
+            src="/guides/webflow-code-embed-locked.webp"
+            alt="Webflow Add panel with 'embed' searched: the Code Embed tile is greyed out with an upgrade star and the tooltip 'This element requires a paid site or account plan. Click the star icon to upgrade your plan.'"
+            caption="The Add panel on a free Starter site (19 September 2026). Code Embed is greyed out; hovering shows the plan tooltip."
+            width={600}
+            height={470}
+          />
         </li>
         <li>
           <strong>A photo with one clear subject</strong>, at least 640 px on the long edge, with
@@ -238,12 +246,19 @@ export default function WebflowGuide() {
         the transcode, so export the scene on the same colour as your section rather than on
         alpha.
       </p>
+      <Figure
+        src="/guides/webflow-background-video-settings.webp"
+        alt="Webflow Designer with a Background Video element selected in the hero; the Settings panel shows Replace video, the uploaded char-pink-1600x1000-white.mp4 at 625 KB, Loop video and Autoplay video checked, and Include play/pause button unchecked"
+        caption="Background Video settings on the free-plan demo site: the upload, Loop and Autoplay on, the play/pause button off. The element itself has an explicit height and z-index 1 in the Style panel."
+        width={1240}
+        height={800}
+      />
       <p>Two things we hit that no tutorial mentions:</p>
       <ul>
         <li>
-          <strong>Webflow transcodes the upload.</strong> A 561 KB WebM came back as an MP4
-          served from Webflow&apos;s CDN at 990 px wide. So WebM in, MP4 out — fine for playback,
-          but don&apos;t expect the exact file you uploaded.
+          <strong>Webflow transcodes the upload.</strong> WebM or MP4 in, MP4 + WebM out at 720 px
+          tall, served from Webflow&apos;s CDN — fine for playback, but don&apos;t expect the exact
+          file you uploaded.
         </li>
         <li>
           <strong>The video can be invisible on a coloured section.</strong> Webflow&apos;s
