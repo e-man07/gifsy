@@ -2,7 +2,7 @@
 // connective centre of the guides cluster (docs/seo/runs/12). Product facts
 // verified in the repo: the copied snippet is exactly EMBED, the iframe loads
 // a server-rendered poster + scene.json + image/depth/mask/background + a
-// Three.js viewer, assets are edge-cached and CORS-open, no frame-ancestors
+// Three.js viewer, assets are edge-cached and CORS-open, /embed has no frame-ancestors
 // restriction is set, the viewer handles touch but not prefers-reduced-motion,
 // and the root layout's analytics scripts load on /embed too.
 
@@ -281,10 +281,11 @@ export default function EmbedGuide() {
         keyboard control.
       </p>
       <p>
-        The scene auto-orbits gently until the visitor moves the pointer. The viewer does not
-        yet read the operating system&apos;s <code>prefers-reduced-motion</code> setting, so if
-        that matters on your page, do it host-side: hide the frame and show the scene&apos;s own
-        still image instead.
+        The scene auto-orbits gently until the visitor moves the pointer. The viewer reads the
+        operating system&apos;s <code>prefers-reduced-motion</code> setting: when it&apos;s on, the
+        scene holds still at rest and only moves when the visitor drags or moves the pointer
+        over it. If you&apos;d rather show no WebGL at all for those visitors, do it host-side:
+        hide the frame and show the scene&apos;s own still image instead.
       </p>
       <pre className="overflow-x-auto rounded-xl bg-ink p-4 text-xs leading-relaxed text-cloud sm:text-sm"><code>{FALLBACK}</code></pre>
 

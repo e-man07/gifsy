@@ -291,9 +291,10 @@ export default function WebflowGuide() {
 
       <H2 id="motion">Respect reduced motion (and a static fallback)</H2>
       <p>
-        The scene auto-orbits gently until the first pointer move. The viewer does not yet read
-        the visitor&apos;s <code>prefers-reduced-motion</code> setting, so on a copy-heavy page
-        either pick a subtler motion at creation or add the host-side fallback from the{" "}
+        The scene auto-orbits gently until the first pointer move — unless the visitor&apos;s
+        OS has <code>prefers-reduced-motion</code> on, in which case the viewer holds still and
+        only moves under their own drag. On a copy-heavy page you can go further with the
+        host-side fallback from the{" "}
         <Link href="/guides/embed-3d-photo-on-website#a11y">embed guide</Link>: hide the frame and
         show the scene&apos;s still image when the OS asks for less motion.
       </p>

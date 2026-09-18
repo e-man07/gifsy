@@ -195,7 +195,7 @@ export default function FramerGuide() {
       <ul>
         <li>Preview on a phone: sideways drag orbits, vertical swipe scrolls.</li>
         <li>Check the frame has a <code>title</code>.</li>
-        <li>If your page has a lot of copy, consider a subtler motion setting when you create the scene; the viewer does not yet honour the OS reduced-motion setting on its own.</li>
+        <li>The viewer honours the OS reduced-motion setting on its own (no auto-orbit; drag still works). If your page has a lot of copy, a subtler motion setting at creation helps everyone else too.</li>
         <li>Free scenes show a small &ldquo;Made with Gifsy&rdquo; badge in the frame; <Link href="/pricing">Pro</Link> removes it and covers commercial use for client work.</li>
       </ul>
 
