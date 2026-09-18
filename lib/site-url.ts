@@ -47,3 +47,12 @@ export function embedOrigin(): string {
   }
   return typeof window !== "undefined" ? window.location.origin : FALLBACK;
 }
+
+/**
+ * The embed snippet users copy. One place so the workshop, the share page and
+ * the guides quote the same thing. `title` names the frame for screen readers
+ * (every how-to guide tells people to keep it).
+ */
+export function embedSnippet(id: string, origin = embedOrigin()): string {
+  return `<iframe src="${origin}/embed/${id}" title="Interactive 3D photo" style="width:100%;height:500px;border:0" loading="lazy"></iframe>`;
+}

@@ -36,7 +36,7 @@ import {
 import { downloadBlob } from "@/lib/export";
 import { publishScene } from "@/lib/publish/creator";
 import type { PublishResult } from "@/lib/publish/types";
-import { embedOrigin } from "@/lib/site-url";
+import { embedOrigin, embedSnippet } from "@/lib/site-url";
 import { createClient as createSupabaseClient } from "@/lib/supabase/client";
 import { takePendingUpload } from "@/lib/pending-upload";
 
@@ -614,12 +614,12 @@ export function CreateWorkshop() {
               </div>
               <div className="relative">
                 <pre className="card-sm overflow-x-auto rounded-lg bg-panel p-2.5 text-[11px] leading-relaxed text-foreground">
-                  <code>{`<iframe src="${embedOrigin()}/embed/${published.record.id}" style="width:100%;height:500px;border:0" loading="lazy"></iframe>`}</code>
+                  <code>{embedSnippet(published.record.id)}</code>
                 </pre>
                 <button
                   onClick={() =>
                     copyText(
-                      `<iframe src="${embedOrigin()}/embed/${published.record.id}" style="width:100%;height:500px;border:0" loading="lazy"></iframe>`,
+                      embedSnippet(published.record.id),
                       "code",
                     )
                   }

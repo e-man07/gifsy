@@ -25,9 +25,9 @@ import { FREE_GENERATION_LIMIT, PLAN_DISPLAY } from "@/lib/billing/plans";
 import { REFUND_WINDOW_DAYS } from "@/lib/legal";
 import { FOUNDERS, GITHUB_URL } from "@/lib/founders";
 import { JsonLd, faqPageNode, howToNode } from "@/lib/seo/json-ld";
+import { embedSnippet } from "@/lib/site-url";
 
-const EMBED_SNIPPET =
-  '<iframe src="https://www.gifsy.fun/embed/<scene-id>" style="width:100%;height:500px;border:0" loading="lazy"></iframe>';
+const EMBED_SNIPPET = embedSnippet("<scene-id>", "https://www.gifsy.fun");
 
 const HOW_STEPS = [
   {
