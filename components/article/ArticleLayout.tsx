@@ -10,7 +10,7 @@ import { SiteNav } from "@/components/SiteNav";
 import type { NavLink } from "@/components/AccountMenu";
 import { SiteFooter } from "@/components/SiteFooter";
 import { Toc } from "@/components/article/Toc";
-import { FOUNDERS } from "@/lib/founders";
+import { AUTHOR } from "@/lib/founders";
 import { articlePath, formatDate, readTime, SECTION_LABEL, type Article } from "@/lib/articles";
 import { JsonLd, breadcrumbNode, ORG_ID } from "@/lib/seo/json-ld";
 import { siteOrigin } from "@/lib/site-url";
@@ -55,7 +55,7 @@ export function ArticleLayout({
       description: article.description,
       datePublished: article.date,
       dateModified: article.updated ?? article.date,
-      author: FOUNDERS.map((f) => ({ "@type": "Person", name: f.name, url: f.x })),
+      author: { "@type": "Person", name: AUTHOR.name, url: AUTHOR.x },
       publisher: { "@id": ORG_ID() },
       mainEntityOfPage: url,
     },
@@ -87,14 +87,9 @@ export function ArticleLayout({
           </h1>
           <p className="mt-5 max-w-[65ch] text-lg leading-relaxed text-muted">{article.description}</p>
           <p className="mt-5 text-sm text-muted">
-            {FOUNDERS.map((f, i) => (
-              <span key={f.x}>
-                {i > 0 && " & "}
-                <a href={f.x} rel="me noopener" target="_blank" className="text-foreground underline underline-offset-4">
-                  {f.name}
-                </a>
-              </span>
-            ))}
+            <a href={AUTHOR.x} rel="me noopener" target="_blank" className="text-foreground underline underline-offset-4">
+              {AUTHOR.name}
+            </a>
             <span className="mx-2">·</span>
             {formatDate(article.date)}
             {article.updated && article.updated !== article.date && (

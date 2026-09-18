@@ -17,6 +17,10 @@ export const FOUNDERS: readonly Founder[] = [
   { name: "Priyanshu Tiwari", role: "Co-founder", x: "https://x.com/priyanshudotsol" },
 ];
 
+/** Who signs the guides and comparisons. One byline: the articles are
+ *  written by Aman; the footer and About still credit both founders. */
+export const AUTHOR: Founder = FOUNDERS[0];
+
 /** "Aman Jha and Priyanshu Tiwari" — for prose. */
 export const OPERATOR_NAMES = FOUNDERS.map((f) => f.name).join(" and ");
 
