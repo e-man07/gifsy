@@ -216,12 +216,10 @@ export default function WebflowGuide() {
         If you&apos;re on a Starter site and not ready to pay, you can still show the scene —
         just not the draggable version. Export a <strong>WebM</strong> clip of the orbit from the
         Gifsy workshop and use Webflow&apos;s <strong>Background Video</strong> element, which is
-        available on the free plan. We built a whole studio-portfolio demo this way on a Starter
-        site — a full-bleed hero, a six-scene work grid, and before/after pairs, all Gifsy
-        renders:{" "}
-        <a href="https://gifsy-embed-test.webflow.io/" rel="noopener" target="_blank">
-          gifsy-embed-test.webflow.io
-        </a>
+        available on the free plan. We built a studio-portfolio demo this way on a Starter site
+        from a free marketplace template, swapping every image for a Gifsy render and no custom
+        code:{" "}
+        <a href="https://fig-form.webflow.io/" rel="noopener" target="_blank">fig-form.webflow.io</a>
         .
       </p>
       <ol>
@@ -231,10 +229,14 @@ export default function WebflowGuide() {
         <li>Give the element a <strong>height</strong> in the Style panel (it has no intrinsic height — inside a grid it collapses to nothing). 320 px worked for a card; a hero wants a vh value (ours is 85vh).</li>
       </ol>
       <p>
-        Webflow re-encodes the upload to an MP4 of about 990 px wide, so export at least that
-        wide and keep the WebM under 2 MB where you can — ours came out at 205–823 KB for
-        4-second orbit loops. Background Videos below the fold don&apos;t play until they scroll
-        into view, which is Webflow&apos;s doing, not the file&apos;s.
+        Webflow re-encodes the upload to MP4 and WebM at 720 px tall (a 1600×1000 source became
+        1152×720), so anything sharper than that is wasted bytes; 1–3 MB opaque H.264 uploads
+        looked identical after transcoding. Two things to know: Webflow auto-generates the
+        poster from frame 0 and it comes back a shade greyer than the video (a pure-white
+        background turned into a light-grey box until autoplay started), and Background Videos
+        below the fold don&apos;t play until they scroll into view. Transparency doesn&apos;t survive
+        the transcode, so export the scene on the same colour as your section rather than on
+        alpha.
       </p>
       <p>Two things we hit that no tutorial mentions:</p>
       <ul>
