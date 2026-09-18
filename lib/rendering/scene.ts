@@ -30,7 +30,7 @@ export const FG_DEPTH_BASE = 0.55;
 // (see buildParallaxScene), so the subject can slide hard without ever revealing
 // a baked-in twin — which is what lets these values be bold. BG_OVERSCAN + the
 // backdrop's edge-hold keep a lateral slide from ever revealing a gutter.
-const GEO_SEGMENTS = 150; // was 72 — finer mesh renders the XY warp smoothly
+const GEO_SEGMENTS = 300; // was 150: hard depth steps inside a subject (open jacket, an ear) tore into a sawtooth at the orbit extreme; 4× the triangles is still trivial for a GPU
 const BG_OVERSCAN = 1.08; // a touch more headroom behind the subject at motion extremes
 const DEPTH_BIAS = 0.4;
 const PARALLAX_BG = 0.1;
@@ -288,6 +288,27 @@ export function subjectExtent(cutout: HTMLImageElement): SubjectExtent {
   };
 }
 
+/** The subject shader's Z relief scale (its `fgDepth` uniform). */
+export function subjectReliefDepth(config: Pick<SceneConfig, "depthStrength" | "foregroundStrength">): number {
+  return config.depthStrength * (FG_DEPTH_BASE + (1 - FG_DEPTH_BASE) * config.foregroundStrength);
+}
+
+/**
+ * How far (world units) the subject's nearest pixel is pushed toward the
+ * camera by the Z relief: `(d - bias) * fgDepth * 0.6 * boost` at d = 1 — the
+ * vertex shader's formula. Orbit pushes all-forward (bias 0, boost 1.2); the
+ * other modes are ± around 0.5. A contained subject has to be framed at this
+ * pushed distance, or perspective magnifies it out of the frame: at the
+ * default depth 0.5 that was ~30% overflow on a photo-sized matte.
+ */
+export function subjectReliefPush(config: Pick<SceneConfig, "depthStrength" | "foregroundStrength">): { rest: number; orbit: number } {
+  const fg = subjectReliefDepth(config) * 0.6;
+  return {
+    rest: (1 - 0.5) * fg * 1.0,
+    orbit: (1 - ORBIT_RELIEF_BIAS) * fg * ORBIT_RELIEF_BOOST,
+  };
+}
+
 export function framingPlan(
   fovDeg: number,
   pw: number,
@@ -298,10 +319,13 @@ export function framingPlan(
     subjectOnly = false,
     extent,
     viewportPx,
+    reliefPush,
   }: {
     framing?: Framing;
     subjectOnly?: boolean;
     extent?: SubjectExtent;
+    /** From subjectReliefPush(config); only a subject-only scene uses it. */
+    reliefPush?: { rest: number; orbit: number };
     /** Canvas size in CSS pixels. Only needed for a subject-only scene, where
      *  it bounds how large the matte may be drawn (MAX_MATTE_SCALE). */
     viewportPx?: { w: number; h: number };
@@ -338,11 +362,14 @@ export function framingPlan(
     }
 
     const base = fit * (subjectOnly ? SUBJECT_MARGIN : POPOUT_MARGIN);
+    // The relief moves the subject toward the camera; add that distance back
+    // so the framed size is the size of the *displaced* subject.
+    const push = subjectOnly && reliefPush ? reliefPush : { rest: 0, orbit: 0 };
     return {
-      rest: base,
-      hover: base * (subjectOnly ? 1 : POPOUT_HOVER),
-      orbit: base,
-      capture: base,
+      rest: base + push.rest,
+      hover: base * (subjectOnly ? 1 : POPOUT_HOVER) + push.rest,
+      orbit: base + push.orbit,
+      capture: base + push.rest,
     };
   }
 
@@ -534,9 +561,7 @@ export function buildParallaxScene(input: ParallaxSceneInput): ParallaxScene {
     shadowMesh.position.z = 0.03; // just in front of the backdrop, behind the subject
     scene.add(shadowMesh);
 
-    const fgDepth =
-      config.depthStrength *
-      (FG_DEPTH_BASE + (1 - FG_DEPTH_BASE) * config.foregroundStrength);
+    const fgDepth = subjectReliefDepth(config);
     fgMat = new THREE.ShaderMaterial({
       uniforms: {
         map: { value: fgTex },

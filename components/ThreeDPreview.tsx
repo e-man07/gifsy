@@ -17,6 +17,7 @@ import {
   ORBIT_MAX_THETA,
   ORBIT_MAX_PHI,
   ORBIT_RELIEF_BIAS,
+  subjectReliefPush,
   ORBIT_RELIEF_BOOST,
   type ParallaxScene,
 } from "@/lib/rendering/scene";
@@ -102,6 +103,7 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
         viewportPx: mount
           ? { w: mount.clientWidth, h: mount.clientHeight }
           : undefined,
+        reliefPush: subjectReliefPush(configRef.current),
       },
     );
   }, []);
@@ -187,6 +189,7 @@ export const ThreeDPreview = forwardRef<ThreeDPreviewHandle, Props>(function Thr
       subjectOnly: config.subjectOnly,
       extent: extentRef.current,
       viewportPx: { w, h },
+      reliefPush: subjectReliefPush(config),
     }).rest;
     camera.position.set(0, 0, initZ);
     camera.lookAt(0, 0, 0);
