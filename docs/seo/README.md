@@ -141,9 +141,12 @@ runs on WebGPU in a worker when available (~10 s → ~4 s, no page freeze).
 **Blocked on the founder:** Blob → R2 migration (legacy embeds 502 until
 the Vercel limit resets), Search Console indexing.
 
-**Next:** Immersity same-photo test (needs an account), sticker/@Stickers
-screenshots, later alternatives spokes (Media.io, Depthy), directories +
-outreach once indexed.
+**Deferred (founder, 2026-09-19):** Immersity same-photo test — needs an
+account; the alternatives + compare pages stand on verified pricing/output
+facts without it.
+
+**Next:** sticker/@Stickers screenshots, later alternatives spokes
+(Media.io, Depthy), directories + outreach once indexed.
 
 ## Runs
 
