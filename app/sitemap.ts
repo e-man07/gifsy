@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { siteOrigin } from "@/lib/site-url";
+import { ARTICLES, articlePath } from "@/lib/articles";
 
 // Static marketing/tool pages only. Published scenes (/s/[id]) are
 // user-generated and unbounded — whether to list them publicly for discovery
@@ -16,6 +17,16 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/tools/gif`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/tools/sticker`, lastModified: now, changeFrequency: "monthly", priority: 0.7 },
     { url: `${base}/pricing`, lastModified: now, changeFrequency: "monthly", priority: 0.6 },
+    { url: `${base}/about`, lastModified: now, changeFrequency: "yearly", priority: 0.4 },
+    { url: `${base}/alternatives`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/compare`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: `${base}/guides`, lastModified: now, changeFrequency: "weekly", priority: 0.6 },
+    ...ARTICLES.map((a) => ({
+      url: `${base}${articlePath(a)}`,
+      lastModified: new Date(`${a.updated ?? a.date}T00:00:00Z`),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
     { url: `${base}/terms`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/privacy`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },
     { url: `${base}/refund`, lastModified: now, changeFrequency: "yearly", priority: 0.2 },

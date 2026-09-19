@@ -1,8 +1,8 @@
 // Shared chrome for the three policy pages, so they can't drift in look or
 // navigation. Server component — these pages are static text.
 
-import Link from "next/link";
 import { SiteNav } from "@/components/SiteNav";
+import { SiteFooter } from "@/components/SiteFooter";
 import { POLICY_LAST_UPDATED } from "@/lib/legal";
 
 export function LegalPage({
@@ -37,31 +37,8 @@ export function LegalPage({
         <div className="legal">{children}</div>
       </section>
 
-      <LegalFooter />
+      <SiteFooter />
     </main>
   );
 }
 
-export function LegalFooter() {
-  return (
-    <footer className="mt-auto border-t border-foreground/10 bg-panel py-5 text-center font-display text-xs uppercase tracking-wide text-muted">
-      <nav className="flex flex-wrap items-center justify-center gap-4">
-        <Link href="/" className="hover:text-foreground">
-          Home
-        </Link>
-        <Link href="/pricing" className="hover:text-foreground">
-          Pricing
-        </Link>
-        <Link href="/privacy" className="hover:text-foreground">
-          Privacy
-        </Link>
-        <Link href="/terms" className="hover:text-foreground">
-          Terms
-        </Link>
-        <Link href="/refund" className="hover:text-foreground">
-          Refunds
-        </Link>
-      </nav>
-    </footer>
-  );
-}

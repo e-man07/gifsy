@@ -24,23 +24,27 @@ import { useEffect, useState } from "react";
 const PERSONAS = [
   {
     id: "d556cd5c57",
-    eyebrow: "Web agencies & Webflow/Framer builders",
-    pitch: "A scroll-stopping hero without hiring a WebGL developer.",
+    eyebrow: "Webflow & Framer builders",
+    pitch: "A client hero that moves, without hiring a WebGL developer.",
+    detail: "Paste an Embed element and ship. Commercial use on client sites comes with Pro.",
   },
   {
     id: "1edb4523e4",
     eyebrow: "Portfolio creators",
-    pitch: "Give your best piece the presentation it deserves.",
+    pitch: "One self-portrait or key project shot that responds to the visitor.",
+    detail: "Stays interactive on a phone — a finger drag does what the mouse does.",
   },
   {
     id: "8a68552608",
-    eyebrow: "Solo brands & products",
-    pitch: "One flagship shot with real depth — not a flat product photo.",
+    eyebrow: "Product pages",
+    pitch: "A flagship shot with real depth, not a flat product photo.",
+    detail: "One angle with parallax, not a 360° turntable — pick a shot where the product stands clear of its background.",
   },
   {
     id: "f4c3e9bef8",
-    eyebrow: "Personal brands & creators",
+    eyebrow: "Creators & streamers",
     pitch: "A bio page that feels alive, not static.",
+    detail: "Capture the same scene as a looping GIF or WebM for socials.",
   },
 ];
 
@@ -50,11 +54,13 @@ function PersonaCard({
   id,
   eyebrow,
   pitch,
+  detail,
   mountDelay,
 }: {
   id: string;
   eyebrow: string;
   pitch: string;
+  detail: string;
   mountDelay: number;
 }) {
   const [mounted, setMounted] = useState(false);
@@ -103,10 +109,9 @@ function PersonaCard({
         </p>
       </div>
       <div>
-        <p className="font-display text-xs uppercase tracking-[0.15em] text-sky-deep">
-          {eyebrow}
-        </p>
+        <h3 className="font-display text-sm text-foreground">{eyebrow}</h3>
         <p className="mt-1 text-sm text-muted">{pitch}</p>
+        <p className="mt-1.5 text-xs text-muted/80">{detail}</p>
       </div>
     </div>
   );

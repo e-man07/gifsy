@@ -99,12 +99,13 @@ function Clip({ id }: { id: string }) {
         aria-hidden
         className="pointer-events-none absolute bottom-2 right-2 h-4 w-4 border-b-2 border-r-2 border-white/50"
       />
+      {/* Decorative slate. The words live in CSS (`.marquee-slate::after`)
+          rather than the DOM: 32 cards × "3D · Made with Gifsy" was ~40% of
+          the homepage's crawlable text. */}
       <p
         aria-hidden
-        className="pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 font-display text-[8px] uppercase tracking-[0.25em] text-white/80 sm:text-[9px]"
-      >
-        3D · Made with Gifsy
-      </p>
+        className="marquee-slate pointer-events-none absolute bottom-2 left-1/2 -translate-x-1/2 font-display text-[8px] uppercase tracking-[0.25em] text-white/80 sm:text-[9px]"
+      />
     </div>
   );
 }

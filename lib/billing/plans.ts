@@ -69,7 +69,7 @@ export const PLAN_DISPLAY: Record<PlanId, PlanDisplay> = {
     features: [
       "Everything in Free",
       "Unlimited 3D generations",
-      "Runs fully on your device — works offline",
+      "3D depth runs fully on your device (offline after first download)",
       "Unlimited published 3D scenes",
       "No Gifsy badge on your embeds",
       "Commercial use",

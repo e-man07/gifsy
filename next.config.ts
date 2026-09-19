@@ -35,6 +35,21 @@ const nextConfig: NextConfig = {
     // Serves those same weights to Pro accounts for local execution.
     "/api/models/depth-head": ["./models/depth-head.onnx"],
   },
+  // Framing policy: /embed/* is the product and may be framed by any origin;
+  // every other page is first-party only, so the app, account and checkout
+  // pages can't be dressed up inside someone else's site. `frame-ancestors`
+  // is the modern header; X-Frame-Options is the fallback for old engines.
+  async headers() {
+    return [
+      {
+        source: "/((?!embed/).*)",
+        headers: [
+          { key: "Content-Security-Policy", value: "frame-ancestors 'self'" },
+          { key: "X-Frame-Options", value: "SAMEORIGIN" },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

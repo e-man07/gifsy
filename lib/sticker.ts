@@ -22,8 +22,15 @@ export async function cutout(
   model: BgModel = "isnet_fp16",
 ): Promise<Blob> {
   const { removeBackground } = await import("@imgly/background-removal");
+  // Without cross-origin isolation the WASM backend is single-threaded and
+  // runs on the main thread (~8 s for ISNet on an M-series Mac, page frozen).
+  // On WebGPU it runs in a worker in ~1 s; fall back to WASM where there is
+  // no WebGPU (Firefox, older Safari).
+  const gpu = typeof navigator !== "undefined" && "gpu" in navigator;
   return removeBackground(source, {
     model,
+    device: gpu ? "gpu" : "cpu",
+    proxyToWorker: gpu,
     output: { format: "image/png" },
     // Serve model/wasm chunks from the HTTP cache without revalidating on
     // every visit (staticimgly sends no max-age, so the browser would

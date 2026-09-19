@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 // The sticker creation flow, extracted out of the homepage into its own page —
 // same reasoning as CreateWorkshop for 3D and GifWorkshop for GIF.
 
@@ -126,9 +127,18 @@ export function StickerWorkshop() {
   const canGenerate = !busy && sources.length >= 1;
 
   return (
-    <main className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-8 sm:py-14">
+    <div className="mx-auto w-full max-w-2xl px-5 py-10 sm:px-8 sm:py-14">
       <div className="card rounded-2xl bg-panel p-5 sm:p-7">
-        <h1 className="font-editorial text-3xl text-foreground">Make your sticker</h1>
+        <h1 className="font-editorial text-3xl text-foreground">
+          Telegram sticker maker — turn a photo into a sticker in your browser
+        </h1>
+        {/* First-paint explainer; the numbers mirror lib/sticker.ts + lib/export.ts. */}
+        <p className="mt-2 text-sm text-muted">
+          Drop a photo. Gifsy removes the background with an AI model that runs inside your
+          browser, adds a white outline and a soft shadow — the look Telegram&apos;s own sticker
+          guide recommends — and gives you a transparent 512×512 PNG or WebP under 512 KB, the
+          size the @Stickers bot accepts. Free, no account, and your photo is never uploaded.
+        </p>
 
         <div className="mt-5">
           <Uploader
@@ -231,6 +241,12 @@ export function StickerWorkshop() {
             <img src={result.preview} alt="Your sticker" className="max-h-72 w-auto rounded-lg" />
           </div>
           <p className="text-center text-sm font-semibold text-muted">{result.note}</p>
+          <p className="text-center text-xs text-muted">
+            Want the same photo to move in real 3D?{" "}
+            <Link href="/create" className="font-semibold text-sky-deep underline underline-offset-2">
+              Try the 3D photo maker
+            </Link>
+          </p>
           <div className="flex flex-wrap justify-center gap-3">
             {result.files.map((f) => (
               <button
@@ -248,6 +264,6 @@ export function StickerWorkshop() {
           <ImportGuide png={result.sticker.png} webp={result.sticker.webp} />
         </div>
       )}
-    </main>
+    </div>
   );
 }
