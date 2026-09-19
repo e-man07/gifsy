@@ -19,6 +19,10 @@ import { PlanCards } from "@/components/PlanCards";
 import { HomeNav } from "@/components/home/HomeNav";
 import { HeroUploader } from "@/components/home/HeroUploader";
 import { CinemaEmbed } from "@/components/home/CinemaEmbed";
+import { ScrollFillText } from "@/components/home/ScrollFillText";
+import { EmbedSnippet } from "@/components/home/EmbedSnippet";
+import { ParallaxDrift } from "@/components/home/ParallaxDrift";
+import { DealCards } from "@/components/home/DealCards";
 import { HOME_FAQ } from "@/components/home/home-faq";
 import { GALLERY_COUNT } from "@/lib/gallery";
 import { FREE_GENERATION_LIMIT, PLAN_DISPLAY } from "@/lib/billing/plans";
@@ -28,6 +32,14 @@ import { JsonLd, faqPageNode, howToNode } from "@/lib/seo/json-ld";
 import { embedSnippet } from "@/lib/site-url";
 
 const EMBED_SNIPPET = embedSnippet("<scene-id>", "https://www.gifsy.fun");
+
+// The definition a search snippet will quote. Kept as one string so the
+// scroll-fill component can split it into words without losing the copy.
+const DEFINITION =
+  "A 3D photo maker turns a single flat photo into a scene with real depth. Gifsy does it " +
+  "with two AI models that run in your browser: one estimates a depth map, one cuts the " +
+  "subject out. The result isn't a video — it's an interactive embed that responds to the " +
+  "visitor's mouse or touch.";
 
 const HOW_STEPS = [
   {
@@ -67,14 +79,130 @@ function Heading({
 
 const inlineLink = "text-sky-deep underline underline-offset-2";
 
-/** One cell of the video-vs-embed comparison: a mark plus a short phrase. */
-function Cell({ yes, highlight, children }: { yes: boolean; highlight?: boolean; children: React.ReactNode }) {
+/** "https://x.com/WhyParabola" → "@WhyParabola". */
+const xHandle = (url: string) => "@" + url.replace(/\/$/, "").split("/").pop();
+
+/** The sign-off under the founder letter: monograms, names set like a
+ *  signature, each linking to its X profile. */
+function FounderSignoff() {
+  const tints = ["bg-sky", "bg-ink"];
   return (
-    <div className={`flex items-start gap-2 px-4 py-3 text-muted ${highlight ? "bg-sky/5" : ""}`}>
+    <div
+      className="mt-10 flex flex-col gap-6 border-t border-foreground/10 pt-6 sm:flex-row sm:items-end sm:justify-between"
+      data-reveal
+      style={{ "--reveal-delay": "160ms" } as CSSProperties}
+    >
+      <div className="flex items-center gap-4">
+        <div className="flex shrink-0 -space-x-2.5" aria-hidden>
+          {FOUNDERS.map((f, i) => (
+            <span
+              key={f.x}
+              className={`flex h-11 w-11 items-center justify-center rounded-full ${tints[i]} font-display text-base text-cloud ring-[3px] ring-background`}
+            >
+              {f.name[0]}
+            </span>
+          ))}
+        </div>
+        <div>
+          <p className="font-editorial text-xl italic leading-tight text-foreground sm:text-2xl">
+            {FOUNDERS.map((f, i) => (
+              <span key={f.x}>
+                {i > 0 && <span className="not-italic text-muted"> &amp; </span>}
+                <a
+                  href={f.x}
+                  rel="me noopener"
+                  target="_blank"
+                  className="whitespace-nowrap decoration-foreground/30 underline-offset-4 transition hover:underline"
+                >
+                  {f.name}
+                </a>
+              </span>
+            ))}
+          </p>
+          <p className="mt-1 text-xs text-muted sm:text-sm">
+            {FOUNDERS.map((f, i) => (
+              <span key={f.x}>
+                {i > 0 && " · "}
+                <span className="whitespace-nowrap">
+                  {f.role}{" "}
+                  <a href={f.x} rel="me noopener" target="_blank" className="inline-flex items-center gap-1 hover:text-foreground">
+                    <XMark />
+                    {xHandle(f.x)}
+                  </a>
+                </span>
+              </span>
+            ))}
+          </p>
+        </div>
+      </div>
+      <Link
+        href="/about"
+        className="group inline-flex items-center gap-1.5 font-display text-sm text-foreground sm:pb-1"
+      >
+        More about Gifsy
+        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" strokeWidth={2.5} aria-hidden />
+      </Link>
+    </div>
+  );
+}
+
+/** The X (Twitter) wordmark, inline so the sign-off doesn't ship an icon asset. */
+function XMark() {
+  return (
+    <svg viewBox="0 0 24 24" className="h-3 w-3 fill-current" aria-label="on X">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+/* Platform marks for the embed section: simple monograms in the brand's own
+   tile, so the row reads at a glance without shipping four logo assets. */
+const markTile = "tool-mark flex h-12 w-12 shrink-0 items-center justify-center rounded-xl";
+
+function WebflowMark() {
+  return (
+    <span className={`${markTile} bg-ink font-display text-lg text-white`} aria-hidden>
+      W
+    </span>
+  );
+}
+
+function FramerMark() {
+  return (
+    <span className={`${markTile} bg-foreground/5`} aria-hidden>
+      <svg viewBox="0 0 24 24" className="h-6 w-6 fill-foreground">
+        <path d="M4 0h16v8h-8zM4 8h8l8 8H4zM4 16h8v8z" />
+      </svg>
+    </span>
+  );
+}
+
+function SquarespaceMark() {
+  return (
+    <span className={`${markTile} bg-ink font-display text-lg text-white`} aria-hidden>
+      S
+    </span>
+  );
+}
+
+function WordPressMark() {
+  return (
+    <span className={`${markTile} bg-foreground/5`} aria-hidden>
+      <span className="flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#21759b] font-display text-sm text-[#21759b]">
+        W
+      </span>
+    </span>
+  );
+}
+
+/** One cell of the video-vs-embed comparison: a mark plus a short phrase. */
+function Cell({ yes, children }: { yes: boolean; children: React.ReactNode }) {
+  return (
+    <div className="flex items-start gap-2.5 px-1 text-muted">
       {yes ? (
-        <Check className="mt-0.5 h-4 w-4 shrink-0 text-grass" strokeWidth={2.5} aria-hidden />
+        <Check className="mt-1 h-5 w-5 shrink-0 text-grass" strokeWidth={2.5} aria-hidden />
       ) : (
-        <X className="mt-0.5 h-4 w-4 shrink-0 text-petal" strokeWidth={2.5} aria-hidden />
+        <X className="mt-1 h-5 w-5 shrink-0 text-petal" strokeWidth={2.5} aria-hidden />
       )}
       <span>{children}</span>
     </div>
@@ -180,7 +308,7 @@ export default function Home() {
       </section>
 
       {/* ─────────────────── COMMUNITY SHOWCASE ────────────────────── */}
-      <section className="overflow-hidden border-t border-ink/10 bg-white py-12 sm:py-16">
+      <section className="overflow-hidden bg-white py-12 sm:py-16">
         <div className="mx-auto max-w-7xl px-5 sm:px-8" data-reveal>
           <h2 className="font-editorial text-2xl text-ink sm:text-3xl">
             Interactive 3D photos published on Gifsy
@@ -196,7 +324,7 @@ export default function Home() {
       </section>
 
       {/* ───────────────────── EMBEDDED SCENE ─────────────────────── */}
-      <section className="relative overflow-hidden border-y border-foreground/10 bg-panel">
+      <section className="relative overflow-hidden bg-panel">
         <div className="relative py-10 sm:py-16">
           <div className="mx-auto mb-6 max-w-6xl px-5 text-center sm:mb-9 sm:px-8" data-reveal>
             <p className="font-display text-xs uppercase tracking-[0.35em] text-sky-deep">Now showing</p>
@@ -217,37 +345,29 @@ export default function Home() {
       {/* ───────────────────────── DEFINITION ──────────────────────── */}
       {/* One statement set large — it's the definition a search snippet will
           quote — with the scope caveat as a quiet aside beside it. */}
-      <section className="border-b border-foreground/10 bg-background">
-        <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 sm:px-8 sm:py-20 lg:grid-cols-[1.4fr_1fr] lg:gap-16">
-          <div data-reveal>
-            <h2 className="sr-only">What a 3D photo maker does</h2>
-            <p className="font-editorial text-2xl leading-snug text-foreground sm:text-3xl lg:text-[2.1rem]">
-              A 3D photo maker turns a single flat photo into a scene with real depth. Gifsy
-              does it with two AI models that run in your browser: one estimates a depth map,
-              one cuts the subject out. The result isn&apos;t a video — it&apos;s an interactive
-              embed that responds to the visitor&apos;s mouse or touch.
-            </p>
-          </div>
-          <aside
-            className="self-center border-l-2 border-sky/40 pl-5 text-sm text-muted sm:text-base"
-            data-reveal
-            style={{ "--reveal-delay": "100ms" } as CSSProperties}
-          >
-            <p className="font-display text-foreground">Not a 3D model.</p>
-            <p className="mt-1.5">
-              This is a 2.5D parallax scene: you look around the photo, about ±23°, not behind
-              it. Need something you can spin 360° or print? Use a mesh generator like Meshy or
-              Tripo. Gifsy is for photos on web pages.
-            </p>
-          </aside>
-        </div>
+      <section className="bg-background">
+        <h2 className="sr-only">What a 3D photo maker does</h2>
+        <ScrollFillText
+          text={DEFINITION}
+          className="font-editorial text-2xl leading-snug sm:text-3xl lg:text-[2.1rem]"
+          aside={
+            <aside className="self-center border-l-2 border-sky/40 pl-5 text-sm text-muted sm:text-base">
+              <p className="font-display text-foreground">Not a 3D model.</p>
+              <p className="mt-1.5">
+                This is a 2.5D parallax scene: you look around the photo, about ±23°, not behind
+                it. Need something you can spin 360° or print? Use a mesh generator like Meshy or
+                Tripo. Gifsy is for photos on web pages.
+              </p>
+            </aside>
+          }
+        />
       </section>
 
       {/* ─────────────────────────── HOW ───────────────────────────── */}
-      <section id="how" className="scroll-mt-24 border-b border-foreground/10 bg-panel">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
+      <section id="how" className="flex scroll-mt-24 flex-col justify-center bg-panel md:min-h-[80vh]">
+        <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
           <Heading eyebrow="How it works" title="One photo in. A scene you can drag out." />
-          <ol className="mt-10 grid gap-6 md:grid-cols-3">
+          <ol className="mt-12 grid gap-6 md:grid-cols-3 md:gap-8">
             {(
               [
                 {
@@ -278,24 +398,28 @@ export default function Home() {
             ).map(({ Icon, title, lines }, i) => (
               <li
                 key={title}
-                className="card flex flex-col gap-3 rounded-2xl bg-background p-6"
+                className="card how-card flex min-h-[20rem] flex-col rounded-2xl bg-background p-8 sm:p-10"
                 data-reveal
-                style={{ "--reveal-delay": `${i * 90}ms` } as CSSProperties}
+                style={{ "--reveal-delay": `${i * 140}ms` } as CSSProperties}
               >
-                <div className="flex items-center gap-3">
-                  <span className="num text-sm text-sky-deep">{i + 1}</span>
-                  <Icon className="h-5 w-5 text-sky" strokeWidth={1.75} aria-hidden />
+                <div className="flex items-center gap-4">
+                  <span className="num how-num text-base text-sky-deep">{i + 1}</span>
+                  <span className="how-tile flex h-11 w-11 items-center justify-center rounded-xl bg-sky/10">
+                    <Icon className="h-5 w-5 text-sky" strokeWidth={1.75} aria-hidden />
+                  </span>
                 </div>
-                <h3 className="font-display text-base text-foreground">{title}</h3>
-                {lines.map((l) => (
-                  <p key={l} className="text-sm text-muted">
-                    {l}
-                  </p>
-                ))}
+                <h3 className="mt-7 font-display text-lg text-foreground sm:text-xl">{title}</h3>
+                <div className="mt-4 space-y-3">
+                  {lines.map((l) => (
+                    <p key={l} className="text-[15px] leading-relaxed text-muted">
+                      {l}
+                    </p>
+                  ))}
+                </div>
               </li>
             ))}
           </ol>
-          <p className="mt-6 text-sm text-muted" data-reveal>
+          <p className="mt-8 text-sm text-muted" data-reveal>
             Each model runs once, on your device. The viewer never runs AI.{" "}
             <Link href="/guides/how-3d-photos-work" className={inlineLink}>
               How it works, in detail
@@ -309,42 +433,87 @@ export default function Home() {
       </section>
 
       {/* ───────────────────────── EMBED ───────────────────────────── */}
-      <section className="border-b border-foreground/10 bg-background">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
-          <div className="grid gap-8 lg:grid-cols-2 lg:gap-14">
-            <Heading eyebrow="Embed" title="Paste it into any site">
-              <p>
-                After publishing, this is the whole snippet. Full width, 500 px tall by default,
-                and <code>loading=&quot;lazy&quot;</code> so it stays off your page&apos;s critical
-                path. Free embeds carry a small &ldquo;Made with Gifsy&rdquo; badge; Pro removes it.
-              </p>
-            </Heading>
-            <div className="min-w-0" data-reveal style={{ "--reveal-delay": "100ms" } as CSSProperties}>
-              <pre className="card-sm whitespace-pre-wrap break-all rounded-xl bg-ink p-4 text-xs leading-relaxed text-cloud sm:text-sm">
-                <code>{EMBED_SNIPPET}</code>
-              </pre>
-              <ul className="mt-4 grid gap-3 sm:grid-cols-3">
-                {[
-                  { name: "Webflow", how: "Code Embed (paid plan) or Background Video", href: "/guides/3d-photo-webflow" },
-                  { name: "Framer", how: "Embed component, HTML", href: "/guides/3d-photo-framer" },
-                  { name: "Squarespace, WordPress, Carrd, Notion", how: "Code or custom-HTML block", href: "/guides/embed-3d-photo-on-website" },
-                ].map((p) => (
-                  <li key={p.name}>
-                    <Link href={p.href} className="block rounded-xl border border-foreground/10 px-4 py-3 transition hover:border-sky/50">
-                      <span className="block font-display text-sm text-foreground">{p.name}</span>
-                      <span className="mt-0.5 block text-xs text-muted">{p.how} — guide</span>
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            </div>
+      <section className="flex flex-col justify-center bg-background md:min-h-[70vh]">
+        <div className="mx-auto w-full max-w-7xl px-5 py-14 text-center sm:px-8 sm:py-24">
+          <div className="mx-auto max-w-3xl">
+            <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep" data-reveal>
+              Embed
+            </p>
+            <h2 className="mt-2 font-editorial text-4xl leading-[1.05] text-foreground sm:text-5xl lg:text-6xl">
+              <span className="block" data-reveal style={{ "--reveal-delay": "80ms" } as CSSProperties}>
+                Your 3D photo.
+              </span>
+              <span className="block text-sky" data-reveal style={{ "--reveal-delay": "200ms" } as CSSProperties}>
+                Anywhere on the web.
+              </span>
+            </h2>
+            <p
+              className="mx-auto mt-5 max-w-2xl text-base text-muted sm:text-lg"
+              data-reveal
+              style={{ "--reveal-delay": "320ms" } as CSSProperties}
+            >
+              After publishing, this is the whole snippet. Full width, 500 px tall by default, and{" "}
+              <code>loading=&quot;lazy&quot;</code> so it stays off your page&apos;s critical path.
+              Free embeds carry a small &ldquo;Made with Gifsy&rdquo; badge; Pro removes it.
+            </p>
+          </div>
+
+          <div
+            className="embed-window mx-auto mt-10 max-w-5xl rounded-2xl text-left"
+            data-reveal
+            style={{ "--reveal-delay": "160ms" } as CSSProperties}
+          >
+            <EmbedSnippet snippet={EMBED_SNIPPET} />
+          </div>
+
+          <div className="mt-12">
+            <h3 className="font-display text-base text-foreground sm:text-lg" data-reveal>
+              Works with your favorite tools
+            </h3>
+            <ul className="mt-5 grid grid-cols-2 gap-3 text-left sm:gap-4 lg:grid-cols-4">
+              {(
+                [
+                  { name: "Webflow", href: "/guides/3d-photo-webflow", Mark: WebflowMark },
+                  { name: "Framer", href: "/guides/3d-photo-framer", Mark: FramerMark },
+                  { name: "Squarespace", href: "/guides/3d-photo-squarespace", Mark: SquarespaceMark },
+                  { name: "WordPress", href: "/guides/3d-photo-wordpress", Mark: WordPressMark },
+                ] satisfies { name: string; href: string; Mark: () => React.ReactElement }[]
+              ).map(({ name, href, Mark }, i) => (
+                <li
+                  key={name}
+                  className="tool-card"
+                  data-reveal
+                  style={{ "--reveal-delay": `${120 + i * 110}ms` } as CSSProperties}
+                >
+                  <Link
+                    href={href}
+                    className="card-sm group flex h-full items-center gap-4 rounded-2xl bg-background px-4 py-4 sm:px-5"
+                  >
+                    <Mark />
+                    <span className="min-w-0">
+                      <span className="block truncate font-display text-base text-foreground">{name}</span>
+                      <span className="mt-0.5 flex items-center gap-1 text-sm text-muted transition group-hover:text-sky-deep">
+                        Guide <ArrowRight className="tool-arrow h-3.5 w-3.5" aria-hidden />
+                      </span>
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
+            <p className="mt-5 text-sm text-muted" data-reveal style={{ "--reveal-delay": "560ms" } as CSSProperties}>
+              Carrd, Notion, Shopify, or anything with a custom-HTML block:{" "}
+              <Link href="/guides/embed-3d-photo-on-website" className={inlineLink}>
+                the general embed guide
+              </Link>
+              .
+            </p>
           </div>
         </div>
       </section>
 
       {/* ────────────────── VIDEO VS INTERACTIVE ───────────────────── */}
-      <section className="border-b border-foreground/10 bg-panel">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
+      <section className="bg-panel">
+        <div className="mx-auto max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
           <Heading title="A video export, or an embed that stays live?">
             <p>
               Immersity for Web, png3D, Upsampler and Media.io hand you a video. Gifsy gives you
@@ -355,30 +524,29 @@ export default function Home() {
               .
             </p>
           </Heading>
-          <div className="card mt-8 overflow-hidden rounded-2xl bg-background" data-reveal>
-            <div className="grid grid-cols-[1.3fr_1fr_1fr] border-b border-foreground/10 text-sm font-semibold text-foreground">
-              <div className="px-4 py-3" />
-              <div className="px-4 py-3">Video / GIF export</div>
-              <div className="bg-sky/10 px-4 py-3 text-sky-deep">Interactive embed</div>
-            </div>
-            {[
-              { k: "Visitor control", v: [false, "None — it plays"], e: [true, "Drag, tilt, spin"] },
-              { k: "File weight", v: [false, "A video per placement"], e: [true, "Image + depth + mask, once"] },
-              { k: "Battery", v: [false, "Decodes video constantly"], e: [true, "GPU idles until the pointer moves"] },
-              { k: "Edits after publishing", v: [false, "Re-export and replace"], e: [true, "Re-publish; same iframe"] },
-              { k: "Email and social feeds", v: [true, "Works"], e: [false, "Use a GIF there"] },
-            ].map((row, i) => (
-              <div
-                key={row.k}
-                className={`grid grid-cols-[1.3fr_1fr_1fr] text-sm ${i > 0 ? "border-t border-foreground/10" : ""}`}
-              >
-                <div className="px-4 py-3 font-semibold text-foreground">{row.k}</div>
-                <Cell yes={row.v[0] as boolean}>{row.v[1] as string}</Cell>
-                <Cell yes={row.e[0] as boolean} highlight>
-                  {row.e[1] as string}
-                </Cell>
+          <div className="card-soft mt-8 rounded-2xl bg-background px-6 py-7 sm:px-8 sm:py-9" data-reveal>
+            <div className="grid grid-cols-[1.3fr_1fr_1fr] gap-x-6 text-base font-semibold text-foreground sm:text-lg">
+              <div />
+              <div className="px-1">Video / GIF export</div>
+              <div className="px-1">
+                <span className="inline-block rounded-full bg-sky/10 px-3.5 py-1 text-sky-deep">Interactive embed</span>
               </div>
-            ))}
+            </div>
+            <div className="mt-7 flex flex-col gap-6 sm:gap-7">
+              {[
+                { k: "Visitor control", v: [false, "None — it plays"], e: [true, "Drag, tilt, spin"] },
+                { k: "File weight", v: [false, "A video per placement"], e: [true, "Image + depth + mask, once"] },
+                { k: "Battery", v: [false, "Decodes video constantly"], e: [true, "GPU idles until the pointer moves"] },
+                { k: "Edits after publishing", v: [false, "Re-export and replace"], e: [true, "Re-publish; same iframe"] },
+                { k: "Email and social feeds", v: [true, "Works"], e: [false, "Use a GIF there"] },
+              ].map((row) => (
+                <div key={row.k} className="grid grid-cols-[1.3fr_1fr_1fr] gap-x-6 text-base sm:text-lg">
+                  <div className="font-semibold text-foreground">{row.k}</div>
+                  <Cell yes={row.v[0] as boolean}>{row.v[1] as string}</Cell>
+                  <Cell yes={row.e[0] as boolean}>{row.e[1] as string}</Cell>
+                </div>
+              ))}
+            </div>
           </div>
           <p className="mt-3 text-xs text-muted" data-reveal>
             For email and feeds,{" "}
@@ -391,8 +559,8 @@ export default function Home() {
       </section>
 
       {/* ──────────────────────── PERSONAS ─────────────────────────── */}
-      <section className="border-b border-foreground/10 bg-background">
-        <div className="mx-auto max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+      <section className="bg-background">
+        <div className="mx-auto max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
           <Heading eyebrow="For your work" title="Built for the jobs a flat hero image can't do">
             <p>Same effect, four jobs. Every card is a live embed — grab one.</p>
           </Heading>
@@ -403,8 +571,8 @@ export default function Home() {
       </section>
 
       {/* ──────────────────────── SHOWCASE ────────────────────────── */}
-      <section className="overflow-hidden border-b border-foreground/10 bg-background py-12 sm:py-16">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+      <section className="overflow-hidden bg-background py-12 sm:py-16">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="flex items-end justify-between gap-4" data-reveal>
             <div>
               <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">Made with Gifsy</p>
@@ -427,7 +595,7 @@ export default function Home() {
         <div className="mt-7" data-reveal style={{ "--reveal-delay": "100ms" } as CSSProperties}>
           <GalleryStrip />
         </div>
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+        <div className="mx-auto max-w-7xl px-5 sm:px-8">
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3" data-reveal>
             <a
               href="#top"
@@ -444,13 +612,20 @@ export default function Home() {
       </section>
 
       {/* ───────────────────────── LIMITS ──────────────────────────── */}
-      <section className="border-b border-foreground/10 bg-panel">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
+      <section className="flex flex-col justify-center bg-panel md:min-h-[70vh]">
+        <div className="mx-auto w-full max-w-7xl px-5 py-14 sm:px-8 sm:py-20">
           <Heading title="Which photos work — and which don't">
             <p>The honest list, learned by running the model on a lot of photos.</p>
           </Heading>
-          <div className="mt-8 grid gap-6 md:grid-cols-[1fr_1fr_auto]">
-            <ul className="card space-y-2.5 rounded-2xl bg-background p-6 text-sm text-foreground" data-reveal>
+          {/* Staggered row: each card starts at a different height and drifts
+              at a different rate as the section scrolls through, so the three
+              slide past one another rather than sitting on one baseline. */}
+          <ParallaxDrift className="mt-8 grid gap-6 md:grid-cols-[1fr_1fr_auto] md:items-start">
+            <ul
+              className="card space-y-2.5 rounded-2xl bg-background p-6 text-sm text-foreground md:mt-32"
+              data-reveal
+              data-drift="0.28"
+            >
               <li className="font-display">Works best</li>
               {[
                 "One clear subject with visible separation from the background",
@@ -466,6 +641,7 @@ export default function Home() {
             <ul
               className="card space-y-2.5 rounded-2xl bg-background p-6 text-sm text-foreground"
               data-reveal
+              data-drift="-0.14"
               style={{ "--reveal-delay": "80ms" } as CSSProperties}
             >
               <li className="font-display">Works worst</li>
@@ -483,8 +659,9 @@ export default function Home() {
               ))}
             </ul>
             <div
-              className="flex flex-col justify-center rounded-2xl border border-foreground/10 px-6 py-5 text-sm text-muted md:max-w-[220px]"
+              className="flex flex-col justify-center rounded-2xl border border-foreground/10 px-6 py-5 text-sm text-muted md:mt-16 md:max-w-[220px]"
               data-reveal
+              data-drift="0.42"
               style={{ "--reveal-delay": "160ms" } as CSSProperties}
             >
               <p className="num text-3xl text-foreground">±23°</p>
@@ -495,66 +672,62 @@ export default function Home() {
                 not a bug.
               </p>
             </div>
-          </div>
+          </ParallaxDrift>
         </div>
       </section>
 
       {/* ──────────────────────── DATA FLOW ────────────────────────── */}
-      <section className="border-b border-foreground/10 bg-background">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
-          <Heading title="What leaves your browser">
-            <p>Made in your browser is a claim you can check. Here is exactly what goes where.</p>
-          </Heading>
-          <div className="mt-8 grid gap-4 md:grid-cols-3">
-            {[
-              {
-                title: "GIFs and stickers",
-                out: "Nothing",
-                note: "Encoded and downloaded in the tab. No account, no upload endpoint.",
-              },
-              {
-                title: "3D on Free",
-                out: "Activations, for one step",
-                note: "Your device runs the first half of the depth model. The second half runs on our server and receives intermediate numbers — not the photo. That step is what counts as a free generation.",
-              },
-              {
-                title: "3D on Pro",
-                out: "Nothing",
-                note: "Both halves run on your device, so depth generation works offline after the first ~50 MB model download.",
-              },
-            ].map((c, i) => (
-              <div
-                key={c.title}
-                className="card rounded-2xl bg-panel p-6"
-                data-reveal
-                style={{ "--reveal-delay": `${i * 80}ms` } as CSSProperties}
-              >
-                <h3 className="font-display text-base text-foreground">{c.title}</h3>
-                <p className="mt-3 text-xs text-muted">Leaves the browser</p>
-                <p className="font-display text-lg text-foreground">{c.out}</p>
-                <p className="mt-3 text-sm text-muted">{c.note}</p>
-              </div>
-            ))}
-          </div>
-          <p className="mt-5 max-w-3xl text-sm text-muted" data-reveal>
-            <strong className="text-foreground">Publishing</strong> uploads the finished scene —
-            image, depth, mask, backdrop — and it becomes public at its share link. Full account
-            in the{" "}
-            <Link href="/privacy" className={inlineLink}>
-              privacy policy
-            </Link>
-            ; code is{" "}
-            <a href={GITHUB_URL} className={inlineLink} rel="noopener" target="_blank">
-              open on GitHub
-            </a>
-            .
-          </p>
-        </div>
+      <section className="bg-background">
+        <DealCards
+          cards={[
+            {
+              title: "GIFs and stickers",
+              out: "Nothing",
+              note: "Encoded and downloaded in the tab. No account, no upload endpoint.",
+              sends: false,
+            },
+            {
+              title: "3D on Free",
+              out: "Activations, for one step",
+              note: "Your device runs the first half of the depth model. The second half runs on our server and receives intermediate numbers — not the photo. That step is what counts as a free generation.",
+              sends: true,
+            },
+            {
+              title: "3D on Pro",
+              out: "Nothing",
+              note: "Both halves run on your device, so depth generation works offline after the first ~50 MB model download.",
+              sends: false,
+            },
+          ]}
+          heading={
+            <div className="max-w-2xl">
+              <h2 className="font-editorial text-3xl text-foreground sm:text-4xl">What leaves your browser</h2>
+              <p className="mt-3 text-sm text-muted sm:text-base">
+                Made in your browser is a claim you can check. Here is exactly what goes where.
+              </p>
+            </div>
+          }
+          footer={
+            <p className="max-w-3xl text-sm text-muted">
+              <strong className="text-foreground">Publishing</strong> uploads the finished scene —
+              image, depth, mask, backdrop — and it becomes public at its share link. Full account
+              in the{" "}
+              <Link href="/privacy" className={inlineLink}>
+                privacy policy
+              </Link>
+              ; code is{" "}
+              <a href={GITHUB_URL} className={inlineLink} rel="noopener" target="_blank">
+                open on GitHub
+              </a>
+              .
+            </p>
+          }
+        />
       </section>
 
       {/* ─────────────────────────── PLANS ─────────────────────────── */}
-      <section id="plans" className="scroll-mt-24 border-b border-foreground/10 bg-panel">
-        <div className="mx-auto w-full max-w-6xl px-5 py-12 sm:px-8 sm:py-16">
+      <section id="plans" className="scroll-mt-24 bg-panel">
+        <div className="mx-auto w-full max-w-7xl px-5 py-12 sm:px-8 sm:py-16">
           <div className="mx-auto mb-9 max-w-2xl text-center" data-reveal>
             <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">Plans</p>
             <h2 className="mt-2 font-editorial text-3xl text-foreground sm:text-4xl">
@@ -578,41 +751,34 @@ export default function Home() {
       </section>
 
       {/* ──────────────────────── WHO BUILT THIS ───────────────────── */}
-      <section className="border-b border-foreground/10 bg-background">
-        <div className="mx-auto max-w-6xl px-5 py-14 sm:px-8 sm:py-20">
-          <div className="card grid gap-6 rounded-2xl bg-panel p-6 sm:p-8 md:grid-cols-[auto_1fr] md:items-center" data-reveal>
-            <div className="flex flex-col gap-2">
-              {FOUNDERS.map((f) => (
-                <a
-                  key={f.x}
-                  href={f.x}
-                  rel="me noopener"
-                  target="_blank"
-                  className="card-sm flex items-center gap-3 rounded-full bg-background py-2 pl-2 pr-4 transition hover:-translate-y-0.5"
-                >
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-sky font-display text-sm text-cloud">
-                    {f.name[0]}
-                  </span>
-                  <span>
-                    <span className="block font-display text-sm text-foreground">{f.name}</span>
-                    <span className="block text-xs text-muted">{f.role} · on X</span>
-                  </span>
-                </a>
-              ))}
-            </div>
-            <div>
-              <h2 className="font-editorial text-2xl text-foreground sm:text-3xl">Who built this</h2>
-              <p className="mt-2 text-sm text-muted sm:text-base">
-                We built Gifsy because every hero image on our own sites was flat. The first build
-                ran the depth model on a server; moving the 44 MB encoder into the browser is what
-                made a {PLAN_DISPLAY.pro.price} one-time price possible instead of credits. The
-                viewer is plain Three.js — the AI runs once, then it&apos;s graphics. Made in India.{" "}
-                <Link href="/about" className={inlineLink}>
-                  About Gifsy
-                </Link>
-              </p>
-            </div>
+      {/* A founder letter, not a card: the hook is the headline, the copy
+          runs in one narrow column, and the two of us sign it at the foot.
+          Deliberately the one section on the page with no container, so it
+          breaks the card rhythm between Plans and the FAQ. */}
+      <section className="bg-background">
+        <div className="mx-auto max-w-3xl px-5 py-16 sm:px-8 sm:py-24">
+          <div data-reveal>
+            <p className="font-display text-xs uppercase tracking-[0.2em] text-sky-deep">Who built this</p>
+            <h2 className="mt-3 font-editorial text-3xl leading-[1.15] text-foreground sm:text-[2.5rem]">
+              We built Gifsy because every hero image on our own sites was flat.
+            </h2>
           </div>
+          <div
+            className="mt-6 space-y-4 text-base leading-relaxed text-muted sm:text-lg"
+            data-reveal
+            style={{ "--reveal-delay": "80ms" } as CSSProperties}
+          >
+            <p>
+              The first build ran the depth model on a server and would have had to charge
+              credits. Moving the 44 MB encoder into the browser is what made a{" "}
+              {PLAN_DISPLAY.pro.price} one-time price possible instead.
+            </p>
+            <p>
+              The viewer is plain Three.js — the AI runs once, then it&apos;s just graphics. Two
+              people, no company yet, made in India.
+            </p>
+          </div>
+          <FounderSignoff />
         </div>
       </section>
 
