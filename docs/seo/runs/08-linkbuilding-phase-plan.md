@@ -100,7 +100,7 @@ Marketplace.
 
 | Target | URL | Cost | Link | Notes |
 |---|---|---|---|---|
-| Toolify | https://www.toolify.ai/ (submit) | Free | dofollow | Auto-crawled; generates https://www.toolify.ai/alternative/leiapix-ai — being listed here gets Gifsy onto its alternatives pages |
+| Toolify | https://www.toolify.ai/ (submit) | **$99 one-time** (+$49 per update) — corrected 2026-09-19; a free queue may or may not still exist | dofollow | Generates https://www.toolify.ai/alternative/leiapix-ai — but at $99 it is not worth it in Foundation phase; AlternativeTo/SaaSHub/AIxploria give the same "alternatives page" effect free |
 | There's An AI For That | https://theresanaiforthat.com/ (submit) | Free basic (long queue) / paid | dofollow | Highest DR in the AI niche; category "3D" / "image animation" |
 | Uneed | https://www.uneed.best/ | Free (1 product) | dofollow | Weeks-long queue; submit early |
 | DevHunt | https://devhunt.org/ | Free | dofollow | Quick approval; open-source angle helps |
