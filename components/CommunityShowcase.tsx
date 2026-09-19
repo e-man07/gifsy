@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useRef } from "react";
+
 // Recordings of scenes people actually published, streaming past in two
 // rows moving opposite directions — proof the product works on more than our
 // own curated shots. Sixteen distinct scenes, eight per row with no scene
@@ -49,7 +51,43 @@ const ROWS: string[][] = [
 
 const CLIP_PLAYBACK_RATE = 2;
 
+// Card size at 1x; the clips are 600×760. Declared on the <video> so the box
+// is sized before any media arrives.
+const CLIP_W = 300;
+const CLIP_H = 380;
+
+// The 32 cards used to be `autoplay preload="metadata"` — which autoplay
+// overrides, so the browser fetched all sixteen clips (~8 MB) at page load
+// and decoded 32 streams at once, most of them off-screen. Now a card only
+// gets its `src` and plays while it is on screen (with a margin so it is
+// already moving when it slides in), and pauses again as it leaves. The
+// poster paints in the meantime, so nothing looks different; the loop's two
+// copies of a clip share one cached download.
 function Clip({ id }: { id: string }) {
+  const ref = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const v = ref.current;
+    if (!v) return;
+    // The recorded orbit is a slow, deliberate sweep; at 1x in a small card
+    // it barely reads as moving. The rate survives load.
+    v.playbackRate = CLIP_PLAYBACK_RATE;
+
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          if (!v.src) v.src = `/showcase/${id}.mp4`;
+          v.play().catch(() => {});
+        } else {
+          v.pause();
+        }
+      },
+      { rootMargin: "0px 200px" },
+    );
+    io.observe(v);
+    return () => io.disconnect();
+  }, [id]);
+
   return (
     // A scaled-down "screening room" box, same family as the big EMBEDDED
     // SCENE section further down the page: a dark elevated stage rather than
@@ -60,19 +98,14 @@ function Clip({ id }: { id: string }) {
     // the clip's bottom edge happens to be.
     <div className="relative w-[240px] shrink-0 overflow-hidden rounded-xl bg-black shadow-[0_20px_45px_rgba(14,36,56,0.25)] ring-1 ring-inset ring-white/10 sm:w-[300px]">
       <video
-        // The recorded orbit is a slow, deliberate sweep; at 1x in a small
-        // card it barely reads as moving. The rate survives load, so setting
-        // it once on mount is enough.
-        ref={(v) => {
-          if (v) v.playbackRate = CLIP_PLAYBACK_RATE;
-        }}
-        src={`/showcase/${id}.mp4`}
+        ref={ref}
         poster={`/showcase/${id}.jpg`}
-        autoPlay
+        width={CLIP_W}
+        height={CLIP_H}
         muted
         loop
         playsInline
-        preload="metadata"
+        preload="none"
         aria-label={`Community scene ${id}`}
         className="block h-[320px] w-full bg-black object-cover sm:h-[380px]"
       />

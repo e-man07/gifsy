@@ -17,8 +17,10 @@ import { useEffect, useRef, useState, useSyncExternalStore, type ReactNode } fro
 
 // How many words are mid-fade at once. Higher reads as a softer sweep.
 const SPREAD = 4;
-// Grey the words start at, as a share of the foreground colour.
-const REST_ALPHA = 22;
+// Grey the words start at, as a share of the foreground colour. 50% of the
+// near-black foreground on white is ~3.4:1, the WCAG floor for large text —
+// the un-inked words are real copy, and at 22% they failed contrast.
+const REST_ALPHA = 50;
 
 type Props = {
   text: string;
@@ -89,8 +91,12 @@ export function ScrollFillText({ text, className, aside }: Props) {
     : Math.min(words.length - 1, Math.floor(head - SPREAD / 2));
   const caret = <span className="scroll-fill-caret" aria-hidden />;
 
+  // Screen readers get the sentence once, as plain text; the per-word spans
+  // are hidden from them. (aria-label is not allowed on a <p>, so the
+  // accessible text is a visually-hidden span instead.)
   const paragraph = (
-    <p className={className} aria-label={text}>
+    <p className={className}>
+      <span className="sr-only">{text}</span>
       {caretAfter < 0 ? caret : null}
       {words.map((word, i) => {
         const t = reduced ? 1 : Math.min(1, Math.max(0, (head - i) / SPREAD));

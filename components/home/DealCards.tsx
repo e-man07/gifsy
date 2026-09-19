@@ -18,6 +18,13 @@
 // dropped and the cards are simply laid out — the copy is server-rendered
 // either way, so crawlers see the full text.
 //
+// The pinned and the flat layouts share one DOM: the track height and the
+// sticky frame are breakpoint classes, not a JS branch. The server used to
+// assume desktop and render the 260vh track, so on a phone hydration swapped
+// it for the flat layout and everything below the section jumped — a CLS of
+// 1.0 on mobile. Now the server can't get the layout wrong; only the card
+// transforms wait for the client, and transforms don't shift layout.
+//
 // Card positions are expressed as percentages of the card's own width, so
 // the deal works at any column width without measuring.
 
@@ -63,7 +70,11 @@ export function DealCards({ cards, heading, footer }: Props) {
   const trackRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const reduced = useMedia(REDUCED, false);
-  const desktop = useMedia(DESKTOP, true);
+  // Server value false: the HTML ships the cards dealt out, and the client
+  // tucks them in once it knows it is a desktop. The other way round, a
+  // phone would paint the three cards flung off to the sides until
+  // hydration.
+  const desktop = useMedia(DESKTOP, false);
   const animate = desktop && !reduced;
 
   useEffect(() => {
@@ -149,7 +160,17 @@ export function DealCards({ cards, heading, footer }: Props) {
                 <Laptop className="h-4 w-4" strokeWidth={1.75} />
               </span>
               <span className="relative flex h-px flex-1 items-center">
-                <span className={`deal-wire absolute inset-0 ${c.sends ? "deal-wire-live" : ""}`} />
+                {c.sends ? (
+                  // The live wire is one dash-period wider than its box and
+                  // slides left by that period, so the dashes appear to
+                  // flow. A transform keeps it on the compositor; animating
+                  // background-position repaints every frame.
+                  <span className="absolute inset-0 overflow-hidden">
+                    <span className="deal-wire deal-wire-live absolute inset-y-0 left-0 w-[calc(100%+12px)]" />
+                  </span>
+                ) : (
+                  <span className="deal-wire absolute inset-0" />
+                )}
                 {!c.sends && (
                   <span className="deal-cut relative z-10 mx-auto flex h-5 w-5 items-center justify-center rounded-full bg-panel text-petal ring-1 ring-foreground/10">
                     <X className="h-3 w-3" strokeWidth={3} />
@@ -175,15 +196,15 @@ export function DealCards({ cards, heading, footer }: Props) {
     </div>
   );
 
-  if (!animate) {
-    return <div className="py-14 sm:py-20">{frame}</div>;
-  }
-
   return (
     // Track = one viewport pinned plus 1.6 viewports of scroll to deal the
     // cards. The page can't move past the section until the deal is done.
-    <div ref={trackRef} className="relative" style={{ height: "260vh" }}>
-      <div className="sticky top-0 flex h-screen items-center overflow-hidden">{frame}</div>
+    // Below md, and under reduced motion, the same elements are just a
+    // padded block — see the note at the top of the file.
+    <div ref={trackRef} className="relative md:motion-safe:h-[260vh]">
+      <div className="py-14 sm:py-20 md:motion-safe:sticky md:motion-safe:top-0 md:motion-safe:flex md:motion-safe:h-screen md:motion-safe:items-center md:motion-safe:overflow-hidden md:motion-safe:py-0">
+        {frame}
+      </div>
     </div>
   );
 }

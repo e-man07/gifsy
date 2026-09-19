@@ -37,7 +37,6 @@ import { downloadBlob } from "@/lib/export";
 import { publishScene } from "@/lib/publish/creator";
 import type { PublishResult } from "@/lib/publish/types";
 import { embedOrigin, embedSnippet } from "@/lib/site-url";
-import { createClient as createSupabaseClient } from "@/lib/supabase/client";
 import { takePendingUpload } from "@/lib/pending-upload";
 
 const ThreeDPreview = dynamic(() => import("@/components/ThreeDPreview").then((m) => m.ThreeDPreview), {
@@ -343,7 +342,11 @@ export function CreateWorkshop() {
   async function handlePublish() {
     if (!threedImage || !threedGrid) return;
     // Publishing (unlike creation) needs an account — send them to sign in
-    // and back. Creation stayed fully local up to this point.
+    // and back. Creation stayed fully local up to this point, so this is
+    // also the first moment the Supabase SDK is needed: imported here rather
+    // than at the top so its ~65 KB stays out of the route's initial JS
+    // (which the landing page prefetches for every visitor).
+    const { createClient: createSupabaseClient } = await import("@/lib/supabase/client");
     const {
       data: { user },
     } = await createSupabaseClient().auth.getUser();

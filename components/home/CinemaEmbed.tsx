@@ -2,6 +2,12 @@
 // grain and letterboxing over it. Pure markup (no hooks), moved out of the
 // landing page so that file can stay readable. Every overlay is
 // pointer-events-none — the scene itself has to stay draggable.
+//
+// The iframe is mounted on intersection (LazyIframe) rather than at page
+// load: same-origin, it would otherwise boot the WebGL viewer on this
+// page's main thread while the hero is still painting.
+
+import { LazyIframe } from "./LazyIframe";
 
 // Lightning geometry for the cinema section, in a 1000x500 viewBox scaled
 // with "slice" so nothing is stretched — the centre of the box stays the
@@ -36,11 +42,10 @@ export function CinemaEmbed() {
             bigger; all that gets cropped is black margin. On a phone the
             frame is already narrow enough to fill, so it stays 1:1 —
             zooming there pushes him off both edges. */}
-        <iframe
+        <LazyIframe
           src="https://www.gifsy.fun/embed/03ed4c7605"
           title="A 3D scene made with Gifsy"
-          loading="lazy"
-          className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 border-0 sm:h-[210%] sm:w-[210%]"
+          className="absolute left-1/2 top-1/2 h-full w-full -translate-x-1/2 -translate-y-1/2 sm:h-[210%] sm:w-[210%]"
         />
 
         {/* ── Lightning ─────────────────────────────────────────────

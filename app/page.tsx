@@ -231,13 +231,19 @@ export default function Home() {
         id="top"
         className="relative isolate flex min-h-[92vh] flex-col justify-center overflow-hidden"
       >
-        <Image src="/hero-bg.png" alt="" fill priority aria-hidden className="absolute inset-0 -z-20 object-cover" />
+        {/* quality 60: the photo sits under a dark scrim and text, so the
+            extra compression is invisible and takes ~20 KB off the LCP
+            request on a phone. */}
+        <Image src="/hero-bg.png" alt="" fill priority quality={60} aria-hidden className="absolute inset-0 -z-20 object-cover" />
         {/* Legibility scrim: the `via` stop sits where the headline lands. */}
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-ink/50 via-ink/30 to-ink/25" />
 
         <div className="relative z-10 mx-auto flex w-full max-w-5xl flex-col items-center px-5 pb-20 pt-36 text-center sm:px-8 sm:pt-40">
-          {/* Product Hunt featured badge — a remote SVG PH regenerates, so a
-              plain <img> at 180×39 (PH's 250×54 ratio). */}
+          {/* Product Hunt featured badge. A copy of PH's SVG served from
+              /public (it is a static "Featured" mark with no live count):
+              the remote one set a Cloudflare cookie, which Lighthouse
+              flagged as third-party, and cost a DNS+TLS round trip in the
+              hero. Plain <img> at 180×39 (PH's 250×54 ratio). */}
           <a
             href="https://www.producthunt.com/products/gifsy?embed=true&utm_source=badge-featured&utm_medium=badge&utm_campaign=badge-gifsy"
             target="_blank"
@@ -249,7 +255,7 @@ export default function Home() {
               alt="Gifsy - Turn any photo into an interactive 3D scene you can embed. | Product Hunt"
               width={180}
               height={39}
-              src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1251694&theme=light&t=1789548480433"
+              src="/product-hunt-featured.svg"
             />
           </a>
           <p className="font-display text-xs uppercase tracking-[0.22em] text-white/70 drop-shadow-[0_1px_8px_rgba(4,16,29,0.5)]">
