@@ -15,7 +15,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, Check } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { useMaySignedIn } from "@/lib/supabase/session-cookie";
 import { startCheckout } from "@/lib/billing/checkout";
 import { PLAN_DISPLAY, PLAN_ORDER, type PaidPlanId } from "@/lib/billing/plans";
 
@@ -34,17 +34,32 @@ export function PlanCards({
   freeHref?: string;
   showFinePrint?: boolean;
 }) {
-  const [signedIn, setSignedIn] = useState<boolean | null>(null);
+  const [session, setSession] = useState<boolean | null>(null);
   const [busy, setBusy] = useState<PaidPlanId | null>(null);
   const [err, setErr] = useState<string | null>(null);
 
+  // Same trick as AccountMenu: without a session cookie there is nothing to
+  // ask Supabase, so the SDK stays out of the page.
+  const maySignedIn = useMaySignedIn();
+  const signedIn = maySignedIn ? session : false;
+
   useEffect(() => {
-    const supabase = createClient();
-    supabase.auth
-      .getUser()
-      .then(({ data }) => setSignedIn(!!data.user))
-      .catch(() => setSignedIn(false));
-  }, []);
+    if (!maySignedIn) return;
+    let cancelled = false;
+    import("@/lib/supabase/client").then(({ createClient }) =>
+      createClient()
+        .auth.getUser()
+        .then(({ data }) => {
+          if (!cancelled) setSession(!!data.user);
+        })
+        .catch(() => {
+          if (!cancelled) setSession(false);
+        }),
+    );
+    return () => {
+      cancelled = true;
+    };
+  }, [maySignedIn]);
 
   const upgrade = async (plan: PaidPlanId) => {
     setBusy(plan);

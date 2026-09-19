@@ -482,16 +482,28 @@ body {
       0 0 0 4px color-mix(in srgb, var(--sky) 10%, transparent);
   }
 }
-.embed-window .embed-status-dot {
+/* The ring is a pseudo-element scaled and faded on the compositor. It was
+   an animated box-shadow, which repaints the header every frame. */
+.embed-status-dot {
+  position: relative;
+}
+.embed-status-dot::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 1.5px solid rgba(40, 200, 64, 0.55);
   animation: embed-status-pulse 2.4s ease-in-out infinite;
 }
 @keyframes embed-status-pulse {
   0%,
   100% {
-    box-shadow: 0 0 0 0 rgba(40, 200, 64, 0.55);
+    transform: scale(1);
+    opacity: 1;
   }
   60% {
-    box-shadow: 0 0 0 5px rgba(40, 200, 64, 0);
+    transform: scale(2.25);
+    opacity: 0;
   }
 }
 
@@ -546,7 +558,7 @@ body {
     filter: none;
     transition: none;
   }
-  .embed-window .embed-status-dot {
+  .embed-status-dot::after {
     animation: none;
   }
   .embed-window:hover,
@@ -603,13 +615,15 @@ body {
   );
   background-size: 12px 1px;
 }
+/* Slides by one dash period inside a clipped box (see DealCards) — a
+   transform, so the flow never leaves the compositor. */
 .deal-wire-live {
   background-image: linear-gradient(to right, var(--sky) 0 6px, transparent 6px 12px);
   animation: deal-wire-flow 0.9s linear infinite;
 }
 @keyframes deal-wire-flow {
   to {
-    background-position: 12px 0;
+    transform: translateX(-12px);
   }
 }
 @media (prefers-reduced-motion: reduce) {

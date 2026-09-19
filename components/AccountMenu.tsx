@@ -34,7 +34,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
+import { useMaySignedIn } from "@/lib/supabase/session-cookie";
 
 /** A plain nav link belonging to the page, shown inline on desktop by the nav
  *  itself and inside the hamburger on phones. */
@@ -91,13 +91,21 @@ export function AccountMenu({
 }) {
   const linkCls = linkClsFor(tone);
   // undefined = still loading; null = signed out.
-  const [account, setAccount] = useState<Account | null | undefined>(undefined);
+  const [session, setSession] = useState<Account | null | undefined>(undefined);
   const [open, setOpen] = useState(false);
   const avatarRef = useRef<HTMLDivElement>(null);
   const burgerRef = useRef<HTMLDivElement>(null);
 
+  // No session cookie, no Supabase: the SDK is only imported for a visitor
+  // who has one, so an anonymous visitor's header costs no extra script
+  // (see lib/supabase/session-cookie.ts).
+  const maySignedIn = useMaySignedIn();
+  const account = maySignedIn ? session : null;
+
   useEffect(() => {
-    const supabase = createClient();
+    if (!maySignedIn) return;
+    let cancelled = false;
+    let unsubscribe = () => {};
 
     const read = (user: { email?: string | null; user_metadata?: Record<string, unknown> } | null) =>
       user
@@ -111,12 +119,22 @@ export function AccountMenu({
           }
         : null;
 
-    supabase.auth.getUser().then(({ data }) => setAccount(read(data.user)));
-    const { data: sub } = supabase.auth.onAuthStateChange((_e, session) =>
-      setAccount(read(session?.user ?? null)),
-    );
-    return () => sub.subscription.unsubscribe();
-  }, []);
+    import("@/lib/supabase/client").then(({ createClient }) => {
+      if (cancelled) return;
+      const supabase = createClient();
+      supabase.auth.getUser().then(({ data }) => {
+        if (!cancelled) setSession(read(data.user));
+      });
+      const { data: sub } = supabase.auth.onAuthStateChange((_e, s) =>
+        setSession(read(s?.user ?? null)),
+      );
+      unsubscribe = () => sub.subscription.unsubscribe();
+    });
+    return () => {
+      cancelled = true;
+      unsubscribe();
+    };
+  }, [maySignedIn]);
 
   // Close on an outside click or Escape — a dropdown that only closes by
   // re-clicking its trigger feels stuck. Both triggers share one `open`, so
@@ -167,14 +185,17 @@ export function AccountMenu({
             Pricing
           </Link>
           {signIn === "link" && (
-            <Link href="/login" className={linkCls}>
+            <Link href="/login" prefetch={false} className={linkCls}>
               Sign in
             </Link>
           )}
         </div>
       )}
+      {/* No prefetch on the sign-in links: /login pulls the Supabase SDK
+          (~65 KB gzipped), and prefetching it for every visitor who sees a
+          header undid the point of keeping the SDK off the page. */}
       {account === null && signIn === "button" && (
-        <Link href="/login" className={signInBtnClsFor(tone)}>
+        <Link href="/login" prefetch={false} className={signInBtnClsFor(tone)}>
           Sign in
         </Link>
       )}
@@ -276,6 +297,7 @@ export function AccountMenu({
             {account === null && (
               <Link
                 href="/login"
+                prefetch={false}
                 role="menuitem"
                 className={`${itemCls} border-t border-foreground/10`}
                 onClick={close}

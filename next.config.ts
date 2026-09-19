@@ -23,6 +23,9 @@ const nextConfig: NextConfig = {
   // onnxruntime-web ships its own WASM assets and expects to load them at
   // runtime — keep it external so the server bundler doesn't try to inline it.
   serverExternalPackages: ["onnxruntime-web"],
+  // Next 16 only optimises the qualities listed here. 60 is for the hero
+  // photo, which sits under a scrim and text; everything else stays at 75.
+  images: { qualities: [60, 75] },
   // The inpaint route loads onnxruntime-web via createRequire at runtime, so the
   // file tracer can't follow the dependency — force the whole package plus its
   // runtime deps into the function so require("onnxruntime-web") resolves there.
