@@ -138,8 +138,16 @@ shared with the alternatives page, verified 2026-09-17). Hub, alternatives
 page, create page and footer link them. Sitemap 27 URLs. Sticker cutout now
 runs on WebGPU in a worker when available (~10 s → ~4 s, no page freeze).
 
+**Search Console (2026-09-19):** domain property `gifsy.fun` verified.
+`https://www.gifsy.fun/` was already indexed (last crawl 11 Sept, found via
+an X post and a dzj.me link; no sitemap seen yet). Apex shows "Page with
+redirect" — correct, it 308s to www. To do, by the founder: submit
+`/sitemap.xml`, re-request the homepage (rewritten since the crawl), then
+request each `www.` URL from the priority list (~10/day). Also add the
+property to Bing Webmaster Tools (imports from GSC).
+
 **Blocked on the founder:** Blob → R2 migration (legacy embeds 502 until
-the Vercel limit resets), Search Console indexing.
+the Vercel limit resets).
 
 **Deferred (founder, 2026-09-19):** Immersity same-photo test — needs an
 account; the alternatives + compare pages stand on verified pricing/output
@@ -445,7 +453,7 @@ Shared honesty constraints every brief follows: [runs/_brief-context.md](runs/_b
 - [x] internal links: tool pages → guides → comparison → pricing; nothing
       currently links to `/tools/sticker` at all (run 04)
 - [ ] real screenshots: before/after sticker, @Stickers chat (run 04)
-- [ ] request indexing in Google Search Console after each rewrite — site is
+- [~] request indexing in Google Search Console after each rewrite — site is
       currently not indexed at all (run 03)
 - [ ] decide: index `/s/[id]` scenes or not (UGC; currently excluded)
 - [ ] honesty check on privacy claims (photo stays local; free plan uploads
